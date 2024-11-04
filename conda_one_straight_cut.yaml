@@ -1,4 +1,4 @@
-name: conda_one_straight_cut
+name: onecut
 channels:
   - defaults
 dependencies:

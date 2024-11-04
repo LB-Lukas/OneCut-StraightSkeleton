@@ -12,6 +12,34 @@ namespace Geometry {
 
     Face::Face() = default;
 
+    DCEL::DCEL(const std::vector<std::shared_ptr<Vertex>>& vertices) {
+        this->vertices = vertices;
+
+        auto inner_face = std::make_shared<Face>();
+        auto outer_face = std::make_shared<Face>();
+
+        auto n = vertices.size();
+
+        for(int i = 0; i < n; i++) {
+            this->createEdge(vertices[i], vertices[i + 1]);
+        }
+        this->createEdge(vertices[n], vertices[0]);
+
+        auto cw_edges = std::vector<std::shared_ptr<HalfEdge>>();
+        auto ccw_edges = std::vector<std::shared_ptr<HalfEdge>>();
+
+        for(int i = 0; i < this->halfEdges.size(); i+=2) {
+            cw_edges.push_back(this->halfEdges[i]);
+            ccw_edges.push_back(this->halfEdges[i+1]);
+        }
+
+        this->makeCycle(cw_edges, inner_face);
+        this->makeCycle(ccw_edges, outer_face);
+
+        this->faces.push_back(inner_face);
+        this->faces.push_back(outer_face);
+    }
+
     std::shared_ptr<Vertex> DCEL::createVertex(int x, int y) {
         auto vertex = std::make_shared<Vertex>(x, y);
         vertices.push_back(vertex);
@@ -42,6 +70,12 @@ namespace Geometry {
         return std::make_pair(e1, e2);
     }
 
+    std::shared_ptr<Face> DCEL::createFace() {
+        auto face = std::make_shared<Face>();
+        faces.push_back(face);
+        return face;
+    }
+
     void DCEL::makeCycle(const std::vector<std::shared_ptr<HalfEdge>>& edges, const std::shared_ptr<Face>& face) {
         int n = edges.size();
         if (n < 2) return; // No cycle to make if fewer than 2 edges
@@ -63,9 +97,63 @@ namespace Geometry {
         }
     }
 
-    std::shared_ptr<Face> DCEL::createFace() {
-        auto face = std::make_shared<Face>();
-        faces.push_back(face);
-        return face;
+    void DCEL::printDCEL() const {
+    std::cout << "DCEL Structure:" << std::endl;
+
+    // Print vertices and their incident edges
+    std::cout << "\nVertices:" << std::endl;
+    for (const auto& vertex : vertices) {
+        std::cout << "Vertex (" << vertex->x << ", " << vertex->y << ")";
+        if (vertex->incidentEdge) {
+            std::cout << " -> Incident Edge Originating at this Vertex.";
+        }
+        std::cout << std::endl;
     }
+
+    // Print half-edges and their properties
+    std::cout << "\nHalfEdges:" << std::endl;
+    std::unordered_map<std::shared_ptr<HalfEdge>, int> edgeIndices;
+    for (size_t i = 0; i < halfEdges.size(); ++i) {
+        edgeIndices[halfEdges[i]] = i;
+    }
+
+    for (const auto& edge : halfEdges) {
+        std::cout << "HalfEdge " << edgeIndices[edge] << ":" << std::endl;
+        if (edge->origin) {
+            std::cout << "  Origin: (" << edge->origin->x << ", " << edge->origin->y << ")" << std::endl;
+        }
+        if (edge->twin) {
+            std::cout << "  Twin Edge ID: " << edgeIndices[edge->twin] << std::endl;
+        }
+        if (edge->next) {
+            std::cout << "  Next Edge ID: " << edgeIndices[edge->next] << std::endl;
+        }
+        if (edge->prev) {
+            std::cout << "  Prev Edge ID: " << edgeIndices[edge->prev] << std::endl;
+        }
+        if (edge->face) {
+            std::cout << "  Face ID: " << edgeIndices[edge->face->edge] << " (First half-edge of Face)" << std::endl;
+        }
+    }
+
+    // Print faces and their boundary edges
+    std::cout << "\nFaces:" << std::endl;
+    for (size_t i = 0; i < faces.size(); ++i) {
+        std::cout << "Face " << i << ":" << std::endl;
+        if (faces[i]->edge) {
+            std::cout << "  Boundary HalfEdge ID: " << edgeIndices[faces[i]->edge] << std::endl;
+
+            // Loop through the half-edges around the face to show the cycle
+            auto startEdge = faces[i]->edge;
+            auto currentEdge = startEdge;
+            do {
+                std::cout << "    HalfEdge ID: " << edgeIndices[currentEdge] << " -> ";
+                currentEdge = currentEdge->next;
+            } while (currentEdge != startEdge && currentEdge != nullptr);
+            std::cout << " (Back to start)" << std::endl;
+        }
+    }
+    std::cout << std::endl;
+}
+
 }

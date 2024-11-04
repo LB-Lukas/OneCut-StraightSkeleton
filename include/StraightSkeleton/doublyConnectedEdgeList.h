@@ -5,6 +5,8 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
+#include <unordered_map>
 
 namespace Geometry {
 
@@ -37,6 +39,11 @@ namespace Geometry {
 
     class DCEL {
     public:
+        DCEL();
+
+        // create DCEL from polygon
+        DCEL(const std::vector<std::shared_ptr<Vertex>>& vertices);
+
         std::vector<std::shared_ptr<Vertex>> vertices;
         std::vector<std::shared_ptr<HalfEdge>> halfEdges;
         std::vector<std::shared_ptr<Face>> faces;
@@ -49,6 +56,8 @@ namespace Geometry {
         std::shared_ptr<Face> createFace();
 
         void makeCycle(const std::vector<std::shared_ptr<HalfEdge>>& edges, const std::shared_ptr<Face>& face);
+
+        void printDCEL() const;
     };
 
 }
