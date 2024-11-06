@@ -1,6 +1,8 @@
+import numpy as np
 import tkinter as tk
 from tkinter import messagebox
 from enum import Enum
+
 
 class LastAction(Enum):
     ADD_POINT = 1
@@ -36,7 +38,9 @@ class PolygonDrawer:
     def add_point(self, event):
         x, y = event.x, event.y
         
-        # TODO: Check for interstion with existing polygons
+        if self.check_intersection(x, y):
+            messagebox.showerror("Error", "The new line intersects with an existing line.")
+            return
 
         self.points.append((x, y))
         
@@ -52,15 +56,36 @@ class PolygonDrawer:
         self.lines.append(point)
         self.last_action.append(LastAction.ADD_POINT)
 
+    def check_intersection(self, x, y):
+        if len(self.points) > 0:
+            for polygon in self.polygons:
+                for line in polygon[1]:
+                    coords = self.canvas.coords(line)
+                    if len(coords) == 4:
+                        if self.is_intersecting(((coords[0], coords[1]), (coords[2], coords[3])), ((self.points[-1][0], self.points[-1][1]), (x, y))):
+                            return True
+
+        for line in self.lines:
+            coords = self.canvas.coords(line)
+            if len(coords) == 4:
+                if self.is_intersecting(((coords[0], coords[1]), (coords[2], coords[3])), ((self.points[-1][0], self.points[-1][1]), (x, y))):
+                    return True
+        return False
+
     def finish_polygon(self, event):
-        if len(self.points) > 2:
-            # Draw line from last point to first point to close the polygon
-            line = self.canvas.create_line(self.points[-1], self.points[0], fill='black')
-            self.lines.append(line)
-            self.polygons.append((self.points, self.lines))
-            self.points = []
-            self.lines = []
-            self.last_action.append(LastAction.FINISH_POLYGON)
+        if len(self.points) <= 2:
+            return 
+        if self.check_intersection(self.points[0][0], self.points[0][1]):
+            messagebox.showerror("Error", "The new line intersects with an existing line.")
+            return
+        
+        # Draw line from last point to first point to close the polygon
+        line = self.canvas.create_line(self.points[-1], self.points[0], fill='black')
+        self.lines.append(line)
+        self.polygons.append((self.points, self.lines))
+        self.points = []
+        self.lines = []
+        self.last_action.append(LastAction.FINISH_POLYGON)
 
 
     def toggle_grid(self):
@@ -95,27 +120,34 @@ class PolygonDrawer:
     def redo_last_action(self, event):
         pass
     
-    # # Ray casting algorithm to check if a point is inside a polygon
-    # def is_point_in_polygon(self, point, polygon):
-    #     x, y = point
-    #     n = len(polygon)
-    #     inside = False
-
-    #     # Iterate through each edge of the polygon
-    #     for i in range(n):
-    #         x1, y1 = polygon[i]
-    #         x2, y2 = polygon[(i + 1) % n]
-
-    #         # Check if the point is between the y-bounds of the edge
-    #         if (y1 > y) != (y2 > y):
-    #             # Calculate the x-coordinate of the intersection of the edge with the ray
-    #             intersect_x = x1 + (y - y1) * (x2 - x1) / (y2 - y1)
-                
-    #             # If the point is to the left of this intersection, toggle the inside flag
-    #             if x < intersect_x:
-    #                 inside = not inside
-
-    #     return inside
+    def is_intersecting(self, line1, line2):
+        # Start- und Endpunkte der Linien
+        A, B = np.array(line1[0]), np.array(line1[1])
+        C, D = np.array(line2[0]), np.array(line2[1])
+        
+        # Richtungsvektoren der Linien
+        AB = B - A
+        CD = D - C
+        
+        # Helper-Funktion zur Berechnung des Determinanten von zwei Vektoren
+        def det(v, w):
+            return v[0] * w[1] - v[1] * w[0]
+        
+        # Differenz der Startpunkte der beiden Linien
+        AC = C - A
+        
+        # Berechne den Determinanten für Parallelität
+        denominator = det(AB, CD)
+        if denominator == 0:
+            # Die Linien sind parallel und schneiden sich nicht
+            return False
+        
+        # Parameter t und u berechnen
+        t = det(AC, CD) / denominator
+        u = det(AC, AB) / denominator
+        
+        # Prüfen, ob der Schnittpunkt innerhalb beider Liniensegmente liegt
+        return 0 < t < 1 and 0 < u < 1
 
 if __name__ == "__main__":
     root = tk.Tk()
