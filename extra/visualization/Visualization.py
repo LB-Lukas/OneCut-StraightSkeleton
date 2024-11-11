@@ -52,8 +52,8 @@ def visualize_shapes(shapes):
 
 # Example Usage
 if __name__ == "__main__":
-    n = 5
-    shapes = [Polygon.random_simple_polygon(10, 5) for _ in range(n)]
+    n = 1
+    shapes = [Polygon.random_simple_polygon(3, 5) for _ in range(n)]
 
     visualize_shapes(shapes)
 

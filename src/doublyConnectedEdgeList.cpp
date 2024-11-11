@@ -6,7 +6,9 @@ namespace Geometry {
     struct HalfEdge;
     struct Face;
 
-    Vertex::Vertex(int xCoord, int yCoord) : x(xCoord), y(yCoord) {};
+    Vertex::Vertex(const int& xCoord, const int& yCoord) : x(xCoord), y(yCoord) {};
+    Vertex::Vertex(const std::shared_ptr<Vertex>& vertex1, const std::shared_ptr<Vertex>& vertex2)
+    : x((vertex1->x + vertex2->x) / 2), y((vertex1->y + vertex2->y) / 2) {};
 
     HalfEdge::HalfEdge() = default;
 

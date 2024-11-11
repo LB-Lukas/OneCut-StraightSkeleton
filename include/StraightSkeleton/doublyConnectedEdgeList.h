@@ -18,7 +18,8 @@ namespace Geometry {
         int x, y; // Coordinates for the vertex
         std::shared_ptr<HalfEdge> incidentEdge; // Any half-edge originating from this vertex
 
-        Vertex(int xCoord, int yCoord);
+        Vertex(const int& xCoord, const int& yCoord);
+        Vertex(const std::shared_ptr<Vertex>& vertex1, const std::shared_ptr<Vertex>& vertex2);
     };
 
     struct HalfEdge {
