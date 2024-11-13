@@ -1,91 +1,100 @@
-import numpy as np
+from last_action import LastAction
 import tkinter as tk
-from tkinter import filedialog, messagebox
-from enum import Enum
-from polygon_model import PolygonModel
-
-class LastAction(Enum):
-    ADD_POINT = 1
-    FINISH_POLYGON = 2
-    UNDO = 3
-    REDO = 4
-    NO_ACTION = 5
+from tkinter import messagebox
+from intersection_helper import IntersectionHelper
 
 class PolygonDrawer:
-    def __init__(self, root):
+    def __init__(self, root, max_polygons=1):
+
         self.root = root
+        self.max_polygons = max_polygons
         self.canvas = tk.Canvas(root, width=800, height=600, bg='white')
         self.canvas.pack()
         
-        self.model = PolygonModel()
-        self.grid_visible = False
+        self.points = []  # List for points
+        self.lines = []  # List to store lines
+        self.polygons = []  # List to store polygons
+        
+        self.grid_visible = False  # status if
         self.last_action = []
+        
+        self.intersection_helper = IntersectionHelper()
 
+        # Button to toggle grid
         self.toggle_grid_button = tk.Button(root, text="Toggle Grid", command=self.toggle_grid)
         self.toggle_grid_button.pack()
 
-        self.open_fold_file_button = tk.Button(root, text="Open Fold File", command=self.open_fold_file)
-        self.open_fold_file_button.pack()
-
+        # Event handlers for mouse clicks
         self.canvas.bind('<Button-1>', self.add_point)
-        self.canvas.bind('<Button-3>', self.finish_polygon)
+        self.canvas.bind('<Button-3>', self.finish_polygon)  # Right-click to close the polygon
         self.canvas.bind_all('<Control-z>', self.undo_last_action)
 
     def add_point(self, event):
+        if len(self.polygons) >= self.max_polygons:
+            messagebox.showerror("Error", f"Maximum number of polygons is {self.max_polygons}.")
+            return
         x, y = event.x, event.y
-        if self.model.check_intersection(x, y):
+        
+        if self.intersection_helper.check_intersection(x, y, self.polygons, self.lines, self.canvas, self.points):
             messagebox.showerror("Error", "The new line intersects with an existing line.")
             return
+
+        self.points.append((x, y))
         
-        self.model.add_point(x, y)
-        self.draw_point(x, y)
+        # Draw point on canvas
+        point = self.canvas.create_oval(x-1, y-1, x+1, y+1, fill='black')
         
-        if len(self.model.points) > 1:
-            self.draw_line(self.model.points[-2], self.model.points[-1])
+        # Draw line to previous point
+        if len(self.points) > 1:
+            line = self.canvas.create_line(self.points[-2], self.points[-1], fill='black')
+            self.lines.append(line)
+        
+        # Save the last drawn objects for undo
+        self.lines.append(point)
         self.last_action.append(LastAction.ADD_POINT)
 
     def finish_polygon(self, event):
-        if len(self.model.points) <= 2:
-            return
-        if self.model.check_intersection(self.model.points[0][0], self.model.points[0][1]):
+        if len(self.points) <= 2:
+            return 
+        if self.intersection_helper.check_intersection(self.points[0][0], self.points[0][1], self.polygons, self.lines, self.canvas, self.points):
             messagebox.showerror("Error", "The new line intersects with an existing line.")
             return
         
-        self.draw_line(self.model.points[-1], self.model.points[0])
-        self.model.finish_polygon()
+        # Draw line from last point to first point to close the polygon
+        line = self.canvas.create_line(self.points[-1], self.points[0], fill='black')
+        self.lines.append(line)
+        self.polygons.append((self.points, self.lines))
+        self.points = []
+        self.lines = []
         self.last_action.append(LastAction.FINISH_POLYGON)
 
+
+    def toggle_grid(self):
+        if self.grid_visible:
+            # Delete grid
+            self.canvas.delete('grid_line')
+        else:
+            # Draw grid
+            grid_size = 20
+            for i in range(0, self.canvas.winfo_width(), grid_size):
+                self.canvas.create_line(i, 0, i, self.canvas.winfo_height(), tag='grid_line', fill='lightgray')
+            for j in range(0, self.canvas.winfo_height(), grid_size):
+                self.canvas.create_line(0, j, self.canvas.winfo_width(), j, tag='grid_line', fill='lightgray')
+        
+        self.grid_visible = not self.grid_visible
+        
     def undo_last_action(self, event):
         if not self.last_action:
             return
         action = self.last_action.pop()
         if action == LastAction.ADD_POINT:
-            self.canvas.delete(self.model.lines.pop())
-            self.model.points.pop()
-            if self.model.lines:
-                self.canvas.delete(self.model.lines.pop())
+            line = self.lines.pop()
+            self.canvas.delete(line)
+            self.points.pop()
+            if self.lines:
+                self.canvas.delete(self.lines.pop())
         elif action == LastAction.FINISH_POLYGON:
-            polygon_points, polygon_lines = self.model.polygons.pop()
-            for line in polygon_lines:
-                self.canvas.delete(line)
-
-    def toggle_grid(self):
-        if self.grid_visible:
-            self.canvas.delete('grid_line')
-        else:
-            grid_size = 20
-            for i in range(0, self.canvas.winfo_width(), grid_size):
-                self.canvas.create_line(i, 0, i, self.canvas.winfo_height(), tag='grid_line', fill='lightgray')
-            for j in range(0, self.canvas.winfo_height(), grid_size):
-                self.canvas.create_line(0, j, self.canvas.winfo_width(), tag='grid_line', fill='lightgray')
-        self.grid_visible = not self.grid_visible
-
-    def draw_point(self, x, y):
-        self.canvas.create_oval(x-1, y-1, x+1, y+1, fill='black')
-
-    def draw_line(self, start, end, color='black'):
-        self.model.lines.append(self.canvas.create_line(start[0], start[1], end[0], end[1], fill=color))
-        
-    def open_fold_file():
-        pass
-    # TODO implement open_fold_file
+            polygon = self.polygons.pop()
+            self.points, self.lines = polygon
+            if self.lines:
+                self.canvas.delete(self.lines.pop())

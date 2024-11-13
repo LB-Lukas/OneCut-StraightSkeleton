@@ -4,6 +4,7 @@ from tkinter import messagebox
 from enum import Enum
 
 
+
 class LastAction(Enum):
     ADD_POINT = 1
     FINISH_POLYGON = 2
