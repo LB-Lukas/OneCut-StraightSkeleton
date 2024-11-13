@@ -33,7 +33,7 @@ class PolygonDrawer:
         self.canvas.bind('<Button-1>', self.add_point)
         self.canvas.bind('<Button-3>', self.finish_polygon)  # Right-click to close the polygon
         self.canvas.bind_all('<Control-z>', self.undo_last_action)
-        # self.canvas.bind_all('<Control-y>', self.redo_last_action)
+        # self.canvas.bind_all('<Control-y>', self.redo_last_action) maybe implement later
 
     def add_point(self, event):
         x, y = event.x, event.y
@@ -45,7 +45,7 @@ class PolygonDrawer:
         self.points.append((x, y))
         
         # Draw point on canvas
-        point = self.canvas.create_oval(x-3, y-3, x+3, y+3, fill='black')
+        point = self.canvas.create_oval(x-1, y-1, x+1, y+1, fill='black')
         
         # Draw line to previous point
         if len(self.points) > 1:
@@ -107,7 +107,8 @@ class PolygonDrawer:
             return
         action = self.last_action.pop()
         if action == LastAction.ADD_POINT:
-            self.canvas.delete(self.lines.pop())
+            line = self.lines.pop()
+            self.canvas.delete(line)
             self.points.pop()
             if self.lines:
                 self.canvas.delete(self.lines.pop())
@@ -118,6 +119,7 @@ class PolygonDrawer:
                 self.canvas.delete(self.lines.pop())
                 
     def redo_last_action(self, event):
+        # Maybe implement later
         pass
     
     def is_intersecting(self, line1, line2):
@@ -151,6 +153,6 @@ class PolygonDrawer:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Polygon Drawer with Grid and Undo/Redo")
+    root.title("Polygon Drawer")
     app = PolygonDrawer(root)
     root.mainloop()
