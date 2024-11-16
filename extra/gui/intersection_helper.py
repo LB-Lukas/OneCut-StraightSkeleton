@@ -6,13 +6,14 @@ class IntersectionHelper:
         
     
     def check_intersection(self, x, y, polygons, lines, canvas, points):
-        if len(points) > 0:
-            for polygon in polygons:
-                for line in polygon[1]:
-                    coords = canvas.coords(line)
-                    if len(coords) == 4:
-                        if self.is_intersecting(((coords[0], coords[1]), (coords[2], coords[3])), ((points[-1][0], points[-1][1]), (x, y))):
-                            return True
+        if not points:
+            return False
+        for polygon in polygons:
+            for line in polygon[1]:
+                coords = canvas.coords(line)
+                if len(coords) == 4:
+                    if self.is_intersecting(((coords[0], coords[1]), (coords[2], coords[3])), ((points[-1][0], points[-1][1]), (x, y))):
+                        return True
 
         for line in lines:
             coords = canvas.coords(line)

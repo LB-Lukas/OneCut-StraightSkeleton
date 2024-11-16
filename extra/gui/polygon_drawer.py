@@ -1,7 +1,8 @@
 from last_action import LastAction
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from intersection_helper import IntersectionHelper
+from file_management.fold_file_manager import FoldFileManager
 
 class PolygonDrawer:
     def __init__(self, root, max_polygons=1):
@@ -20,9 +21,12 @@ class PolygonDrawer:
         
         self.intersection_helper = IntersectionHelper()
 
-        # Button to toggle grid
+        # Buttons
         self.toggle_grid_button = tk.Button(root, text="Toggle Grid", command=self.toggle_grid)
         self.toggle_grid_button.pack()
+        
+        self.open_file_button = tk.Button(root, text="Open File", command=self.open_file)
+        self.open_file_button.pack()
 
         # Event handlers for mouse clicks
         self.canvas.bind('<Button-1>', self.add_point)
@@ -98,3 +102,43 @@ class PolygonDrawer:
             self.points, self.lines = polygon
             if self.lines:
                 self.canvas.delete(self.lines.pop())
+                
+    def draw_crease_pattern(self, fold_data):
+        vertices = fold_data['vertices_coords']
+        edges = fold_data['edges_vertices']
+        assignments = fold_data['edges_assignment']
+
+        translated_vertices = self.translate_vertices_to_center(vertices)
+
+        for edge, assignment in zip(edges, assignments):
+            x1, y1 = translated_vertices[edge[0]]
+            x2, y2 = translated_vertices[edge[1]]
+            
+            color = 'black'
+            if assignment == 'M':
+                color = 'red'
+            elif assignment == 'V':
+                color = 'blue'
+            
+            self.canvas.create_line(x1, y1, x2, y2, fill=color)
+
+    def translate_vertices_to_center(self, vertices):
+        # Calculate the center of the canvas
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+        center_x = canvas_width / 2
+        center_y = canvas_height / 2
+
+        # Translate vertices to center the canvas
+        translated_vertices = []
+        for x, y in vertices:
+            translated_vertices.append((x + center_x, y + center_y))
+        
+        return translated_vertices
+    
+    def open_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("FOLD files", "*.fold")])
+        if file_path:
+            fold_data = FoldFileManager.read_fold_file(file_path)
+            self.draw_crease_pattern(fold_data)
+
