@@ -12,20 +12,26 @@ find_package(pybind11 REQUIRED)
 # Include CGAL headers
 include_directories(${CGAL_INCLUDE_DIRS})
 
-# Add executable and specify source files
-add_executable(OneStraightCut
-        main.cpp
+# Add the Python module (shared library) target
+add_library(geometry MODULE
+        bindings/straightSkeletonPyBind.cpp
+        src/straightSkeleton.cpp
         src/doublyConnectedEdgeList.cpp
+        src/Folding.cpp
         include/StraightSkeleton/doublyConnectedEdgeList.h
         include/StraightSkeleton/straightSkeleton.h
-        src/straightSkeleton.cpp
         include/StraightSkeleton/Folding.h
-        src/Folding.cpp
-        bindings/straightSkeletonPyBind.cpp
 )
 
-# Link CGAL and pybind11 to the executable
-target_link_libraries(OneStraightCut
+# Link required libraries (CGAL and pybind11)
+target_link_libraries(geometry
         ${CGAL_LIBRARIES}
         pybind11::module
 )
+
+# Specify the output directory for the shared library
+set_target_properties(geometry PROPERTIES
+        PREFIX ""
+        SUFFIX ".so"  # For Linux or macOS, use ".pyd" for Windows
+)
+
