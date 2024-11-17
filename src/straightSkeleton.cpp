@@ -1,7 +1,9 @@
 #include "../include/StraightSkeleton/straightSkeleton.h"
+#include "../include/StraightSkeleton/folding.h"
 #include <map>
 #include <vector>
 #include <functional> // For std::greater
+
 
 namespace Geometry {
 
@@ -79,20 +81,32 @@ namespace Geometry {
 
             minHeap.erase(minHeap.begin());
 
-            const auto& l_edge = graph.halfedge(intersect_vertex);
+            const auto l_edge = graph.halfedge(intersect_vertex);
             const auto& r_edge = graph.next_around_target(l_edge);
 
-            const auto& ll_edge = graph.next_around_source(l_edge);
+            const auto ll_edge = graph.next_around_source(l_edge);
             const auto& rr_edge = graph.next_around_source(r_edge);
-
-            minHeap.erase(graph.target(ll_edge));
-            minHeap.erase(graph.target(rr_edge));
 
             const auto& l_vertex = graph.source(graph.next_around_target(ll_edge));
             const auto& r_vertex = graph.source(graph.next_around_target(rr_edge));
 
             const auto& m_vertex = std::make_shared<Point>(graph.point(l_vertex).x() + graph.point(r_vertex).x(),
                 graph.point(l_vertex).y() + graph.point(r_vertex).y());
+
+            // create new edge of new vertex
+            const auto& m_edge = std::make_shared<Line>(*m_vertex, graph.point(intersect_vertex));
+
+            // delete old triangles
+            minHeap.erase(graph.target(ll_edge));
+            minHeap.erase(graph.target(rr_edge));
+
+            // Mark edges as mountain or valley folds
+            //fold_type_map[l_edge] = FoldType::Convex;
+            //fold_type_map[e2] = FoldType::Valley;
+            //fold_type_map[e3] = FoldType::Mountain;
+
+            graph.remove_edge(ll_edge);
+            graph.remove_edge(rr_edge);
         }
     }
 }

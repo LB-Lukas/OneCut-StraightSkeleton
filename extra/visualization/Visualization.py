@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import geometry
 
 class Polygon:
     def __init__(self, vertices):
