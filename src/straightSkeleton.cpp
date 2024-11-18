@@ -105,8 +105,8 @@ namespace Geometry {
             //fold_type_map[e2] = FoldType::Valley;
             //fold_type_map[e3] = FoldType::Mountain;
 
-            graph.remove_edge(ll_edge);
-            graph.remove_edge(rr_edge);
+            //graph.remove_edge(ll_edge);
+            //graph.remove_edge(rr_edge);
         }
     }
 }
