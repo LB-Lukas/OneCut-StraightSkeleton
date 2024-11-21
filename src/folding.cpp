@@ -9,6 +9,11 @@
 //
 
 namespace Geometry {
+    Folding::Folding() : graph(PlanarGraph()) {
+        this->foldtype_map = graph.add_property_map<CGAL::SM_Edge_index, FoldType>("e:fold-type").first;
+    }
+
+
     std::vector<Point> Folding::getVertices() {
         std::vector<Point> vertices;
 
@@ -26,6 +31,27 @@ namespace Geometry {
 
     std::vector<std::pair<Point, Point>> Folding::getValleys() {
         return this->getEdges(FoldType::Convex);
+    }
+
+    Folding Folding::getFolding(const std::vector<Point> &points) {
+        Folding folding;
+
+        auto& graph = folding.graph;
+
+        auto vertex_0 = graph.add_vertex(points[0]);
+        auto vertex = vertex_0;
+
+        for(int i = 1; i < points.size(); i++) {
+            auto new_vertex = graph.add_vertex(points[i]);
+            auto edge = graph.add_edge(vertex, new_vertex);
+            folding.foldtype_map[graph.edge(edge)] = FoldType::Reflex;
+            vertex = new_vertex;
+        }
+
+        auto edge = graph.edge(graph.add_edge(vertex, vertex_0));
+        folding.foldtype_map[edge] = FoldType::Convex;
+
+        return folding;
     }
 
     std::vector<std::pair<Point, Point>> Folding::getEdges(FoldType foldType) {

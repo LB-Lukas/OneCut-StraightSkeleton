@@ -22,15 +22,22 @@ namespace Geometry {
     };
 
     class Folding {
+    protected:
         PlanarGraph graph;
 
-        std::vector<std::pair<Point, Point>> Folding::getEdges(FoldType foldType);
+        CGAL::Surface_mesh<CGAL::Point_2<CGAL::Epeck>>::Property_map<CGAL::SM_Edge_index, FoldType> foldtype_map;
+
+        std::vector<std::pair<Point, Point>> getEdges(FoldType foldType);
     public:
+        Folding();
+
         // export
         std::vector<Point> getVertices();
 
         std::vector<std::pair<Point, Point>> getMountains();
 
         std::vector<std::pair<Point, Point>> getValleys();
+
+        static Folding getFolding(const std::vector<Point> &points);
     };
 }

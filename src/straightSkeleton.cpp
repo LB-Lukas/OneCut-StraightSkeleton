@@ -39,8 +39,8 @@ namespace Geometry {
         }
 
         // Create triangles and add to min-heap
-        std::map<CGAL::SM_Vertex_index,
-                double,
+        std::map<std::pair<CGAL::SM_Vertex_index,
+                double>,
                 IntersectMinHeapComparator> minHeap;
 
         for(int i = 0; i < vertices.size(); i++) {
@@ -71,17 +71,18 @@ namespace Geometry {
             double distance = std::sqrt(squared_distance);
 
             // Push triangle with distance to the min-heap
-            minHeap[intersect_vertex] = distance;
+            //minHeap[intersect_vertex] = distance;
         }
 
         // Optional: Process triangles in min-heap (example usage)
         while (!minHeap.empty()) {
-            const CGAL::SM_Vertex_index& intersect_vertex = minHeap.begin()->first;
+            /*
+            //const CGAL::SM_Vertex_index& intersect_vertex = minHeap.begin()->first;
             const auto& intersection = minHeap.begin()->second;
 
             minHeap.erase(minHeap.begin());
 
-            const auto l_edge = graph.halfedge(intersect_vertex);
+            //const auto l_edge = graph.halfedge(intersect_vertex);
             const auto& r_edge = graph.next_around_target(l_edge);
 
             const auto ll_edge = graph.next_around_source(l_edge);
@@ -97,8 +98,8 @@ namespace Geometry {
             const auto& m_edge = std::make_shared<Line>(*m_vertex, graph.point(intersect_vertex));
 
             // delete old triangles
-            minHeap.erase(graph.target(ll_edge));
-            minHeap.erase(graph.target(rr_edge));
+            //minHeap.erase(graph.target(ll_edge));
+            //minHeap.erase(graph.target(rr_edge));
 
             // Mark edges as mountain or valley folds
             //fold_type_map[l_edge] = FoldType::Convex;
@@ -107,6 +108,7 @@ namespace Geometry {
 
             //graph.remove_edge(ll_edge);
             //graph.remove_edge(rr_edge);
+            */
         }
     }
 }
