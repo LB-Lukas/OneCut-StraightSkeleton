@@ -3,10 +3,10 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from intersection_helper import IntersectionHelper
 from file_management.fold_file_manager import FoldFileManager
+from folding_manager import FoldingManager
 
 class PolygonDrawer:
     def __init__(self, root, max_polygons=1):
-
         self.root = root
         self.max_polygons = max_polygons
         self.canvas = tk.Canvas(root, width=800, height=600, bg='white')
@@ -31,7 +31,7 @@ class PolygonDrawer:
         # Event handlers for mouse clicks
         self.canvas.bind('<Button-1>', self.add_point)
         self.canvas.bind('<Button-3>', self.finish_polygon)  # Right-click to close the polygon
-        self.canvas.bind_all('<Control-z>', self.undo_last_action)
+        self.canvas.bind_all('<Control-z>', self.undo_last_action) 
 
     def add_point(self, event):
         if len(self.polygons) >= self.max_polygons:
@@ -142,3 +142,35 @@ class PolygonDrawer:
             fold_data = FoldFileManager.read_fold_file(file_path)
             self.draw_crease_pattern(fold_data)
 
+
+    def draw_folding(self, f_manager: FoldingManager):
+        """Draws the folding pattern on the canvas.
+        This method visualizes the vertices, mountain folds, and valley folds
+        of the folding pattern managed by the FoldingManager instance.
+            f_manager (FoldingManager): The FoldingManager instance containing
+                                        the folding pattern data.
+        Raises:
+            messagebox.showerror: If no folding is generated, an error message
+                                  is displayed and the function returns early.
+        """
+        if not f_manager.folding:
+            messagebox.showerror("Error", "No folding generated.")
+            print("No folding generated.")
+            return
+        
+        for vertex in f_manager.get_vertices():
+            #print("pd for vertex")
+            #print("vertex:", vertex)
+            self.canvas.create_oval(vertex[0]-1, vertex[1]-1, vertex[0]+1, vertex[1]+1, fill='black')
+            
+        for mountain in f_manager.get_mountains():
+            +print("pd for mountain")
+            #print("mountain:", mountain)
+            start, end = mountain
+            self.canvas.create_line(start[0], start[1], end[0], end[1], fill='red')
+            
+        for valley in f_manager.get_valleys():
+            #print("pd for valley")
+            #print("valley:", valley)
+            start, end = valley
+            self.canvas.create_line(start[0], start[1], end[0], end[1], fill='blue')

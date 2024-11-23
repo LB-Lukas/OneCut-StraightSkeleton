@@ -13,10 +13,10 @@ add_library(geometry MODULE
         bindings/straightSkeletonPyBind.cpp
         src/straightSkeleton.cpp
         src/doublyConnectedEdgeList.cpp
-        src/Folding.cpp
+        src/folding.cpp
         include/StraightSkeleton/doublyConnectedEdgeList.h
         include/StraightSkeleton/straightSkeleton.h
-        include/StraightSkeleton/Folding.h
+        include/StraightSkeleton/folding.h
 )
 
 target_link_libraries(geometry
