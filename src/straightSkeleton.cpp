@@ -10,7 +10,7 @@ namespace Geometry {
     /**
      * 
      */
-    typedef CGAL::Surface_mesh<CGAL::Point_2<CGAL::Epeck>>::Property_map<CGAL::SM_Vertex_index, double> DistMap;
+    typedef CGAL::Surface_mesh<Point>::Property_map<CGAL::SM_Vertex_index, double> DistMap;
 
     // Custom comparator for a min-heap based on triangle area
 
@@ -77,7 +77,7 @@ namespace Geometry {
 
             // Compute distance of intersect point to edge
             Line edge_line(*lvertex, *rvertex);
-            double squared_distance = to_double(CGAL::squared_distance(edge_line, graph.point(intersect_vertex)));
+            double squared_distance = CGAL::to_double(CGAL::squared_distance(edge_line, graph.point(intersect_vertex)));
             double distance = std::sqrt(squared_distance);
 
             distMap[intersect_vertex] = distance;

@@ -18,14 +18,14 @@
 
 namespace Geometry {
     enum class FoldType {
-        Convex, Reflex
+        Convex, Reflex, None
     };
 
     class Folding {
     protected:
         PlanarGraph graph;
 
-        CGAL::Surface_mesh<CGAL::Point_2<CGAL::Epeck>>::Property_map<CGAL::SM_Edge_index, FoldType> foldtype_map;
+        CGAL::Surface_mesh<CGAL::Point_2<CGAL::Epeck>>::Property_map<CGAL::SM_Halfedge_index, FoldType> foldtype_map;
 
         std::vector<std::pair<Point, Point>> getEdges(FoldType foldType);
     public:

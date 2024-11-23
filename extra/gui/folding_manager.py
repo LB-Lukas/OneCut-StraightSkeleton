@@ -6,7 +6,8 @@
     
 # from geometry import Folding, Point
 
-from test_folding import Folding, Point
+#from geometry import Folding, Point
+import geometry as gm
     
 
 class FoldingManager():
@@ -26,15 +27,15 @@ class FoldingManager():
         Returns a list of all valley folds in the folding.
     """
     def __init__(self, points):
-        self.folding = Folding() # A folding has the methods getFolding(points[]), getVertices(), getMountains(), getValleys()
+        self.folding = gm.Folding() # A folding has the methods getFolding(points[]), getVertices(), getMountains(), getValleys()
         self.__generate_folding(points)
     
     def __generate_folding(self, points):
         polygon = []
         for point in points:
-            point = Point(point[0], point[1])
-            polygon.append(point)
-        self.folding = self.folding.getFolding(polygon)
+            _point = gm.Point(point[0], point[1])
+            polygon.append(_point)
+        self.folding = gm.Folding.getFolding(polygon)
     
     # function to get all the vertices
     def get_vertices(self):

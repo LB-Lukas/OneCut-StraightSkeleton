@@ -33,4 +33,4 @@ set_target_properties(geometry PROPERTIES
 
 install(TARGETS geometry
         COMPONENT python
-        DESTINATION "${PROJECT_SOURCE_DIR}/extra/visualization")
+        DESTINATION "${PROJECT_SOURCE_DIR}/extra/gui")

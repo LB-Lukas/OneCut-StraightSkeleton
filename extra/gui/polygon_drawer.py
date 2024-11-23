@@ -162,13 +162,13 @@ class PolygonDrawer:
             #print("pd for vertex")
             #print("vertex:", vertex)
             self.canvas.create_oval(vertex[0]-1, vertex[1]-1, vertex[0]+1, vertex[1]+1, fill='black')
-            
+
         for mountain in f_manager.get_mountains():
-            +print("pd for mountain")
+            #print("pd for mountain")
             #print("mountain:", mountain)
             start, end = mountain
             self.canvas.create_line(start[0], start[1], end[0], end[1], fill='red')
-            
+
         for valley in f_manager.get_valleys():
             #print("pd for valley")
             #print("valley:", valley)
