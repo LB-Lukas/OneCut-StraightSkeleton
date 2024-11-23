@@ -7,6 +7,7 @@
 namespace py = pybind11;
 
 namespace geometry {
+
     PYBIND11_MODULE(geometry, m) {
         py::class_<Geometry::StraightSkeleton, std::shared_ptr<Geometry::StraightSkeleton>>(m, "StraightSkeleton")
             .def(py::init<const std::vector<std::shared_ptr<Point>>&>(), py::arg("vertices"));
@@ -29,7 +30,7 @@ namespace geometry {
         // Expose the Point_2 type to Python
         py::class_<Point>(m, "Point")
             .def(py::init<double, double>())
-            .def("x", &Point::x)
-            .def("y", &Point::y);
+            .def("x", [](const Point& p) { return CGAL::to_double(p.x()); })
+            .def("y", [](const Point& p) { return CGAL::to_double(p.y()); });
     }
 }
