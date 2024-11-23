@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+
 import geometry
+
 
 class Polygon:
     def __init__(self, vertices):
@@ -53,6 +55,11 @@ def visualize_shapes(shapes):
 
 # Example Usage
 if __name__ == "__main__":
+    fold_type_convex = geometry.FoldType.Convex
+
+    if fold_type_convex == geometry.FoldType.Convex:
+        print("false")
+
     n = 1
     shapes = [Polygon.random_simple_polygon(3, 5) for _ in range(n)]
 

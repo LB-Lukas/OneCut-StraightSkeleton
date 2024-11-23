@@ -33,16 +33,16 @@ namespace Geometry {
         return this->getEdges(FoldType::Convex);
     }
 
-    Folding Folding::getFolding(const std::vector<Point> &points) {
+    Folding Folding::getFolding(const std::vector<Point> &polygon_points) {
         Folding folding;
 
         auto& graph = folding.graph;
 
-        auto vertex_0 = graph.add_vertex(points[0]);
+        auto vertex_0 = graph.add_vertex(polygon_points[0]);
         auto vertex = vertex_0;
 
-        for(int i = 1; i < points.size(); i++) {
-            auto new_vertex = graph.add_vertex(points[i]);
+        for(int i = 1; i < polygon_points.size(); i++) {
+            auto new_vertex = graph.add_vertex(polygon_points[i]);
             auto edge = graph.add_edge(vertex, new_vertex);
             folding.foldtype_map[graph.edge(edge)] = FoldType::Reflex;
             vertex = new_vertex;
@@ -58,7 +58,7 @@ namespace Geometry {
         std::vector<std::pair<Point, Point>> edges;
 
         for(const auto& edge : graph.edges()) {
-            const auto& fold_map = graph.property_map<CGAL::SM_Edge_index, FoldType>("e:fold_type").value();
+            const auto fold_map = graph.property_map<CGAL::SM_Edge_index, FoldType>("e:fold_type").value();
             // ToDo: check if inside cut graph
             if(fold_map[edge] != foldType) continue;
 

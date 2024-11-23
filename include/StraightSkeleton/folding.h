@@ -38,6 +38,6 @@ namespace Geometry {
 
         std::vector<std::pair<Point, Point>> getValleys();
 
-        static Folding getFolding(const std::vector<Point> &points);
+        static Folding getFolding(const std::vector<Point> &polygon_points);
     };
 }

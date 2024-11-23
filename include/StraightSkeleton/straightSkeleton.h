@@ -25,10 +25,10 @@ typedef CGAL::Surface_mesh<Point> PlanarGraph;
 
 namespace Geometry {
     class StraightSkeleton {
-    std::shared_ptr<DCEL> skeletonGraph;
+        std::shared_ptr<DCEL> skeletonGraph;
 
     public:
-        StraightSkeleton(const std::vector<std::shared_ptr<Point>>& vertices);
+        StraightSkeleton(const std::vector<std::shared_ptr<Point>>& polygon_vertices);
 
     };
 }

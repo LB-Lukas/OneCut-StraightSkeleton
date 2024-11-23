@@ -2,90 +2,103 @@
 #include "../include/StraightSkeleton/folding.h"
 #include <map>
 #include <vector>
+#include <queue>
 #include <functional> // For std::greater
 
 
 namespace Geometry {
+    /**
+     * 
+     */
+    typedef CGAL::Surface_mesh<CGAL::Point_2<CGAL::Epeck>>::Property_map<CGAL::SM_Vertex_index, double> DistMap;
 
     // Custom comparator for a min-heap based on triangle area
-    struct IntersectMinHeapComparator {
-        bool operator()(const std::pair<CGAL::SM_Vertex_index, double>& t1,
-            const std::pair<CGAL::SM_Vertex_index, double>& t2) const {
-            return t1.second < t2.second;
-        }
-    };
 
-    StraightSkeleton::StraightSkeleton(const std::vector<std::shared_ptr<Point>> &vertices) {
+    StraightSkeleton::StraightSkeleton(const std::vector<std::shared_ptr<Point>> &polygon_vertices) {
         PlanarGraph graph;
 
-        // Vector to store triangles
-        auto triangles = std::vector<Triangle>();
+        DistMap distMap = graph.add_property_map<CGAL::SM_Vertex_index, double>("e:dist-map").first;
 
-        // Vector to store rays
-        std::vector<std::pair<std::shared_ptr<Line>, CGAL::SM_Vertex_index>> rays;
+        /// comperator for Intersect heap
+        struct IntersectMinHeapComparator {
+            // stores the distance of the intersectvertices to corresponding edge
+            //std::shared_ptr<DistMap> _distMap = distMap;
+
+            bool operator()(const CGAL::SM_Vertex_index& t1,
+                const CGAL::SM_Vertex_index& t2) const {
+                return true;// distMap[t1] < distMap[t2];
+            }
+        };
+
+        // Vector to store triangles
+        //auto triangles = std::vector<Triangle>();
+
+        // Vector to store rays with the corresponding vertex_index
+        std::vector<std::pair<Line, CGAL::SM_Vertex_index>> rays;
 
         // Create rays
-        for(int i = 0; i < vertices.size(); i++) {
-            const auto& lvertex = vertices[(i - 1 + vertices.size()) % vertices.size()]; // Handle wrap-around with modulo
-            const auto& rvertex = vertices[(i + 1) % vertices.size()];
+        for(int i = 0; i < polygon_vertices.size(); i++) {
+            const auto& lvertex = polygon_vertices[(i - 1 + polygon_vertices.size()) % polygon_vertices.size()]; // Handle wrap-around with modulo
+            const auto& rvertex = polygon_vertices[(i + 1) % polygon_vertices.size()];
 
+            // needed to compute the line of the wege
             Point mvertex(lvertex->x() + rvertex->x(), lvertex->y() + rvertex->y());
 
-            const auto& vertex = graph.add_vertex(*vertices[i]);    // vertex of polygon in graph
+            const auto& vertex = graph.add_vertex(*polygon_vertices[i]);    // vertex of polygon in graph
 
-            auto ray = std::make_shared<Line>(*vertices[i], mvertex);
+            // ray of bisecting angle
+            Line ray = Line(*polygon_vertices[i], mvertex);
 
             rays.push_back(std::make_pair(ray, vertex));
         }
 
         // Create triangles and add to min-heap
-        std::map<std::pair<CGAL::SM_Vertex_index,
-                double>,
-                IntersectMinHeapComparator> minHeap;
+        std::priority_queue<CGAL::SM_Vertex_index, std::vector<CGAL::SM_Vertex_index>, IntersectMinHeapComparator> minHeap;
 
-        for(int i = 0; i < vertices.size(); i++) {
-            const auto& lvertex = vertices[i];
-            const auto& rvertex = vertices[(i + 1) % vertices.size()];
+        for(int i = 0; i < polygon_vertices.size(); i++) {
+            const auto& lvertex = polygon_vertices[i];
+            const auto& rvertex = polygon_vertices[(i + 1) % polygon_vertices.size()];
 
-            const auto& ray1 = rays[i];
-            const auto& ray2 = rays[(i + 1) % vertices.size()];
-            
+            const auto& lray = rays[i];
+            const auto& rray = rays[(i + 1) % polygon_vertices.size()];
+
             // Compute intersection of rays
-            auto intersection = CGAL::intersection(*ray1.first, *ray2.first);
+            auto intersection = CGAL::intersection(lray.first, rray.first);
             auto intersect_point = std::get_if<Point>(&*intersection);
 
-            const auto& intersect_vertex = graph.add_vertex(*intersect_point);
-            graph.add_edge(ray1.second, intersect_vertex);
-            graph.add_edge(ray2.second, intersect_vertex);
+            const auto intersect_vertex = graph.add_vertex(*intersect_point);
+            graph.add_edge(lray.second, intersect_vertex);
+            graph.add_edge(rray.second, intersect_vertex);
 
-
-
-            if(intersect_point == nullptr) continue; // Skip if no intersection
+            if(intersect_point == nullptr) continue; // Skip if no intersection (should not be the case)
 
             // Create a triangle
-            Triangle triangle(*lvertex, *rvertex, *intersect_point);
+            //Triangle triangle(*lvertex, *rvertex, *intersect_point);
 
             // Compute distance of intersect point to edge
             Line edge_line(*lvertex, *rvertex);
-            double squared_distance = CGAL::to_double(CGAL::squared_distance(Line(*lvertex, *rvertex), *rvertex));
+            double squared_distance = to_double(CGAL::squared_distance(edge_line, graph.point(intersect_vertex)));
             double distance = std::sqrt(squared_distance);
 
+            distMap[intersect_vertex] = distance;
+
             // Push triangle with distance to the min-heap
-            //minHeap[intersect_vertex] = distance;
+            minHeap.push(intersect_vertex);
         }
 
-        // Optional: Process triangles in min-heap (example usage)
+        // Process triangles in min-heap (example usage)
         while (!minHeap.empty()) {
-            /*
-            //const CGAL::SM_Vertex_index& intersect_vertex = minHeap.begin()->first;
-            const auto& intersection = minHeap.begin()->second;
+            const CGAL::SM_Vertex_index& intersect_vertex = minHeap.top();
+            minHeap.pop();
+            //const auto& intersection = minHeapBegin.;
 
-            minHeap.erase(minHeap.begin());
+            //minHeap.po(minHeap.begin());
 
-            //const auto l_edge = graph.halfedge(intersect_vertex);
+            const auto& l_edge = graph.halfedge(intersect_vertex);
             const auto& r_edge = graph.next_around_target(l_edge);
 
-            const auto ll_edge = graph.next_around_source(l_edge);
+            // todo: check if not the edge_line
+            const auto& ll_edge = graph.next_around_source(l_edge);
             const auto& rr_edge = graph.next_around_source(r_edge);
 
             const auto& l_vertex = graph.source(graph.next_around_target(ll_edge));
@@ -97,18 +110,14 @@ namespace Geometry {
             // create new edge of new vertex
             const auto& m_edge = std::make_shared<Line>(*m_vertex, graph.point(intersect_vertex));
 
-            // delete old triangles
-            //minHeap.erase(graph.target(ll_edge));
-            //minHeap.erase(graph.target(rr_edge));
+            //minHeap(graph.target(ll_edge), minHeap.top());
 
-            // Mark edges as mountain or valley folds
-            //fold_type_map[l_edge] = FoldType::Convex;
-            //fold_type_map[e2] = FoldType::Valley;
-            //fold_type_map[e3] = FoldType::Mountain;
+            // delete old triangles
+            //minHeap.(graph.target(ll_edge));
+            //minHeap.erase(graph.target(rr_edge));
 
             //graph.remove_edge(ll_edge);
             //graph.remove_edge(rr_edge);
-            */
         }
     }
 }
