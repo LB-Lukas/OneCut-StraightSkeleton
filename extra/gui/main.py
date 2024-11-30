@@ -13,7 +13,7 @@ def main():
     root.title(f"{SOFTWARE_NAME} v{SOFTWARE_VERSION}")
     #root.iconbitmap("extra/gui/icon.ico") # no icon added yet
     app = PolygonDrawer(root, max_polygons=MAX_POLYGONS)
-    foldingManager = FoldingManager([(1, 30), (100, 30), (100, 130), (50, 230), (120, 50), (140, 75), (180, 90), (160, 120), (200, 150), (220, 170), (210, 200), (180, 210), (160, 240), (140, 230), (110, 180), (90, 160), (80, 130), (70, 90), (60, 70), (50, 50)])
+    foldingManager = FoldingManager([(50, 50), (150, 30), (200, 100), (125, 200), (30, 150)])
     app.draw_folding(foldingManager)
     root.mainloop()
 

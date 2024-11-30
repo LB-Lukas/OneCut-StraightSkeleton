@@ -9,8 +9,8 @@ namespace py = pybind11;
 namespace geometry {
 
     PYBIND11_MODULE(geometry, m) {
-        py::class_<Geometry::StraightSkeleton, std::shared_ptr<Geometry::StraightSkeleton>>(m, "StraightSkeleton")
-            .def(py::init<const std::vector<std::shared_ptr<Point>>&>(), py::arg("vertices"));
+        //py::class_<Geometry::StraightSkeleton, std::shared_ptr<Geometry::StraightSkeleton>>(m, "StraightSkeleton")
+        //    .def(py::init<const std::vector<Point>&>(), py::arg("vertices"));
 
 
         py::enum_<Geometry::FoldType>(m, "FoldType")

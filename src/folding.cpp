@@ -13,6 +13,10 @@ namespace Geometry {
         this->foldtype_map = graph.add_property_map<CGAL::SM_Halfedge_index, FoldType>("e:fold-type").first;
     }
 
+    Folding::Folding(const PlanarGraph& graph) : graph(graph) {
+        this->foldtype_map = this->graph.add_property_map<CGAL::SM_Halfedge_index, FoldType>("e:fold-type").first;
+    }
+
 
     std::vector<Point> Folding::getVertices() {
         std::vector<Point> vertices;
@@ -39,17 +43,16 @@ namespace Geometry {
      * @return
      */
     Folding Folding::getFolding(const std::vector<Point> &polygon_points) {
-        Folding folding;
+        auto skeleton = StraightSkeleton(polygon_points);
+        Folding folding(skeleton.graph);
+        bool reflex = false;
 
-        // Assuming graph is initialized properly in Folding constructor
-        // auto& graph = folding.graph;
+        std::cout << skeleton.graph.halfedges().size() << std::endl;
 
-        if (polygon_points.empty()) {
-            std::cerr << "Error: polygon_points is empty!" << std::endl;
-            return folding;  // Early exit if no points are provided
+        for(const auto half_edge : folding.graph.halfedges()) {
+            folding.foldtype_map[half_edge] =  FoldType::Reflex;
         }
 
-        // Add the first vertex
         auto vertex_0 = folding.graph.add_vertex(polygon_points[0]);
 
         auto vertex = vertex_0;
@@ -60,8 +63,8 @@ namespace Geometry {
             auto edge = folding.graph.add_edge(vertex, new_vertex);
             auto twin = folding.graph.opposite(edge);
 
-            folding.foldtype_map[edge] = (i % 2 == 0 ? FoldType::Reflex : FoldType::Convex);
-            folding.foldtype_map[twin] = (i % 2 == 0 ? FoldType::Reflex : FoldType::Convex);
+            folding.foldtype_map[edge] = FoldType::Convex;
+            folding.foldtype_map[twin] = FoldType::Convex;
             vertex = new_vertex;
         }
 
@@ -69,8 +72,8 @@ namespace Geometry {
         auto edge = folding.graph.add_edge(vertex, vertex_0);
         auto twin = folding.graph.opposite(edge);
 
-        folding.foldtype_map[edge] = FoldType::Reflex;
-        folding.foldtype_map[twin] = FoldType::Reflex;
+        folding.foldtype_map[edge] = FoldType::Convex;
+        folding.foldtype_map[twin] = FoldType::Convex;
 
         return folding;
     }

@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.29)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the build type" FORCE)
+endif()
+
+
 project(OneStraightCut)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -17,6 +23,8 @@ add_library(geometry MODULE
         include/StraightSkeleton/doublyConnectedEdgeList.h
         include/StraightSkeleton/straightSkeleton.h
         include/StraightSkeleton/folding.h
+        include/StraightSkeleton/MinHeapTriangleRay.h
+        src/MinHeapTriangleRay.cpp
 )
 
 target_link_libraries(geometry

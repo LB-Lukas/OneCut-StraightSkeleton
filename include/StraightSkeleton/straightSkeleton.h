@@ -28,8 +28,9 @@ namespace Geometry {
         std::shared_ptr<DCEL> skeletonGraph;
 
     public:
-        StraightSkeleton(const std::vector<std::shared_ptr<Point>>& polygon_vertices);
+        StraightSkeleton(const std::vector<Point>& polygon_vertices);
 
+        PlanarGraph graph;
     };
 }
 

@@ -31,6 +31,8 @@ namespace Geometry {
     public:
         Folding();
 
+        Folding(const PlanarGraph& graph);
+
         // export
         std::vector<Point> getVertices();
 
