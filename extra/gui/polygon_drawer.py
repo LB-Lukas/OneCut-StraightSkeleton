@@ -27,6 +27,9 @@ class PolygonDrawer:
         
         self.open_file_button = tk.Button(root, text="Open File", command=self.open_file)
         self.open_file_button.pack()
+        
+        self.finish_polygon_button = tk.Button(root, text="Finish Polygon", command=self.finish_polygon)
+        self.finish_polygon_button.pack()
 
         # Event handlers for mouse clicks
         self.canvas.bind('<Button-1>', self.add_point)
@@ -57,7 +60,7 @@ class PolygonDrawer:
         self.lines.append(point)
         self.last_action.append(LastAction.ADD_POINT)
 
-    def finish_polygon(self, event):
+    def finish_polygon(self):
         if len(self.points) <= 2:
             return 
         if self.intersection_helper.check_intersection(self.points[0][0], self.points[0][1], self.polygons, self.lines, self.canvas, self.points):
