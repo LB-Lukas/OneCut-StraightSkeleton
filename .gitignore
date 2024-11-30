@@ -1,4 +1,5 @@
 .conda
 build
 extra/gui/__pycache__
+extra/gui/file_management/__pycache__
 extra/gui/geometry.so
