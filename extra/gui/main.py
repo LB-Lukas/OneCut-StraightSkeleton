@@ -1,6 +1,6 @@
 from tkinter import Tk, filedialog
 
-from extra.gui.folding_manager import FoldingManager
+from folding_manager import FoldingManager
 from polygon_drawer import PolygonDrawer
 
 MAX_POLYGONS: int = 3
