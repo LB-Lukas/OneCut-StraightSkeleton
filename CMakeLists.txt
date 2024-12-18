@@ -1,87 +1,89 @@
 #----------------------------------------------#
-#-----Konfiguration des Buildsystems CMake-----#
+#----- Configuration of the CMake Build System #
 #----------------------------------------------#
 
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.15)
 project(OneStraightCut)
 
-#----------------------------------------------#
-#-------------------Optionen-------------------#
-#----------------------------------------------#
-
-# Setze verwendeten C++-Standard auf C++20
+# Use C++20 standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Disable CGAL build warnings about the CMake build type
 set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
 
-# Füge selbsgeschriebene Includes hinzu
-include_directories(include)
-# Füge externe Includes hinzu
-include_directories(external)
-
 #----------------------------------------------#
-#----------Download und Nutzung von GoogleTest--#
+#----- Platform-Specific Configuration --------#
 #----------------------------------------------#
 
+# Platform-specific paths for GMP and MPFR
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin") # macOS
+    message(STATUS "Configuring for macOS")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows") # Windows
+    message(STATUS "Configuring for Windows")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux") # Linux
+    message(STATUS "Configuring for Linux")
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+#----------------------------------------------#
+#------------ External Libraries --------------#
+#----------------------------------------------#
+
+# CGAL library setup
+find_package(CGAL QUIET COMPONENTS Core)
+if(NOT CGAL_FOUND)
+    message(FATAL_ERROR "This project requires the CGAL library. Please install it before proceeding.")
+endif()
+include_directories(${CGAL_INCLUDE_DIRS})
+
+# GoogleTest setup
 include(FetchContent)
-cmake_policy(SET CMP0135 NEW)
-
 FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
 )
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-option(INSTALL_GTEST "Enable installation of googletest." OFF)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) # Relevant only for Windows
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 enable_testing()
 
 #----------------------------------------------#
-#---------------Verwende Pybind11--------------#
+#--------------- Pybind11 Setup ---------------#
 #----------------------------------------------#
+
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
-find_package(CGAL QUIET COMPONENTS Core)
-if(NOT CGAL_FOUND)
-    message(STATUS "This project requires the CGAL library, and will not be compiled.")
-    return()
-endif()
-include_directories(${CGAL_INCLUDE_DIRS})
 
 #----------------------------------------------#
-#---------------Erzeuge Projekt----------------#
+#-------------- Build Targets -----------------#
 #----------------------------------------------#
 
-# Quelle für das Projekt
+# Source files
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
-# Pybind11 Modul erzeugen
-pybind11_add_module(geometry
-    bindings/straightSkeletonPyBind.cpp
-    ${SRC_FILES}
-)
+# Pybind11 module
+pybind11_add_module(geometry bindings/straightSkeletonPyBind.cpp ${SRC_FILES})
+target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_include_directories(geometry PRIVATE ${CGAL_INCLUDE_DIRS})
 
-# Verlinke das Pybind11 Modul
-target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module)
-
-#----------------------------------------------#
-#-------------Erzeuge Testprogramme------------#
-#----------------------------------------------#
-
-# Testprogramm für simple_test
+# Test executables
 add_executable(simple_test tests/simple_test.cpp)
-target_link_libraries(simple_test GTest::gtest_main)
+target_link_libraries(simple_test PRIVATE GTest::gtest_main)
 gtest_discover_tests(simple_test)
 
-# TODO: Test kompiliert nicht
-# Testprogramm für folding_test
-# add_executable(folding_test tests/folding_test.cpp)
-# target_link_libraries(folding_test GTest::gtest_main)
-# gtest_discover_tests(folding_test)
+add_executable(folding_test tests/folding_test.cpp ${SRC_FILES})
+target_link_libraries(folding_test PRIVATE GTest::gtest_main ${CGAL_LIBRARIES} ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+target_include_directories(folding_test PRIVATE ${CGAL_INCLUDE_DIRS})
 
 #----------------------------------------------#
-#----------Installation des Projekts-----------#
+#------------ Installation Paths --------------#
 #----------------------------------------------#
+
 install(TARGETS geometry
-COMPONENT python
-LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/extra/gui")
+        COMPONENT python
+        LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+)
