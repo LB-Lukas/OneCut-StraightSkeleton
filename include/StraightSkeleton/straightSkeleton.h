@@ -1,9 +1,4 @@
-//
-// Created by user on 11/5/24.
-//
-
-#ifndef STRAIGHSKELETON_H
-#define STRAIGHSKELETON_H
+#pragma once
 
 #include "doublyConnectedEdgeList.h"
 
@@ -19,7 +14,6 @@
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_2 Point;
 typedef K::Line_2 Line;
-typedef K::Triangle_2 Triangle;
 
 typedef CGAL::Surface_mesh<Point> PlanarGraph;
 
@@ -28,10 +22,9 @@ namespace Geometry {
         std::shared_ptr<DCEL> skeletonGraph;
 
     public:
-        StraightSkeleton(const std::vector<Point>& polygon_vertices);
+        StraightSkeleton(const std::vector<Point>& polygon_points);
 
         PlanarGraph graph;
     };
 }
 
-#endif //STRAIGHSKELETON_H

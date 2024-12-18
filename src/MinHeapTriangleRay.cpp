@@ -48,6 +48,8 @@ private:
 
     // Heapify up to maintain the heap property
     void heapify_up(double i) {
+        if(i == 0) return;  // no parent
+
         double parent_weight = weight_map[heap[parent(i)]];
         double el_weight = weight_map[heap[i]];
 
@@ -59,7 +61,7 @@ private:
 
 public:
 
-    MinHeapTriangleRay() {}
+    MinHeapTriangleRay() : heap(), index_map(), weight_map() {}
 
     /**
      *
@@ -69,6 +71,14 @@ public:
         for(size_t i = 0; i < element_weight_pairs.size(); i++) {
             this->insert(element_weight_pairs[i].first, element_weight_pairs[i].second);
         }
+    }
+
+    double get_min_weight() {
+        return weight_map[heap[0]];
+    }
+
+    size_t get_size() {
+        return heap.size();
     }
 
     // Insert a value into the heap

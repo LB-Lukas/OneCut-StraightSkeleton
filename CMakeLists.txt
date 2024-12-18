@@ -18,13 +18,13 @@ include_directories(${CGAL_INCLUDE_DIRS})
 add_library(geometry MODULE
         bindings/straightSkeletonPyBind.cpp
         src/straightSkeleton.cpp
-        src/doublyConnectedEdgeList.cpp
         src/folding.cpp
         include/StraightSkeleton/doublyConnectedEdgeList.h
         include/StraightSkeleton/straightSkeleton.h
         include/StraightSkeleton/folding.h
         include/StraightSkeleton/MinHeapTriangleRay.h
         src/MinHeapTriangleRay.cpp
+        src/Triangle.cpp
 )
 
 target_link_libraries(geometry
