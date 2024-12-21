@@ -21,7 +21,7 @@ class Polygon:
                     sum(y for x, y in vertices) / number_of_vertices)
 
         # Step 3: Sort points by angle with respect to the centroid
-        vertices.sort(key=lambda point: np.arctan2(point[1] - centroid[1], point[0] - centroid[0]))
+        vertices.sort(key=lambda point:  np.arctan2(point[1] - centroid[1], point[0] - centroid[0]))
 
         return Polygon(vertices)
 
