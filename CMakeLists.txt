@@ -103,7 +103,7 @@ gtest_discover_tests(simple_test)
 
 # Test: folding_test
 add_executable(folding_test tests/folding_test.cpp ${SRC_FILES}
-        src/Polygon.cpp)
+        src/polygon.cpp)
 target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(folding_test)
 

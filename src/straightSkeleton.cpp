@@ -55,6 +55,7 @@ namespace Geometry {
 
     bool testPolygonConnection() {
         //Triangle max = triay
+        return false;
     }
 
     StraightSkeleton::StraightSkeleton(const std::vector<Point>& polygon_points) {
