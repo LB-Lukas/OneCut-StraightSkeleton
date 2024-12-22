@@ -1,5 +1,5 @@
 #pragma once
-#include "../include/StraightSkeleton/straightSkeleton.h";
+#include "../include/StraightSkeleton/straightSkeleton.h"
 
 namespace Geometry {
     struct Triangle {

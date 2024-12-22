@@ -19,7 +19,7 @@ namespace Geometry {
 
     // Custom comparator for a min-heap based on triangle area
 
-    Line computeRay(const Point& l_point, const Point& ll_point, const Point& r_point, const Point& rr_point) {
+    Line StraightSkeleton::computeRay(const Point& l_point, const Point& ll_point, const Point& r_point, const Point& rr_point) {
         const Line l_line = Line(l_point, ll_point);
         const Line r_line = Line(r_point, rr_point);
 
@@ -55,6 +55,7 @@ namespace Geometry {
 
     bool testPolygonConnection() {
         //Triangle max = triay
+        return false;
     }
 
     StraightSkeleton::StraightSkeleton(const std::vector<Point>& polygon_points) {

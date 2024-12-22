@@ -5,4 +5,4 @@
 class Polygon {
     public:
     Polygon();
-}
+};
