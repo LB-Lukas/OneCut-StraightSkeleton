@@ -44,6 +44,15 @@ namespace Geometry {
      */
     Folding Folding::getFolding(const std::vector<Point> &polygon_points) {
         auto skeleton = StraightSkeleton(polygon_points);
+        // TODO: Add perpendiculars to the skeleton
+        // Planarer Graph mit den Skeleton Kanten und den Skeleton Punkten
+        // typedef CGAL::Surface_mesh<Point> PlanarGraph;   das ist der Datentyp
+        // Hier alle Knoten durchgehen und Kanten senkrecht zu den Polygon Kanten einfügen
+        // Surface Mesh für Straight Skeleton und ursprüngliches Polygon muss separat genommen werden
+        // Beachte: "Each perpendicular edge is contained in one skeleton face, and is perpendicular to the graph edge contained in that skeleton face"
+
+
+        // TODO: Edge Assignment
         Folding folding(skeleton.graph);
         bool reflex = false;
 
