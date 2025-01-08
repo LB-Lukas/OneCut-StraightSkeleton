@@ -9,6 +9,7 @@
 
 namespace Geometry {
 
+typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_2 Point;
 typedef CGAL::Surface_mesh<Point> PlanarGraph;
 

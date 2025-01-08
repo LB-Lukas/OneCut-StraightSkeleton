@@ -107,6 +107,11 @@ add_executable(folding_test tests/folding_test.cpp ${SRC_FILES}
 target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(folding_test)
 
+# Test: perpendicular_test
+add_executable(perpendicular_test tests/perpendicular_test.cpp ${SRC_FILES})
+target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(perpendicular_test)
+
 #----------------------------------------------#
 #----------Installation des Projekts-----------#
 #----------------------------------------------#
