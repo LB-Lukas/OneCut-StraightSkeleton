@@ -15,6 +15,18 @@ typedef CGAL::Surface_mesh<Point> PlanarGraph;
 
 class PerpendicularGraph {
 public:
+    /**
+     * @brief Construct a new Perpendicular Graph object
+     * 
+     */
+    PerpendicularGraph();
+
+    /**
+     * @brief Construct a new Perpendicular Graph object
+     * 
+     * @param skeletonGraph the straight skeleton graph
+     * @param cutGraph the cut graph
+     */
     PerpendicularGraph(const PlanarGraph& skeletonGraph, const PlanarGraph& cutGraph);
 
     /**

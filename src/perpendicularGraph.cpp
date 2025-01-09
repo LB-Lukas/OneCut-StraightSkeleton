@@ -3,6 +3,8 @@
 
 namespace Geometry {
 
+    PerpendicularGraph::PerpendicularGraph() {}
+
     PerpendicularGraph::PerpendicularGraph(const PlanarGraph &skeletonGraph, const PlanarGraph &cutGraph) : 
         skeletonGraph(skeletonGraph),
         cutGraph(cutGraph) {}
