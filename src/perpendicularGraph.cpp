@@ -18,8 +18,14 @@ namespace Geometry {
         // Für alle Knoten des Skeleton Graphen Perpendiculars berechnen
         for (const auto& vertex : this->skeletonGraph.vertices()) {
             // Für alle Kanten des Cut Graphen Perpendiculars berechnen
-
-            // dem Perpendicular Graphen die Perpendiculars hinzufügen
+            // -> also für jede Skeleton Face berechenen!
+            for (const auto& face : this->skeletonGraph.faces()) {
+                // Für alle Kanten, die Eine Cut-Edge sind, Perpendiculars berechnen
+                // TODO: FIX THIS LINE; Idea: Iterate over all edges of the face
+                for (const auto& edge : this->skeletonGraph.edges(face)) { // THIS IS NOT CORRECT AND DOES NOT EXIST
+                    auto perpendicular = calculatePerpendicularBisector(edge);
+                    this->perpendicularGraph.add_edge(perpendicular.first, perpendicular.second);
+                }
         }
     }
 
@@ -44,7 +50,7 @@ namespace Geometry {
         return this->skeletonGraph;
     }
 
-    std::pair<Point, Point> PerpendicularGraph::calculatePerpendicularBisector(const std::pair<Point, Point> &edge) {
+    std::pair<Point, Point> PerpendicularGraph::calculatePerpendicularBisector(const Point& point,const std::pair<Point, Point> &edge) {
         // The perpendicular must be perpendicular to the edge of the cut graph and its origin must be the vertex of the skeleton graph
         throw std::runtime_error("Method not yet implemented.");
         return std::pair<Point, Point>(Point(0, 0), Point(0, 0));

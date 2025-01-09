@@ -71,7 +71,7 @@ private:
     PlanarGraph skeletonGraph;
     PlanarGraph perpendicularGraph;
 
-    std::pair<Point, Point> calculatePerpendicularBisector(const std::pair<Point, Point>& edge);
+    std::pair<Point, Point> calculatePerpendicularBisector(const Point& point, const std::pair<Point, Point>& edge);
 };
 
 
