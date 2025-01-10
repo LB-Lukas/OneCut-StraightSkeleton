@@ -19,13 +19,32 @@ namespace Geometry {
         for (const auto& vertex : this->skeletonGraph.vertices()) {
             // Für alle Kanten des Cut Graphen Perpendiculars berechnen
             // -> also für jede Skeleton Face berechenen!
-            for (const auto& face : this->skeletonGraph.faces()) {
-                // Für alle Kanten, die Eine Cut-Edge sind, Perpendiculars berechnen
-                // TODO: FIX THIS LINE; Idea: Iterate over all edges of the face
-                for (const auto& edge : this->skeletonGraph.edges(face)) { // THIS IS NOT CORRECT AND DOES NOT EXIST
-                    auto perpendicular = calculatePerpendicularBisector(edge);
-                    this->perpendicularGraph.add_edge(perpendicular.first, perpendicular.second);
+            for (const auto halfedge : CGAL::halfedges_around_target(vertex, this->skeletonGraph)) {
+                PlanarGraph::Face_index face = this->skeletonGraph.face(halfedge);
+
+                // Only handle faces that are not the outer face
+                if (face == PlanarGraph::null_face()) {
+                    continue;
                 }
+
+                // Get one halfedge of the current face
+                auto h = this->skeletonGraph.halfedge(face);
+                for (auto edge : this->skeletonGraph.halfedges_around_face(h)) {
+                    // Check if the edge is a cut edge
+                    if (GraphUtils::isEdgeInGraph(this->cutGraph, std::make_pair(this->skeletonGraph.point(this->skeletonGraph.source(edge)), this->skeletonGraph.point(this->skeletonGraph.target(edge))))) {
+                        // Calculate perpendicular bisector
+                        Point p = this->skeletonGraph.point(vertex);
+                        Point first = this->skeletonGraph.point(this->skeletonGraph.source(edge));
+                        Point second = this->skeletonGraph.point(this->skeletonGraph.target(edge));
+                        auto perpendicular = calculatePerpendicularBisector(p, std::pair<Point, Point>(first, second));
+                        // Add perpendicular to the perpendicular graph
+                        auto v1 = this->perpendicularGraph.add_vertex(perpendicular.first);
+                        auto v2 = this->perpendicularGraph.add_vertex(perpendicular.second);
+                        this->perpendicularGraph.add_edge(v1, v2);
+                    }
+                }
+
+            }
         }
     }
 
@@ -52,8 +71,20 @@ namespace Geometry {
 
     std::pair<Point, Point> PerpendicularGraph::calculatePerpendicularBisector(const Point& point,const std::pair<Point, Point> &edge) {
         // The perpendicular must be perpendicular to the edge of the cut graph and its origin must be the vertex of the skeleton graph
+        Point A = edge.first;
+        Point B = edge.second;
+        Line AB(A, B);
+
+        // calculate perpendicular point on edge AB
+        Point L = AB.projection(point);
+
+        return std::pair<Point, Point>(point, L);
+
+
+        /*
         throw std::runtime_error("Method not yet implemented.");
         return std::pair<Point, Point>(Point(0, 0), Point(0, 0));
+        */
     }
 
 }

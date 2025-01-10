@@ -4,13 +4,17 @@
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Point_2.h>
+#include <CGAL/Line_2.h>
 #include <CGAL/Surface_mesh.h>
+
+#include "StraightSkeleton/graphUtils.h" 
 
 
 namespace Geometry {
 
 typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 typedef K::Point_2 Point;
+typedef K::Line_2 Line;
 typedef CGAL::Surface_mesh<Point> PlanarGraph;
 
 class PerpendicularGraph {

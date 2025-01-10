@@ -31,6 +31,16 @@ public:
      * @return true if the graphs are equal, false otherwise
      */
     static bool areGraphsEqual(const PlanarGraph& graph1, const PlanarGraph& graph2); 
+
+    /**
+     * @brief Checks if an edge is part of a graph
+     * 
+     * @param graph the graph
+     * @param edge the edge
+     * 
+     * @return true if the edge is part of the graph, false otherwise
+     */
+    static bool isEdgeInGraph(const PlanarGraph& graph, const std::pair<Point, Point>& edge);
 };
 
 
