@@ -112,6 +112,11 @@ add_executable(perpendicular_test tests/perpendicular_test.cpp ${SRC_FILES})
 target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(perpendicular_test)
 
+# Test: graphutils_test
+add_executable(graphutils_test tests/graphutils_test.cpp ${SRC_FILES})
+target_link_libraries(graphutils_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(graphutils_test)
+
 #----------------------------------------------#
 #----------Installation des Projekts-----------#
 #----------------------------------------------#
