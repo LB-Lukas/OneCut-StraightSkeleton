@@ -87,8 +87,8 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 #----------------------------------------------#
 
 pybind11_add_module(geometry
+    bindings/straightSkeletonPyBind.cpp
     ${SRC_FILES}
-        bindings/StraightSkeletonPyBind.cpp
 )
 
 # specify name of generated .so file
@@ -103,16 +103,8 @@ target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module)
 enable_testing()
 
 # Test: folding_test
-add_executable(folding_test tests/FoldingTest.cpp ${SRC_FILES}
-        tests/MinHeapTriangleRayTest.cpp
-        include/straight_skeleton/StraightSkeleton.h
-        include/straight_skeleton/StraightSkeletonTypes.h
-        include/straight_skeleton/Folding.h
-        include/straight_skeleton/event_management/ClosestPairDataStructure.h
-        include/straight_skeleton/event_management/EventHeap.h
-        include/straight_skeleton/event_management/NaiveClosestPair.h
-        include/straight_skeleton/event_management/SkeletonEvent.h
-        include/straight_skeleton/event_management/SkeletonEventTriangle.h)
+add_executable(folding_test tests/folding_test.cpp ${SRC_FILES}
+        src/polygon.cpp)
 target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(folding_test)
 
