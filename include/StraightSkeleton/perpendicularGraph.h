@@ -69,13 +69,21 @@ public:
      */
     PlanarGraph getCompleteGraph() const;
 
+    /**
+     * @brief Calculate the perpendicular bisector of a point and an edge
+     * @todo Make later private (only pulbic for test purposes)
+     * 
+     * @param point 
+     * @param edge 
+     * @return std::pair<Point, Point> 
+     */
+    std::pair<Point, Point> calculatePerpendicularBisector(const Point& point, const std::pair<Point, Point>& edge);
+
 
 private:
     PlanarGraph cutGraph;
     PlanarGraph skeletonGraph;
     PlanarGraph perpendicularGraph;
-
-    std::pair<Point, Point> calculatePerpendicularBisector(const Point& point, const std::pair<Point, Point>& edge);
 };
 
 
