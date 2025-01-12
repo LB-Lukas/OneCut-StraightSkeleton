@@ -3,7 +3,7 @@ from tkinter import Tk, filedialog
 from folding_manager import FoldingManager
 from polygon_drawer import PolygonDrawer
 
-MAX_POLYGONS: int = 3
+MAX_POLYGONS: int = 1
 SOFTWARE_NAME: str = "Straight-Skeleton Tool"
 SOFTWARE_VERSION: str = "0.1.0"
 
