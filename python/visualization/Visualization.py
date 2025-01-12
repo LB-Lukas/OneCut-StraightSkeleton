@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+import geometry
+
+
 class Polygon:
     def __init__(self, vertices):
         if len(vertices) < 3:
@@ -30,13 +33,14 @@ class Polygon:
     def perimeter(self):
         def distance(p1, p2):
             return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
-        return sum(distance(self.vertices[i], self.vertices[(i + 1) % len(self.vertices)]) for i in range(len(self.vertices)))
+
+        return sum(
+            distance(self.vertices[i], self.vertices[(i + 1) % len(self.vertices)]) for i in range(len(self.vertices)))
 
     def draw(self, ax):
         polygon = plt.Polygon(self.vertices, fill=False, edgecolor='purple', linewidth=2)
         ax.add_patch(polygon)
         ax.set_aspect('equal')
-
 
 
 # Visualization function
@@ -52,8 +56,13 @@ def visualize_shapes(shapes):
 
 # Example Usage
 if __name__ == "__main__":
-    n = 5
-    shapes = [Polygon.random_simple_polygon(10, 5) for _ in range(n)]
+    fold_type_convex = geometry.FoldType.Convex
+
+    if fold_type_convex == geometry.FoldType.Convex:
+        print("false")
+
+    n = 1
+    shapes = [Polygon.random_simple_polygon(3, 5) for _ in range(n)]
 
     visualize_shapes(shapes)
 

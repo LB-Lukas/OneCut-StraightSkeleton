@@ -1,1 +1,8 @@
 .conda
+build
+python/gui/__pycache__
+python/gui/file_management/__pycache__
+.idea/
+cmake-build-debug/
+extra/gui/**/*.so
+.vscode
