@@ -87,7 +87,7 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 #----------------------------------------------#
 
 pybind11_add_module(geometry
-    bindings/straightSkeletonPyBind.cpp
+        bindings/StraightSkeletonPyBind.cpp
     ${SRC_FILES}
 )
 
@@ -103,8 +103,7 @@ target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module)
 enable_testing()
 
 # Test: folding_test
-add_executable(folding_test tests/folding_test.cpp ${SRC_FILES}
-        src/polygon.cpp)
+add_executable(folding_test tests/FoldingTest.cpp ${SRC_FILES})
 target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(folding_test)
 
@@ -127,6 +126,16 @@ gtest_discover_tests(min_heap_triangle_ray_test)
 add_executable(naive_closest_pair_test tests/NaiveClosestPairTest.cpp ${SRC_FILES})
 target_link_libraries(naive_closest_pair_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(naive_closest_pair_test)
+
+# Test: PerpendicularTest
+add_executable(perpendicular_test tests/PerpendicularTest.cpp ${SRC_FILES})
+target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(perpendicular_test)
+
+# Test: GraphUtilsTest
+add_executable(graph_utils_test tests/GraphUtilsTest.cpp ${SRC_FILES})
+target_link_libraries(graph_utils_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(graph_utils_test)
 
 #----------------------------------------------#
 #----------Project-Installation----------------#

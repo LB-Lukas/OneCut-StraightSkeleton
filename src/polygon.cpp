@@ -1,1 +1,0 @@
-#include "StraightSkeleton/polygon.h"
