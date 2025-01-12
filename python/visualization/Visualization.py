@@ -21,7 +21,7 @@ class Polygon:
                     sum(y for x, y in vertices) / number_of_vertices)
 
         # Step 3: Sort points by angle with respect to the centroid
-        vertices.sort(key=lambda point:  np.arctan2(point[1] - centroid[1], point[0] - centroid[0]))
+        vertices.sort(key=lambda point: np.arctan2(point[1] - centroid[1], point[0] - centroid[0]))
 
         return Polygon(vertices)
 
@@ -33,13 +33,14 @@ class Polygon:
     def perimeter(self):
         def distance(p1, p2):
             return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
-        return sum(distance(self.vertices[i], self.vertices[(i + 1) % len(self.vertices)]) for i in range(len(self.vertices)))
+
+        return sum(
+            distance(self.vertices[i], self.vertices[(i + 1) % len(self.vertices)]) for i in range(len(self.vertices)))
 
     def draw(self, ax):
         polygon = plt.Polygon(self.vertices, fill=False, edgecolor='purple', linewidth=2)
         ax.add_patch(polygon)
         ax.set_aspect('equal')
-
 
 
 # Visualization function
