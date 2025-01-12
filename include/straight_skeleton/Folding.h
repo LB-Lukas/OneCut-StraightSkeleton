@@ -4,7 +4,7 @@
 
 #ifndef FOLDING_H
 #define FOLDING_H
-#include "straightSkeleton.h"
+#include "StraightSkeleton.h"
 
 #endif //FOLDING_H
 
@@ -16,7 +16,7 @@
 #include <CGAL/squared_distance_2.h>
 #include <CGAL/Surface_mesh.h>
 
-namespace Geometry {
+namespace straight_skeleton {
     enum class FoldType {
         Convex, Reflex, None
     };

@@ -4,6 +4,7 @@
 # chmod +x build_project.sh
 
 # Navigate to the build directory, create it if it doesn't exist
+
 mkdir -p build
 cd build
 

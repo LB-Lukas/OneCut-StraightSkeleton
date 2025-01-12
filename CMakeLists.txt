@@ -8,6 +8,7 @@ project(OneStraightCut)
 # Use C++20 standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 # Disable CGAL build warnings about the CMake build type
 set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
@@ -86,32 +87,60 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 #----------------------------------------------#
 
 pybind11_add_module(geometry
-    bindings/straightSkeletonPyBind.cpp
     ${SRC_FILES}
+        bindings/StraightSkeletonPyBind.cpp
 )
+
+# specify name of generated .so file
+set_target_properties(geometry PROPERTIES OUTPUT_NAME geometry)
 
 target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module)
 
 #----------------------------------------------#
-#---------------Testprogramme------------------#
+#---------------Tests--------------------------#
 #----------------------------------------------#
 
-# Test: simple_test
-add_executable(simple_test tests/simple_test.cpp)
-target_link_libraries(simple_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(simple_test)
+enable_testing()
 
 # Test: folding_test
-add_executable(folding_test tests/folding_test.cpp ${SRC_FILES}
-        src/Polygon.cpp)
+add_executable(folding_test tests/FoldingTest.cpp ${SRC_FILES}
+        tests/MinHeapTriangleRayTest.cpp
+        include/straight_skeleton/StraightSkeleton.h
+        include/straight_skeleton/StraightSkeletonTypes.h
+        include/straight_skeleton/Folding.h
+        include/straight_skeleton/event_management/ClosestPairDataStructure.h
+        include/straight_skeleton/event_management/EventHeap.h
+        include/straight_skeleton/event_management/NaiveClosestPair.h
+        include/straight_skeleton/event_management/SkeletonEvent.h
+        include/straight_skeleton/event_management/SkeletonEventTriangle.h)
 target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(folding_test)
 
+# Test: SkeletonEventTriangleTest
+add_executable(triangle_test tests/SkeletonEventTriangleTest.cpp ${SRC_FILES})
+target_link_libraries(triangle_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(triangle_test)
+
+# Test: SkeletonEventRayTest
+add_executable(ray_test tests/SkeletonEventRayTest.cpp ${SRC_FILES})
+target_link_libraries(ray_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(ray_test)
+
+# Test: min_heap_triangle_test
+add_executable(min_heap_triangle_ray_test tests/MinHeapTriangleRayTest.cpp ${SRC_FILES})
+target_link_libraries(min_heap_triangle_ray_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(min_heap_triangle_ray_test)
+
+# Test: NaiveClosestPairTest
+add_executable(naive_closest_pair_test tests/NaiveClosestPairTest.cpp ${SRC_FILES})
+target_link_libraries(naive_closest_pair_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(naive_closest_pair_test)
+
 #----------------------------------------------#
-#----------Installation des Projekts-----------#
+#----------Project-Installation----------------#
 #----------------------------------------------#
 
 install(TARGETS geometry
     COMPONENT python
-    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/extra/gui"
+    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/python/gui"
 )

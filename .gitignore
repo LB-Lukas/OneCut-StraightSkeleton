@@ -1,7 +1,7 @@
 .conda
 build
-extra/gui/__pycache__
-extra/gui/file_management/__pycache__
+python/gui/__pycache__
+python/gui/file_management/__pycache__
 .idea/
 cmake-build-debug/
 extra/gui/**/*.so

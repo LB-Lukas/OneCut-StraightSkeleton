@@ -2,13 +2,15 @@
 // Created by user on 11/11/24.
 //
 
-#include "../include/StraightSkeleton/folding.h"
+#include "straight_skeleton/Folding.h"
+#include "straight_skeleton/StraightSkeleton.h"
+#include "straight_skeleton/event_management/SkeletonEvent.h"
 
 //              // use default "FoldType::Convex"
 //            auto fold_type_map = graph.add_property_map<CGAL::SM_Halfedge_index, FoldType>("e:fold_type", FoldType::Convex).first;
 //
 
-namespace Geometry {
+namespace straight_skeleton {
     Folding::Folding() : graph(PlanarGraph()) {
         this->foldtype_map = graph.add_property_map<CGAL::SM_Halfedge_index, FoldType>("e:fold-type").first;
     }
@@ -43,7 +45,7 @@ namespace Geometry {
      * @return
      */
     Folding Folding::getFolding(const std::vector<Point> &polygon_points) {
-        auto skeleton = StraightSkeleton(polygon_points);
+        auto skeleton = straight_skeleton::StraightSkeleton(polygon_points);
         Folding folding(skeleton.graph);
         bool reflex = false;
 
