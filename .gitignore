@@ -1,8 +1,23 @@
-.conda
+# IDE specific files
+.idea/
+.vscode
+.VSCodeCounter
+
+# Build directories
 build
+cmake-build-debug/
+
+# Python specific files
+.conda
 python/gui/__pycache__
 python/gui/file_management/__pycache__
-.idea/
-cmake-build-debug/
+
+# Binary files
+*.so
 extra/gui/**/*.so
-.vscode
+
+# JavaScript files
+*.js
+
+# Miscellaneous
+TODO
