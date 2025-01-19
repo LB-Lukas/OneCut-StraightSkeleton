@@ -19,7 +19,10 @@ namespace straight_skeleton {
     using Vector        = K::Vector_2;
     using Direction     = K::Direction_2;
     using PlanarGraph   = CGAL::Surface_mesh<Point>;
-    using VertexIndex = PlanarGraph::Vertex_index;
+    using VertexIndex   = PlanarGraph::Vertex_index;
+    using FaceIndex     = PlanarGraph::Face_index;
+    using EdgeIndex     = PlanarGraph::Edge_index;  
+    using HalfedgeIndex = PlanarGraph::Halfedge_index;
 }
 
 
