@@ -58,6 +58,15 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 enable_testing()
 
+# Cairo
+find_package(PkgConfig REQUIRED) # Use pkg-config to locate Cairo
+pkg_check_modules(CAIRO REQUIRED cairo)
+
+# Include Cairo directories
+include_directories(${CAIRO_INCLUDE_DIRS})
+link_directories(${CAIRO_LIBRARY_DIRS})
+add_definitions(${CAIRO_CFLAGS_OTHER})
+
 #----------------------------------------------#
 #---------------Verwende Pybind11--------------#
 #----------------------------------------------#
@@ -137,6 +146,10 @@ add_executable(graph_utils_test tests/GraphUtilsTest.cpp ${SRC_FILES})
 target_link_libraries(graph_utils_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(graph_utils_test)
 
+# Test: StraightSkeletonTest
+add_executable(straight_skeleton_test tests/StraightSkeletonTest.cpp ${SRC_FILES})
+target_link_libraries(straight_skeleton_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(straight_skeleton_test)
 #----------------------------------------------#
 #----------Project-Installation----------------#
 #----------------------------------------------#

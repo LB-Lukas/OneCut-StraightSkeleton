@@ -6,3 +6,5 @@ python/gui/file_management/__pycache__
 cmake-build-debug/
 extra/gui/**/*.so
 .vscode
+Testing
+test-output

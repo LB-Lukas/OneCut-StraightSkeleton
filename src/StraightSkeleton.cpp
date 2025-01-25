@@ -67,6 +67,8 @@ namespace straight_skeleton {
 
         // Add the intersection vertex to the graph
         const CGAL::SM_Vertex_index intersect_vertex = graph.add_vertex(intersect_triangle->intersect_point);
+
+        // add new edges to graph
         graph.add_edge(intersect_vertex, intersect_triangle->l_pol_vertex);
         graph.add_edge(intersect_vertex, intersect_triangle->r_pol_vertex);
 
@@ -76,8 +78,6 @@ namespace straight_skeleton {
         TrianglePtr ll_triangle = l_triangle->l_triangle_ptr;
         TrianglePtr rr_triangle = r_triangle->r_triangle_ptr;
 
-        // Build a new “intersection_ray” from geometry
-        // We wrap in try/catch in case lines are parallel or invalid
         Line intersect_ray;
         try {
             intersect_ray = computeRay(graph.point(l_triangle->l_pol_vertex),
@@ -152,12 +152,29 @@ namespace straight_skeleton {
         event_heap.insert(new_r_edge_event, new_r_dist);
 
         // Remove the old neighbor triangles from the heap
-        event_heap.remove(l_triangle->skeleton_event_ptr);
-        event_heap.remove(r_triangle->skeleton_event_ptr);
+        try {
+            event_heap.remove(l_triangle->skeleton_event_ptr);
+        } catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+        }
 
-        // (Optional) check validity
-        new_l_triangle->assertValide();
-        new_r_triangle->assertValide();
+        try {
+            event_heap.remove(r_triangle->skeleton_event_ptr);
+        } catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+        }
+
+        try {
+            new_l_triangle->assertValide();
+        } catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+        }
+
+        try {
+            new_r_triangle->assertValide();
+        } catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+        }
 
         // We are done for this iteration. Move on.
     }

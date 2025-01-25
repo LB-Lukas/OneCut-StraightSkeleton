@@ -4,19 +4,18 @@
 # chmod +x build_project.sh
 
 # Navigate to the build directory, create it if it doesn't exist
-
 mkdir -p build
 cd build
 
 # Run CMake to configure the project
 echo "Configuring project using CMake..."
-cmake ..
+cmake .. -DCMAKE_CXX_FLAGS="-w" -DCMAKE_C_FLAGS="-w"
 
 # Build the project
 echo "Building the project..."
-make
+make -s  # -s suppresses make output, including warnings
 
-echo "Install library.."
+echo "Installing library..."
 make install
 
 # Check if the build was successful
