@@ -1,20 +1,7 @@
 #pragma once
 
-#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
-#include <CGAL/Line_2.h>
-#include <CGAL/Point_2.h>
-
-#include <CGAL/intersections.h>
-#include <CGAL/squared_distance_2.h>
-#include <CGAL/Surface_mesh.h>
-
-typedef CGAL::Exact_predicates_exact_constructions_kernel K;
-typedef K::Point_2 Point;
-typedef K::Line_2 Line;
-typedef K::Vector_2 Vector;
-typedef K::Direction_2 Direction;
-
-typedef CGAL::Surface_mesh<Point> PlanarGraph;
+#include <vector>
+#include "StraightSkeletonTypes.h"
 
 namespace straight_skeleton {
 
@@ -41,6 +28,43 @@ public:
      * @return true if the edge is part of the graph, false otherwise
      */
     static bool isEdgeInGraph(const PlanarGraph& graph, const std::pair<Point, Point>& edge);
+
+    /** 
+     * @brief Get all the faces that contain a certain vertex
+     * 
+     * @param graph the graph
+     * @param vertex the vertex
+     * @return vector<FaceIndex> the faces that contain the vertex
+     */
+    static std::vector<FaceIndex> getFacesContainingVertex(const PlanarGraph& graph, const VertexIndex& vertex);
+
+    /**
+     * @deprecated use getHalfedgesOfFace instead
+     * @brief Get all the edges around a face
+     * 
+     * @param graph the graph
+     * @param face the face
+     * @return vector<EdgeIndex> the edges around the face
+     */
+    static std::vector<EdgeIndex> getEdgesOfFace(const PlanarGraph& graph, const FaceIndex& face);
+
+    /**
+     * @brief Get the Halfedges around a face
+     * 
+     * @param graph the graph
+     * @param face  the face
+     * @return std::vector<HalfedgeIndex> the edges around the face
+     */
+    static std::vector<HalfedgeIndex> getHalfedgesOfFace(const PlanarGraph& graph, const FaceIndex& face);
+
+    /**
+     * @brief Get the Degree of a vertex (number of incident edges)
+     * 
+     * @param graph the graph
+     * @param vertex teh vertex 
+     * @return size_t the degree of the vertex
+     */
+    static size_t getDegree(const PlanarGraph& graph, const VertexIndex& vertex);
 };
 
 
