@@ -73,7 +73,6 @@ namespace straight_skeleton {
         });
         // Add parallel methods for add_edge, etc. if needed
 
-
     py::class_<PerpendicularGraph>(m, "PerpendicularGraph")
         .def(py::init<>())
         .def(py::init<const PlanarGraph&, const PlanarGraph&>())

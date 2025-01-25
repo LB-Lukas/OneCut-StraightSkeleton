@@ -96,7 +96,7 @@ file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 #----------------------------------------------#
 
 pybind11_add_module(geometry
-        bindings/StraightSkeletonPyBind.cpp
+        bindings/straightSkeletonPyBind.cpp
     ${SRC_FILES}
 )
 
