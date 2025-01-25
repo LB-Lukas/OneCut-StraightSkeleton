@@ -8,12 +8,12 @@ namespace straight_skeleton {
 PerpendicularFinder::PerpendicularFinder(const IStraightSkeleton& skeleton) : skeleton(skeleton) {}
 
 std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
-    std::vector<PerpChain> result;
+    std::vector<PerpChain> result;  // result is a vector of a vector of PerpSegment objects
 
     int faceCount = skeleton.faceCount();
     std::cout << "Face count: " << faceCount << std::endl;
     for (int f = 0; f < faceCount; f++) {
-        const ISkeletonFace& face = skeleton.face(f); // NOT ALLOWED?
+        const ISkeletonFace& face = skeleton.face(f);
         std::cout << "Processing face: " << f << std::endl;
 
         // Vertex 0 and 1 form the cut Edge
