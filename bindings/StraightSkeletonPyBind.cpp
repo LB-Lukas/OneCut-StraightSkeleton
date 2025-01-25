@@ -3,7 +3,6 @@
 #include <memory>
 #include "../include/straight_skeleton/StraightSkeletonTypes.h"
 #include "../include/straight_skeleton/Folding.h"
-#include "../include/straight_skeleton/PerpendicularGraph.h"
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Point_2.h>
@@ -72,14 +71,6 @@ namespace straight_skeleton {
             return edges;
         });
         // Add parallel methods for add_edge, etc. if needed
-
-    py::class_<PerpendicularGraph>(m, "PerpendicularGraph")
-        .def(py::init<>())
-        .def(py::init<const PlanarGraph&, const PlanarGraph&>())
-        .def("addPerpendiculars", &PerpendicularGraph::addPerpendiculars)
-        .def("getPerpendicularGraph", &PerpendicularGraph::getPerpendicularGraph)
-        .def("getCutGraph", &PerpendicularGraph::getCutGraph)
-        .def("getStraightSkeletonGraph", &PerpendicularGraph::getStraightSkeletonGraph);
             
     }
 }

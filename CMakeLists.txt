@@ -100,7 +100,7 @@ target_link_libraries(PerpendicularDemo PRIVATE ${CGAL_LIBRARIES})
 #----------------------------------------------#
 
 pybind11_add_module(geometry
-        bindings/straightSkeletonPyBind.cpp
+        bindings/StraightSkeletonPyBind.cpp
     ${SRC_FILES}
 )
 
