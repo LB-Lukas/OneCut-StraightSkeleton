@@ -27,6 +27,7 @@ class StraightSkeletonApp:
         self.main_view.finish_polygon_button.config(command=self.polygon_controller.finish_polygon)
         self.main_view.export_pdf_button.config(command=self.file_controller.export_to_pdf)
         self.main_view.export_png_button.config(command=self.file_controller.export_to_png)
+        self.main_view.generate_skeleton_button.config(command=self.polygon_controller.generate_skeleton)
         
         self.main_view.canvas_view.canvas.bind("<Shift-Button-1>", self.polygon_controller.add_point)
         self.main_view.canvas_view.canvas.bind("<Button-3>", self.polygon_controller.finish_polygon)

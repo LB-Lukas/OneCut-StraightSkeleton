@@ -24,6 +24,9 @@ class MainView(tk.Frame):
         self.export_png_button = tk.Button(self.button_frame, text="Export to PNG")
         self.export_png_button.pack(side=tk.LEFT, padx=5)
         
+        self.generate_skeleton_button = tk.Button(self.button_frame, text="Generate Skeleton")
+        self.generate_skeleton_button.pack(side=tk.LEFT, padx=5)
+        
         # Create canvas area
         self.canvas_view = CanvasView(self)
         self.canvas_view.pack(side=tk.BOTTOM, expand=True)

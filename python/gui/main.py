@@ -3,14 +3,14 @@ from app import StraightSkeletonApp
 
 
 SOFTWARE_NAME: str = "Straight-Skeleton Tool"
-SOFTWARE_VERSION: str = "0.2.0"
+SOFTWARE_VERSION: str = "0.2.1"
 MAX_POLYGONS: int = 1
 
 
 def main():
     root = tk.Tk()
     root.title(f"{SOFTWARE_NAME} v{SOFTWARE_VERSION}")
-    app = StraightSkeletonApp(root)
+    app = StraightSkeletonApp(root, MAX_POLYGONS)
     root.mainloop()
 
 
