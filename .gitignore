@@ -6,6 +6,8 @@ cmake-build-debug/
 .conda
 python/gui/__pycache__
 python/gui/file_management/__pycache__
+__pycache__/
+*.pyc
 
 # IDE specific files
 .idea/
