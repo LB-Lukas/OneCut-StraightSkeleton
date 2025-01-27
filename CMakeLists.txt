@@ -149,6 +149,12 @@ gtest_discover_tests(graph_utils_test)
 add_executable(straight_skeleton_test tests/StraightSkeletonTest.cpp ${SRC_FILES})
 target_link_libraries(straight_skeleton_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(straight_skeleton_test)
+
+# Test: PerpendicularTest
+add_executable(perpendicular_test tests/PerpendicularTest.cpp ${SRC_FILES})
+target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(perpendicular_test)
+
 #----------------------------------------------#
 #----------Project-Installation----------------#
 #----------------------------------------------#

@@ -21,11 +21,11 @@ std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
             std::cout << "Processing vertex: " << v << std::endl;
             if (face.adjacentFaceIndex(v) == -1) {
                 std::cout << "Skipping vertex[case 1]: " << v << " due to missing adjacent face at index " << v << std::endl;
-                break;
+                continue;
             }
             if (face.adjacentFaceIndex(v - 1) == -1) {
                 std::cout << "Skipping vertex[case 2]: " << v << " due to missing adjacent face at index " << (v - 1) << std::endl;
-                break;
+                continue;
             }
 
             PerpChain chain;
