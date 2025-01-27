@@ -5,4 +5,5 @@ class LastAction(Enum):
     FINISH_POLYGON = 2
     UNDO = 3
     REDO = 4
-    NO_ACTION = 5
+    MOVE_POINT = 5
+    NO_ACTION = 6

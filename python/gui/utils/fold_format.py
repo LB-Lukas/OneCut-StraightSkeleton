@@ -1,5 +1,5 @@
-import json
-from typing import List, Optional, Union
+from typing import List
+
 
 class Frame:
     def __init__(self):
@@ -13,6 +13,7 @@ class Frame:
         self.face_orders = []
         self.faces_vertices = []
 
+
 class FOLDFormat(Frame):
     def __init__(self):
         super().__init__()
@@ -22,35 +23,46 @@ class FOLDFormat(Frame):
         self.file_classes = []
         self.file_frames = []
 
+
     def get_file_spec(self) -> float:
         return self.file_spec
+
 
     def set_file_spec(self, file_spec: float):
         self.file_spec = file_spec
 
+
     def get_file_creator(self) -> str:
         return self.file_creator
+
 
     def set_file_creator(self, file_creator: str):
         self.file_creator = file_creator
 
+
     def get_file_author(self) -> str:
         return self.file_author
+
 
     def set_file_author(self, file_author: str):
         self.file_author = file_author
 
+
     def get_file_classes(self) -> List[str]:
         return self.file_classes
+
 
     def set_file_classes(self, file_classes: List[str]):
         self.file_classes = file_classes
 
+
     def get_file_frames(self) -> List[Frame]:
         return self.file_frames
 
+
     def set_file_frames(self, file_frames: List[Frame]):
         self.file_frames = file_frames
+
 
     def get_frame(self, index: int) -> Frame:
         if index == 0:
@@ -60,6 +72,7 @@ class FOLDFormat(Frame):
             parent = self.get_frame(frame.get_frame_parent())
             return self.merge(parent, frame)
         return frame
+
 
     def merge(self, parent: Frame, child: Frame) -> Frame:
         frame = Frame()
