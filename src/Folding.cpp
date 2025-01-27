@@ -90,6 +90,8 @@ namespace straight_skeleton {
     }
 
 
+    // PROPERTY MAP Example Use Case => implement also in PerpendicularGraph
+
     std::vector<std::pair<Point, Point>> Folding::getEdges(FoldType foldType) {
         std::vector<std::pair<Point, Point>> edges;
 
