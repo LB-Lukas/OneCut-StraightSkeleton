@@ -58,6 +58,15 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 enable_testing()
 
+# Cairo
+find_package(PkgConfig REQUIRED) # Use pkg-config to locate Cairo
+pkg_check_modules(CAIRO REQUIRED cairo)
+
+# Include Cairo directories
+include_directories(${CAIRO_INCLUDE_DIRS})
+link_directories(${CAIRO_LIBRARY_DIRS})
+add_definitions(${CAIRO_CFLAGS_OTHER})
+
 #----------------------------------------------#
 #---------------Verwende Pybind11--------------#
 #----------------------------------------------#
@@ -81,6 +90,10 @@ include_directories(external)
 
 # Quelle für das Projekt
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+
+# Build PerpendicularDemo 
+add_executable(PerpendicularDemo examples/PerpendicularDemo.cpp ${SRC_FILES})
+target_link_libraries(PerpendicularDemo PRIVATE ${CGAL_LIBRARIES})
 
 #----------------------------------------------#
 #---------------Pybind11-Modul-----------------#
@@ -127,15 +140,20 @@ add_executable(naive_closest_pair_test tests/NaiveClosestPairTest.cpp ${SRC_FILE
 target_link_libraries(naive_closest_pair_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(naive_closest_pair_test)
 
-# Test: PerpendicularTest
-add_executable(perpendicular_test tests/PerpendicularTest.cpp ${SRC_FILES})
-target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(perpendicular_test)
-
 # Test: GraphUtilsTest
 add_executable(graph_utils_test tests/GraphUtilsTest.cpp ${SRC_FILES})
 target_link_libraries(graph_utils_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
 gtest_discover_tests(graph_utils_test)
+
+# Test: StraightSkeletonTest
+add_executable(straight_skeleton_test tests/StraightSkeletonTest.cpp ${SRC_FILES})
+target_link_libraries(straight_skeleton_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(straight_skeleton_test)
+
+# Test: PerpendicularTest
+add_executable(perpendicular_test tests/PerpendicularTest.cpp ${SRC_FILES})
+target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
+gtest_discover_tests(perpendicular_test)
 
 #----------------------------------------------#
 #----------Project-Installation----------------#
