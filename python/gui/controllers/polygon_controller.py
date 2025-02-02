@@ -25,7 +25,8 @@ class PolygonController:
             messagebox.showinfo("Error", f"Maximum number of polygons is {self.max_polygons}")
             return
 
-        x, y = event.x, event.y
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
 
         if self.intersection_helper.check_intersection(x, y, self.polygons, self.line_ids, self.canvas, self.points):
             messagebox.showerror("Error", "The new line intersects with an existing line.")
@@ -205,10 +206,15 @@ class PolygonController:
 
 
     def move_start(self, event):
-        object_id = self.canvas.find_closest(event.x, event.y)[0]
+        obj = self.canvas.find_withtag("current")
+        if not obj:
+            return
+        object_id = obj[0]
         self.move_data["object"] = object_id
-        self.move_data["x"] = event.x
-        self.move_data["y"] = event.y
+        canvas_x = self.canvas.canvasx(event.x)
+        canvas_y = self.canvas.canvasy(event.y)
+        self.move_data["x"] = canvas_x
+        self.move_data["y"] = canvas_y
 
         coords = self.canvas.coords(object_id)
         orig_x = (coords[0] + coords[2]) / 2
@@ -240,9 +246,13 @@ class PolygonController:
 
     def move(self, event):
         if self.move_data["object"] is not None:
+            
+            canvas_x = self.canvas.canvasx(event.x)
+            canvas_y = self.canvas.canvasy(event.y)
+            
             object_id = self.move_data["object"]
-            dx = event.x - self.move_data["x"]
-            dy = event.y - self.move_data["y"]
+            dx = canvas_x - self.move_data["x"]
+            dy = canvas_y - self.move_data["y"]
 
             self.canvas.move(object_id, dx, dy)
 
@@ -252,8 +262,9 @@ class PolygonController:
 
             self.update_connected_line_ids(object_id, new_x, new_y)
 
-            self.move_data["x"] = event.x
-            self.move_data["y"] = event.y
+            self.move_data["x"] = canvas_x
+            self.move_data["y"] = canvas_y
+            self.generate_skeleton()
 
 
     def update_connected_line_ids(self, point_id, new_x, new_y):
@@ -273,3 +284,10 @@ class PolygonController:
                 next_line_id = polygon['line_ids'][index]
                 next_point = polygon['points'][next_index]
                 self.canvas.coords(next_line_id, new_x, new_y, next_point[0], next_point[1])
+                
+                
+    def on_enter(self, evnet):
+        self.canvas.itemconfig("current", fill="gray")
+        
+    def on_leave(self, event):
+        self.canvas.itemconfig("current", fill="black")

@@ -22,7 +22,7 @@ class StraightSkeletonApp:
         
         
     def _setup_button_commands(self):
-        self.main_view.toggle_grid_button.config(command=self.main_view.canvas_view.toggle_grid)
+        #self.main_view.toggle_grid_button.config(command=self.main_view.canvas_view.toggle_grid)
         self.main_view.open_file_button.config(command=self.file_controller.open_file)
         self.main_view.finish_polygon_button.config(command=self.polygon_controller.finish_polygon)
         self.main_view.export_pdf_button.config(command=self.file_controller.export_to_pdf)
@@ -36,5 +36,23 @@ class StraightSkeletonApp:
         self.main_view.canvas_view.canvas.tag_bind("vertex", "<ButtonPress-1>", self.polygon_controller.move_start)
         self.main_view.canvas_view.canvas.tag_bind("vertex", "<ButtonRelease-1>", self.polygon_controller.move_stop)
         self.main_view.canvas_view.canvas.tag_bind("vertex", "<B1-Motion>", self.polygon_controller.move)
-
+        self.main_view.canvas_view.canvas.tag_bind("vertex", "<Enter>", self.polygon_controller.on_enter)
+        self.main_view.canvas_view.canvas.tag_bind("vertex", "<Leave>", self.polygon_controller.on_leave)
         
+        # Bind Mousewheel events
+        self.main_view.canvas_view.canvas.bind("<MouseWheel>", self.main_view.canvas_view.on_canvas_mousewheel)
+        self.main_view.canvas_view.canvas.bind("Control-MouseWheel", self.main_view.canvas_view.on_canvas_mousewheel)
+        self.main_view.canvas_view.canvas.bind("<Button-4>", self.main_view.canvas_view.on_canvas_mousewheel)
+        self.main_view.canvas_view.canvas.bind("<Button-5>", self.main_view.canvas_view.on_canvas_mousewheel)
+        self.main_view.canvas_view.canvas.bind("<Control-Button-4>", self.main_view.canvas_view.on_canvas_mousewheel)
+        self.main_view.canvas_view.canvas.bind("<Control-Button-5>", self.main_view.canvas_view.on_canvas_mousewheel)
+        
+        for widget in (self.main_view.canvas_view.vertical_bar, self.main_view.canvas_view.horizontal_bar):
+            widget.bind("<MouseWheel>", self.main_view.canvas_view.on_zoom)
+            widget.bind("<Button-4>", self.main_view.canvas_view.on_zoom)
+            widget.bind("<Button-5>", self.main_view.canvas_view.on_zoom)
+            
+        self.main_view.canvas_view.canvas.bind("<ButtonPress-2>", self.main_view.canvas_view.on_pan_start)
+        self.main_view.canvas_view.canvas.bind("<B2-Motion>", self.main_view.canvas_view.on_pan_drag)
+        
+        self.main_view.canvas_view.canvas.bind("<Return>", self.main_view.canvas_view.center_canvas)
