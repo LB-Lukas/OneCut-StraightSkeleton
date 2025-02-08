@@ -3,8 +3,8 @@ from app import StraightSkeletonApp
 
 
 SOFTWARE_NAME: str = "Straight-Skeleton Tool"
-SOFTWARE_VERSION: str = "0.2.3"
-MAX_POLYGONS: int = 1
+SOFTWARE_VERSION: str = "0.2.5"
+MAX_POLYGONS: int = 2
 
 
 def main():

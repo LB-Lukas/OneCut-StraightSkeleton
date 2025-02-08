@@ -9,5 +9,7 @@ class LastAction(Enum):
     MOVE_POINT = 5
     GENERATE_SKELETON = 6
     REMOVE_SKELETON = 7
+    DELETE_VERTEX = 8
+    INSERT_VERTEX = 9
     
     

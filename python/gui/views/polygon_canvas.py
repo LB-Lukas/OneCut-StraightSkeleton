@@ -10,7 +10,6 @@ class CanvasView(tk.Frame):
         super().__init__(parent)
         self.app = app
 
-        # Camera transformation parameters.
         self.camera_scale = 1.0
         self.camera_offset_x = 0
         self.camera_offset_y = 0
@@ -49,21 +48,21 @@ class CanvasView(tk.Frame):
         
         self._redraw()
 
-    # --- Camera Transform Methods ---
+
     def logic_to_canvas(self, lx: float, ly: float) -> tuple:
         cx = lx * self.camera_scale + self.camera_offset_x
         cy = ly * self.camera_scale + self.camera_offset_y
         return (cx, cy)
+
 
     def canvas_to_logic(self, cx: float, cy: float) -> tuple:
         lx = (cx - self.camera_offset_x) / self.camera_scale
         ly = (cy - self.camera_offset_y) / self.camera_scale
         return (lx, ly)
 
-    # --- Redraw Methods ---
+
     def redraw_all(self, polygons, in_progress_points):
         self.canvas.delete("all")
-
         # Draw border lines in logic coordinates.
         bx0, by0 = self.logic_to_canvas(0, 0)
         bx1, by1 = self.logic_to_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
@@ -76,26 +75,37 @@ class CanvasView(tk.Frame):
         BASE_RADIUS = 7
         point_scale_factor = max(0.5, min(2.0, math.sqrt(self.camera_scale)))
         
+        selected_vertex = self.app.polygon_controller.selected_vertex
+        
         # Draw completed polygons.
-        for poly in polygons:
+        for i, poly in enumerate(polygons):  # i is the polygon index
             pts = poly["points"]
             n = len(pts)
-            # Draw polygon edges.
-            for i in range(n):
-                x1, y1 = self.logic_to_canvas(*pts[i])
-                x2, y2 = self.logic_to_canvas(*pts[(i+1) % n])
+        
+            # Draw polygon edges
+            for j in range(n):
+                x1, y1 = self.logic_to_canvas(*pts[j])
+                x2, y2 = self.logic_to_canvas(*pts[(j+1) % n])
                 self.canvas.create_line(x1, y1, x2, y2, fill="black", width=5)
-            # Draw polygon vertices.
-            for (lx, ly) in pts:
+            
+            # Draw polygon vertices
+            for j, (lx, ly) in enumerate(pts):  # j is the vertex index
                 cx, cy = self.logic_to_canvas(lx, ly)
                 r = BASE_RADIUS * point_scale_factor
-                self.canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill="black")
-            # Draw skeleton lines (if any).
-            for sk in poly.get("skeleton_line_ids", []):
-                sx1, sy1, sx2, sy2 = sk["coords"]
-                cax1, cay1 = self.logic_to_canvas(sx1, sy1)
-                cax2, cay2 = self.logic_to_canvas(sx2, sy2)
-                self.canvas.create_line(cax1, cay1, cax2, cay2, fill="green", width=3)
+                
+                # NEW: If this vertex is selected, use a different color
+                if selected_vertex == (i, j):
+                    color = "gray"
+                else:
+                    color = "black"
+                
+                self.canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill=color)
+                # Draw skeleton lines (if any).
+                for sk in poly.get("skeleton_line_ids", []):
+                    sx1, sy1, sx2, sy2 = sk["coords"]
+                    cax1, cay1 = self.logic_to_canvas(sx1, sy1)
+                    cax2, cay2 = self.logic_to_canvas(sx2, sy2)
+                    self.canvas.create_line(cax1, cay1, cax2, cay2, fill="green", width=3)
 
         # Draw in-progress polygon edges.
         if len(in_progress_points) > 1:
@@ -112,12 +122,13 @@ class CanvasView(tk.Frame):
         # Update scroll region.
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
+
     def _redraw(self):
         polygons = self.app.polygon_controller.polygons
         in_progress = self.app.polygon_controller.points
         self.redraw_all(polygons, in_progress)
 
-    # --- Zoom & Scrolling ---
+
     def on_canvas_mousewheel(self, event: tk.Event):
         ctrl_pressed = (event.state & 0x4) != 0  # platform dependent
         if ctrl_pressed:
@@ -129,6 +140,7 @@ class CanvasView(tk.Frame):
                 self.canvas.yview_scroll(-1, "units")
             elif event.num == 5:
                 self.canvas.yview_scroll(1, "units")
+
 
     def on_zoom(self, event: tk.Event):
         factor = 1.1 if (hasattr(event, "delta") and event.delta > 0) or (hasattr(event, "num") and event.num == 4) else 0.9
@@ -148,10 +160,11 @@ class CanvasView(tk.Frame):
 
         self._redraw()
 
-    # --- Panning ---
+
     def on_pan_start(self, event: tk.Event):
         self._pan_last_x = event.x
         self._pan_last_y = event.y
+
 
     def on_pan_drag(self, event: tk.Event):
         dx = event.x - self._pan_last_x
@@ -161,6 +174,7 @@ class CanvasView(tk.Frame):
         self._pan_last_x = event.x
         self._pan_last_y = event.y
         self._redraw()
+
 
     def center_canvas(self, event: tk.Event = None):
         # Center the view based on all polygon points and in-progress points.
@@ -186,7 +200,7 @@ class CanvasView(tk.Frame):
 
         self._redraw()
 
-    # --- Vertex Dragging ---
+
     def on_left_button_down(self, event: tk.Event):
         # Skip dragging if Shift is pressed (used for adding points).
         if (event.state & 0x0001) != 0:
@@ -194,8 +208,20 @@ class CanvasView(tk.Frame):
         canvas_x = self.canvas.canvasx(event.x)
         canvas_y = self.canvas.canvasy(event.y)
         lx, ly = self.canvas_to_logic(canvas_x, canvas_y)
-        self.app.polygon_controller.begin_move_vertex(lx, ly)
-        self._dragging_vertex = True
+        # 1) Attempt to select the nearest vertex
+        selected = self.app.polygon_controller.select_vertex(lx, ly)
+
+        # 2) Redraw to show the updated selection highlight
+        self._redraw()
+
+        # 3) If a vertex was found, optionally record the "move vertex" action
+        if selected:
+            self.app.polygon_controller.begin_move_vertex(lx, ly)
+            self._dragging_vertex = True
+        else:
+            self._dragging_vertex = False
+
+
 
     def on_left_button_drag(self, event: tk.Event):
         if not self._dragging_vertex:
@@ -204,6 +230,7 @@ class CanvasView(tk.Frame):
         canvas_y = self.canvas.canvasy(event.y)
         lx, ly = self.canvas_to_logic(canvas_x, canvas_y)
         self.app.polygon_controller.drag_vertex(lx, ly)
+
 
     def on_left_button_up(self, event: tk.Event):
         if self._dragging_vertex:
