@@ -22,7 +22,7 @@ class IntersectionHelper:
 
         # Check against the edges of all finished polygons.
         for polygon in polygons:
-            poly_points = polygon["points"]
+            poly_points = polygon.points
             n = len(poly_points)
             if n >= 3:
                 # Loop through each edge (including the closing edge from the last to the first point)
@@ -40,8 +40,6 @@ class IntersectionHelper:
                     return True
 
         return False
-
-
 
 
     def is_intersecting(self, line1, line2):
