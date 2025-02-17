@@ -1,275 +1,396 @@
 import tkinter as tk
-import geometry
 from tkinter import messagebox
+import geometry
 from utils.last_action import LastAction
 from utils.intersection_helper import IntersectionHelper
+from utils.undo_manager import UndoManager
+from models.polygon_model import PolygonModel
 
-# TODO undo last action not working properly, 
+
+CANVAS_WIDTH = 600
+CANVAS_HEIGHT = 600
+
+
 class PolygonController:
-    def __init__(self, canvas: tk.Canvas, max_polygons=1):
-        self.canvas = canvas
+    def __init__(self, app, max_polygons: int = 1):
+        self.app = app
         self.max_polygons = max_polygons
 
-        self.points = []
-        self.point_ids = []
-        self.line_ids = []
-        self.polygons = []
-        self.last_actions = []
-        self.move_data = {"object": None, "x": 0, "y": 0, "orig_x": 0, "orig_y": 0}
+        # In-progress polygon (list of points)
+        self.current_points: list[tuple[float, float]] = []
+        # Finished polygons as models
+        self.polygons: list[PolygonModel] = []
 
+        self.undo_manager = UndoManager()
         self.intersection_helper = IntersectionHelper()
+        self.selected_vertex: tuple[int, int] = None  # (polygon_index, vertex_index)
+        self.show_skeleton: bool = False
+        self.show_perpendiculars: bool = False
+
+        # For dragging a vertex.
+        self._moving_poly_index: int = None
+        self._moving_vertex_index: int = None
 
 
-    def add_point(self, event):
+    def _redraw(self):
+        self.app.main_view.canvas_view._redraw()
+
+
+    def _record_action(self, action, data: dict):
+        self.undo_manager.record_action(action, data)
+
+
+    def select_vertex(self, lx: float, ly: float) -> bool:
+        result = self._get_closest_vertex(lx, ly)
+        if result:
+            poly_idx, vertex_idx, _ = result
+            self.selected_vertex = (poly_idx, vertex_idx)
+            return True
+        else:
+            self.selected_vertex = None
+            return False
+
+
+    def clear_selection(self):
+        self.selected_vertex = None
+
+
+    def add_point(self, lx: float, ly: float):
         if len(self.polygons) >= self.max_polygons:
             messagebox.showinfo("Error", f"Maximum number of polygons is {self.max_polygons}")
             return
 
-        x, y = event.x, event.y
+        if not (0 <= lx <= CANVAS_WIDTH and 0 <= ly <= CANVAS_HEIGHT):
+            print("Point out of bounds")
+            return
+        
+        for poly in self.polygons:
+            if PolygonModel.point_in_polygon(lx, ly, poly.points):
+                messagebox.showerror("Error", "The new point is inside an existing polygon.")
+                return
 
-        if self.intersection_helper.check_intersection(x, y, self.polygons, self.line_ids, self.canvas, self.points):
-            messagebox.showerror("Error", "The new line intersects with an existing line.")
+        if self.intersection_helper.check_intersection(
+            x=lx,
+            y=ly,
+            polygons=self.polygons,
+            lines=[],
+            canvas=self.app.main_view.canvas_view.canvas,
+            points=self.current_points,
+        ):
+            messagebox.showerror("Error", "The new line intersects an existing line.")
             return
 
-        self.points.append((x, y))
-        point_id = self.canvas.create_oval(x-7, y-7, x+7, y+7, fill="black", tags="vertex")
-        self.point_ids.append(point_id)
-
-        # connect point wiht previous point
-        if len(self.points) > 1:
-            line = self.canvas.create_line(self.points[-2], self.points[-1], fill="black", width=5, tags="polygon_line")
-            self.line_ids.append(line)
-
-        self.last_actions.append((LastAction.ADD_POINT, {"line_id": line, "point_id": point_id}))
+        self.current_points.append((lx, ly))
+        self._record_action(LastAction.ADD_POINT, {"point": (lx, ly)})
+        self._redraw()
 
 
-    def finish_polygon(self, event=None):
-        if len(self.points) < 3:
+    def finish_polygon(self):
+        if len(self.current_points) < 3:
             messagebox.showinfo("Info", "A polygon must have at least 3 points.")
             return
 
-        first_x, first_y = self.points[0]
-        if self.intersection_helper.check_intersection(first_x, first_y, self.polygons, self.line_ids, self.canvas, self.points):
+        first_x, first_y = self.current_points[0]
+        if self.intersection_helper.check_intersection(
+            x=first_x,
+            y=first_y,
+            polygons=self.polygons,
+            lines=[],
+            canvas=self.app.main_view.canvas_view.canvas,
+            points=self.current_points,
+        ):
             messagebox.showerror("Error", "Closing line intersects with an existing line.")
             return
 
-        last_point = self.points[-1]
-        closing_line = self.canvas.create_line(last_point[0], last_point[1], first_x, first_y, fill='black', width=5, tags="polygon_line")
-        self.line_ids.append(closing_line)
+        new_poly = PolygonModel(self.current_points)
+        self.polygons.append(new_poly)
+        self.current_points = []  # reset in-progress polygon
 
-        polygon = {
-            'points': self.points.copy(),
-            'point_ids': self.point_ids.copy(),
-            'line_ids': self.line_ids.copy(),
-            'skeleton_line_ids': []
-        }
-        self.polygons.append(polygon)
-        self.points.clear()
-        self.point_ids.clear()
-        self.line_ids.clear()
+        if self.show_skeleton:
+            try:
+                new_poly.generate_skeleton()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
-        self.last_actions.append((LastAction.FINISH_POLYGON, {"polygon": polygon})) # record last action
+        self._record_action(LastAction.FINISH_POLYGON, {"polygon": new_poly})
+        self._redraw()
 
 
-    def generate_skeleton(self, event=None):
+    def add_point_to_polygon(self):
         if not self.polygons:
-            messagebox.showinfo("Info", "No polygon available to generate a skeleton.")
+            messagebox.showinfo("Info", "No polygon available to add point.")
             return
 
-        polygon = self.polygons[0]
+        if self.selected_vertex is None:
+            return
 
-        # Remove existing skeleton lines
-        if polygon['skeleton_line_ids']:
-            for sk_line in polygon['skeleton_line_ids']:
-                line_id = sk_line['line_id']
-                self.canvas.delete(line_id)
-            self.last_actions.append((LastAction.REMOVE_SKELETON, {"skeleton_line_ids": polygon['skeleton_line_ids'].copy()})) # record last action
-            polygon['skeleton_line_ids'].clear()
+        poly_index, vertex_index = self.selected_vertex
+        poly = self.polygons[poly_index]
+        next_vertex_index = vertex_index + 1 if vertex_index + 1 < len(poly.points) else 0
+        vx1, vy1 = poly.points[vertex_index]
+        vx2, vy2 = poly.points[next_vertex_index]
+        new_x = (vx1 + vx2) / 2
+        new_y = (vy1 + vy2) / 2
+        offset = 5
+        new_point = (new_x + offset, new_y + offset)
+        self.insert_vertex(poly_index, next_vertex_index, new_point)
 
-        polygon_vertices = [geometry.Point(p[0], p[1]) for p in polygon['points']]
+
+    def toggle_skeleton(self):
+        if not self.polygons:
+            messagebox.showinfo("Info", "No polygon available to toggle skeleton.")
+            return
+
+        self.show_skeleton = not self.show_skeleton
+        if self.show_skeleton:
+            for poly in self.polygons:
+                try:
+                    poly.generate_skeleton()
+                except Exception as e:
+                    messagebox.showerror("Error", str(e))
+        else:
+            old_skeleton_data = [poly.skeleton_line_ids.copy() for poly in self.polygons]
+            for poly in self.polygons:
+                poly.skeleton_line_ids.clear()
+            self._record_action(LastAction.REMOVE_SKELETON, {"skeleton_line_ids": old_skeleton_data})
+        self._redraw()
+
+
+    def _update_skeleton(self):
+        for poly in self.polygons:
+            if poly.skeleton_line_ids:
+                try:
+                    poly.update_skeleton()
+                except Exception as e:
+                    messagebox.showerror("Error", str(e))
+        self._redraw()
+
+
+    def drag_vertex(self, lx: float, ly: float):
+        if self._moving_poly_index is None:
+            return
+
+        lx = max(0, min(lx, CANVAS_WIDTH))
+        ly = max(0, min(ly, CANVAS_HEIGHT))
+
+        for i, poly in enumerate(self.polygons):
+            if i != self._moving_poly_index and len(poly.points) >= 3:
+                if PolygonModel.point_in_polygon(lx, ly, poly.points):
+                    return
+
+        poly = self.polygons[self._moving_poly_index]
+        new_points = poly.points.copy()
+        new_points[self._moving_vertex_index] = (lx, ly)
+        n = len(new_points)
+
+        for i in range(n):
+            a1 = new_points[i]
+            a2 = new_points[(i + 1) % n]
+            for j in range(i + 1, n):
+                if j == i or (j + 1) % n == i or (i + 1) % n == j:
+                    continue
+                b1 = new_points[j]
+                b2 = new_points[(j + 1) % n]
+                if self.intersection_helper.is_intersecting((a1, a2), (b1, b2)):
+                    return
+
+        for i, other_poly in enumerate(self.polygons):
+            if i == self._moving_poly_index:
+                continue
+            m = len(other_poly.points)
+            if m < 2:
+                continue
+            for j in range(n):
+                edge_new = (new_points[j], new_points[(j + 1) % n])
+                for k in range(m):
+                    edge_other = (other_poly.points[k], other_poly.points[(k + 1) % m])
+                    if self.intersection_helper.is_intersecting(edge_new, edge_other):
+                        return
+
+        poly.move_point(self._moving_vertex_index, (lx, ly))
+        self._redraw_or_update_skeleton(poly)
+
+
+    def delete_vertex(self, poly_index: int, vertex_index: int):
+        if poly_index < 0 or poly_index >= len(self.polygons):
+            messagebox.showerror("Error", "Polygon not found.")
+            return
+
+        poly = self.polygons[poly_index]
+        if len(poly.points) <= 3:
+            self.delete_polygon(poly_index)
+            return
 
         try:
-            skeleton = geometry.StraightSkeleton(polygon_vertices)
-            print(skeleton) 
-            skeleton_edges = skeleton.get_edges()
-            print(f"Number of skeleton edges: {len(skeleton_edges)}") 
-
-            if not skeleton_edges:
-                messagebox.showinfo("Info", "No skeleton edges were generated.")
-                return
-
-            # Draw the skeleton lines
-            for edge in skeleton_edges:
-                src, tgt = edge 
-                line_id = self.canvas.create_line(src.x(), src.y(), tgt.x(), tgt.y(), fill='green', width=3, tags="skeleton")
-                polygon['skeleton_line_ids'].append({"line_id": line_id, "coords": (src.x(), src.y(), tgt.x(), tgt.y())})
-
-            self.canvas.tag_lower("skeleton") # Adjust stacking order
-            self.canvas.tag_raise("polygon_line")
-            self.canvas.tag_raise("vertex")
-
-            self.last_actions.append((LastAction.GENERATE_SKELETON, {"skeleton_line_ids": polygon['skeleton_line_ids'].copy()})) # record last actoin
-            #messagebox.showinfo("Success", "Straight skeleton generated and drawn successfully.")
-
+            deleted_point = poly.points.pop(vertex_index)
         except Exception as e:
-            messagebox.showerror("Error", f"An error occurred while generating the skeleton:\n{e}")
+            messagebox.showerror("Error", str(e))
+            return
+
+        self._record_action(LastAction.DELETE_VERTEX, {
+            "polygon_index": poly_index,
+            "vertex_index": vertex_index,
+            "deleted_point": deleted_point
+        })
+        self._redraw_or_update_skeleton(poly)
 
 
-    # FIXME undo last action not working properly
-    def undo_last_action(self, event=None):
-        if not self.last_actions:
+    def delete_selected_vertex(self):
+        if self.selected_vertex is None:
+            return
+        poly_index, vertex_index = self.selected_vertex
+        self.delete_vertex(poly_index, vertex_index)
+        self.selected_vertex = None
+
+
+    def delete_selected_polygon(self):
+        if self.selected_vertex is None:
+            return
+        poly_index, _ = self.selected_vertex
+        self.delete_polygon(poly_index)
+
+
+    def delete_polygon(self, poly_index: int):
+        if poly_index < 0 or poly_index >= len(self.polygons):
+            messagebox.showerror("Error", "Polygon not found.")
+            return
+        removed_poly = self.polygons.pop(poly_index)
+        self._record_action(LastAction.FINISH_POLYGON, {"polygon": removed_poly})
+        self._redraw()
+
+
+    def insert_vertex(self, poly_index: int, vertex_index: int, new_point: tuple):
+        if poly_index < 0 or poly_index >= len(self.polygons):
+            messagebox.showerror("Error", "Polygon not found.")
+            return
+        poly = self.polygons[poly_index]
+        poly.insert_point(vertex_index, new_point)
+        self._record_action(LastAction.INSERT_VERTEX, {
+            "polygon_index": poly_index,
+            "vertex_index": vertex_index,
+            "new_point": new_point
+        })
+        self._redraw_or_update_skeleton(poly)
+
+
+    def undo_last_action(self):
+        if not self.undo_manager.has_actions():
             messagebox.showinfo("Info", "No actions to undo.")
             return
 
-        action, data = self.last_actions.pop()
-
-        if action == LastAction.ADD_POINT:
-            # Remove the point and the line leading to it
-            line_id = data.get("line_id")
-            point_id = data.get("point_id")
-
-            if line_id:
-                try:
-                    self.line_ids.remove(line_id)
-                    self.canvas.delete(line_id)
-                except ValueError:
-                    pass  # Line might have been already removed
-
-            if point_id:
-                try:
-                    self.point_ids.remove(point_id)
-                    self.canvas.delete(point_id)
-                except ValueError:
-                    pass  # Point might have been already removed
-
-            if self.points:
-                self.points.pop()
-
-        elif action == LastAction.FINISH_POLYGON:
-            # Remove the last polygon
-            polygon = data.get("polygon")
-            if polygon:
-                # Remove all lines of the polygon
-                for line_id in polygon['line_ids']:
-                    self.canvas.delete(line_id)
-                # Remove all points of the polygon
-                for point_id in polygon['point_ids']:
-                    self.canvas.delete(point_id)
-                # Remove any skeleton lines if they exist
-                for sk_line_id in polygon['skeleton_line_ids']:
-                    self.canvas.delete(sk_line_id)
-                # Remove the polygon from the list
-                self.polygons.pop()
-
-        elif action == LastAction.MOVE_POINT:
-            object_id = data['object_id']
-            old_x = data['old_x']
-            old_y = data['old_y']
-
-            # Get current position
-            coords = self.canvas.coords(object_id)
-            current_x = (coords[0] + coords[2]) / 2
-            current_y = (coords[1] + coords[3]) / 2
-
-            # Calculate delta to move back to original position
-            dx = old_x - current_x
-            dy = old_y - current_y
-
-            # Move the point back
-            self.canvas.move(object_id, dx, dy)
-
-            # Update the internal points list
-            if object_id in self.point_ids:
-                index = self.point_ids.index(object_id)
-                self.points[index] = (old_x, old_y)
-
-            # Update connected line_ids
-            self.update_connected_line_ids(object_id, old_x, old_y)
-
-            # Regenerate the skeleton after moving a point
-            self.generate_skeleton()
-
-        elif action == LastAction.GENERATE_SKELETON:
-            # Remove all skeleton lines
-            skeleton_line_ids = data.get('skeleton_line_ids', [])
-            for line_id in skeleton_line_ids:
-                self.canvas.delete(line_id)
-            # Clear the skeleton_line_ids from the polygon
-            if self.polygons:
-                polygon = self.polygons[0]
-                polygon['skeleton_line_ids'].clear()
-
-        elif action == LastAction.REMOVE_SKELETON:
-            # TODO implement undo for removing skeleton lines
-            pass
+        action, data = self.undo_manager.pop_action()
+        undo_actions = {
+            LastAction.ADD_POINT: self._undo_add_point,
+            LastAction.FINISH_POLYGON: self._undo_finish_polygon,
+            LastAction.MOVE_POINT: self._undo_move_point,
+            LastAction.GENERATE_SKELETON: self._undo_generate_skeleton,
+            LastAction.REMOVE_SKELETON: self._undo_remove_skeleton,
+            LastAction.DELETE_VERTEX: self._undo_delete_vertex,
+            LastAction.INSERT_VERTEX: self._undo_insert_vertex,
+        }
+        undo_func = undo_actions.get(action)
+        if undo_func:
+            undo_func(data)
+        self._redraw()
 
 
-    def move_start(self, event):
-        object_id = self.canvas.find_closest(event.x, event.y)[0]
-        self.move_data["object"] = object_id
-        self.move_data["x"] = event.x
-        self.move_data["y"] = event.y
-
-        coords = self.canvas.coords(object_id)
-        orig_x = (coords[0] + coords[2]) / 2
-        orig_y = (coords[1] + coords[3]) / 2
-        self.move_data["orig_x"] = orig_x
-        self.move_data["orig_y"] = orig_y
-
-        self.canvas.tag_raise(object_id)
+    def _undo_add_point(self, data: dict):
+        point = data.get("point")
+        if point in self.current_points:
+            self.current_points.remove(point)
 
 
-    def move_stop(self, event):
-        object_id = self.move_data["object"]
-        if object_id is not None:
-            coords = self.canvas.coords(object_id)
-            new_x = (coords[0] + coords[2]) / 2
-            new_y = (coords[1] + coords[3]) / 2
-
-            action_data = {
-                'object_id': object_id,
-                'old_x': self.move_data["orig_x"],
-                'old_y': self.move_data["orig_y"]
-            }
-            self.last_actions.append((LastAction.MOVE_POINT, action_data))
-
-            self.move_data = {"object": None, "x": 0, "y": 0, "orig_x": 0, "orig_y": 0}
-
-            self.generate_skeleton()
+    def _undo_finish_polygon(self, data: dict):
+        polygon = data.get("polygon")
+        if polygon in self.polygons:
+            self.polygons.remove(polygon)
 
 
-    def move(self, event):
-        if self.move_data["object"] is not None:
-            object_id = self.move_data["object"]
-            dx = event.x - self.move_data["x"]
-            dy = event.y - self.move_data["y"]
-
-            self.canvas.move(object_id, dx, dy)
-
-            coords = self.canvas.coords(object_id)
-            new_x = (coords[0] + coords[2]) / 2
-            new_y = (coords[1] + coords[3]) / 2
-
-            self.update_connected_line_ids(object_id, new_x, new_y)
-
-            self.move_data["x"] = event.x
-            self.move_data["y"] = event.y
+    def _undo_move_point(self, data: dict):
+        poly_index = data.get("polygon_index")
+        vertex_index = data.get("vertex_index")
+        old_x = data.get("old_x")
+        old_y = data.get("old_y")
+        if 0 <= poly_index < len(self.polygons):
+            self.polygons[poly_index].points[vertex_index] = (old_x, old_y)
 
 
-    def update_connected_line_ids(self, point_id, new_x, new_y):
-        for polygon in self.polygons:
-            if point_id in polygon['point_ids']:
-                index = polygon['point_ids'].index(point_id)
-                num_points = len(polygon['points'])
+    def _undo_generate_skeleton(self, data: dict):
+        skeleton_data = data.get("skeleton_line_ids", [])
+        if self.polygons:
+            poly = self.polygons[0]
+            for sk in skeleton_data:
+                if sk in poly.skeleton_line_ids:
+                    poly.skeleton_line_ids.remove(sk)
 
-                polygon['points'][index] = (new_x, new_y)
 
-                prev_index = (index - 1) % num_points
-                prev_line_id = polygon['line_ids'][prev_index]
-                prev_point = polygon['points'][prev_index]
-                self.canvas.coords(prev_line_id, prev_point[0], prev_point[1], new_x, new_y)
+    def _undo_remove_skeleton(self, data: dict):
+        skeleton_data = data.get("skeleton_line_ids", [])
+        if self.polygons:
+            poly = self.polygons[0]
+            poly.skeleton_line_ids.extend(skeleton_data)
 
-                next_index = (index + 1) % num_points
-                next_line_id = polygon['line_ids'][index]
-                next_point = polygon['points'][next_index]
-                self.canvas.coords(next_line_id, new_x, new_y, next_point[0], next_point[1])
+
+    def _undo_delete_vertex(self, data: dict):
+        poly_index = data.get("polygon_index")
+        vertex_index = data.get("vertex_index")
+        deleted_point = data.get("deleted_point")
+        if poly_index is not None and 0 <= poly_index < len(self.polygons):
+            self.polygons[poly_index].points.insert(vertex_index, deleted_point)
+
+
+    def _undo_insert_vertex(self, data: dict):
+        poly_index = data.get("polygon_index")
+        vertex_index = data.get("vertex_index")
+        if poly_index is not None and 0 <= poly_index < len(self.polygons):
+            poly = self.polygons[poly_index]
+            if 0 <= vertex_index < len(poly.points):
+                poly.points.pop(vertex_index)
+
+
+    def begin_move_vertex(self, lx: float, ly: float):
+        result = self._get_closest_vertex(lx, ly)
+        if result:
+            poly_idx, vertex_idx, _ = result
+            self._moving_poly_index = poly_idx
+            self._moving_vertex_index = vertex_idx
+            vx, vy = self.polygons[poly_idx].points[vertex_idx]
+            self._record_action(
+                LastAction.MOVE_POINT,
+                {
+                    "polygon_index": poly_idx,
+                    "vertex_index": vertex_idx,
+                    "old_x": vx,
+                    "old_y": vy,
+                }
+            )
+
+
+    def end_move_vertex(self):
+        self._moving_poly_index = None
+        self._moving_vertex_index = None
+        
+        
+    def _get_closest_vertex(self, lx: float, ly: float, threshold: float = 10.0) -> tuple[int, int, float] | None:
+        best_dist_sq = threshold ** 2
+        found_poly_idx = None
+        found_vertex_idx = None
+
+        for i, poly in enumerate(self.polygons):
+            for j, (vx, vy) in enumerate(poly.points):
+                dist_sq = (vx - lx) ** 2 + (vy - ly) ** 2
+                if dist_sq < best_dist_sq:
+                    best_dist_sq = dist_sq
+                    found_poly_idx = i
+                    found_vertex_idx = j
+
+        if found_poly_idx is not None:
+            return (found_poly_idx, found_vertex_idx, best_dist_sq)
+        return None
+
+
+    def _redraw_or_update_skeleton(self, poly: PolygonModel = None):
+        if poly and poly.skeleton_line_ids:
+            self._update_skeleton()
+        else:
+            self._redraw()
