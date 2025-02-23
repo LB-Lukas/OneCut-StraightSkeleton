@@ -16,8 +16,7 @@ namespace straight_skeleton {
 class StraightSkeletonTest : public ::testing::Test {
 protected:
     // Output PDF
-    const std::string filename = "/Users/user/CLionProjects/OneStraightCut/test-output/"
-                                 "StraightSkeletonTest_RandomConvex.pdf";
+    const std::string filename = "/home/lukas/Documents/workspace/OneCut-StraightSkeleton/test-output/StraightSkeletonTest_RandomConvex.pdf";
 
     // We store multiple skeletons in this vector
     std::vector<StraightSkeleton> straightSkeletons;

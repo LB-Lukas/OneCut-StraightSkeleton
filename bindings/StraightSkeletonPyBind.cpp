@@ -8,7 +8,9 @@
 #include <memory>
 
 #include "../include/straight_skeleton/Folding.h"
+#include "../include/straight_skeleton/PerpendicularFinder.h"
 #include "../include/straight_skeleton/StraightSkeletonTypes.h"
+#include "../include/straight_skeleton/TestStraightSkeleton.h"
 
 namespace py = pybind11;
 
@@ -36,6 +38,11 @@ PYBIND11_MODULE(geometry, m) {
     py::class_<Point>(m, "Point").def(py::init<double, double>()).def("x", [](const Point& p) { return CGAL::to_double(p.x()); }).def("y", [](const Point& p) {
         return CGAL::to_double(p.y());
     });
+
+    py::class_<TestSkeleton::Point>(m, "TestPoint")
+        .def(py::init<double, double>())
+        .def("x", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.x()); })
+        .def("y", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.y()); });
 
     py::class_<PlanarGraph>(m, "PlanarGraph")
         .def(py::init<>())
@@ -87,5 +94,26 @@ PYBIND11_MODULE(geometry, m) {
              })
         .def("__repr__",
              [](const straight_skeleton::StraightSkeleton& ss) { return "<StraightSkeleton with " + std::to_string(ss.graph.edges().size()) + " edges>"; });
+
+    py::class_<TestSkeleton::TestStraightSkeleton>(m, "TestStraightSkeleton")
+        .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"))
+        .def("get_edges", &TestSkeleton::TestStraightSkeleton::getEdges)
+        .def("__repr__", [](const TestSkeleton::TestStraightSkeleton& tss) {
+            return "<TestStraightSkeleton with " + std::to_string(tss.graph.edges().size()) + " edges>";
+        });
+
+    py::class_<straight_skeleton::PerpendicularFinder>(m, "PerpendicularFinder")
+        .def(py::init<TestSkeleton::TestStraightSkeleton&>(), py::arg("skeleton"))
+        .def("find_perpendiculars",
+            []( straight_skeleton::PerpendicularFinder& pf) {
+                std::vector<std::pair<straight_skeleton::Point, straight_skeleton::Point>> edges;
+                std::vector<PerpChain> chains = pf.findPerpendiculars();
+                for (const auto& chain : chains) {
+                    for (const auto& seg : chain) {
+                        edges.emplace_back(seg.start, seg.end);
+                    }
+                }
+                return edges;
+            });
 }
 }  // namespace straight_skeleton
