@@ -111,6 +111,12 @@ class PolygonController:
                 new_poly.generate_skeleton()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
+                
+        if self.show_perpendiculars:
+            try:
+                new_poly.generate_perpendiculars()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
         self._record_action(LastAction.FINISH_POLYGON, {"polygon": new_poly})
         self._redraw()
@@ -164,6 +170,51 @@ class PolygonController:
                 except Exception as e:
                     messagebox.showerror("Error", str(e))
         self._redraw()
+        
+        
+    def _redraw_or_update_skeleton(self, poly: PolygonModel = None):
+        if poly and poly.skeleton_line_ids:
+            self._update_skeleton()
+        else:
+            self._redraw()
+
+        
+        
+    def toggle_perpendiculars(self):
+        if not self.polygons:
+            messagebox.showinfo("Info", "No polygon available to toggle perpendiculars")
+            return
+        
+        self.show_perpendiculars = not self.show_perpendiculars
+        if self.show_perpendiculars:
+            for poly in self.polygons:
+                try:
+                    poly.generate_perpendiculars()
+                except Exception as e:
+                    messagebox.showerror("Error", str(e))
+        else:
+            old_perpendicular_data = [poly.perpendicular_line_ids.copy() for poly in self.polygons]
+            for poly in self.polygons:
+                poly.perpendicular_line_ids.clear()
+            self._record_action(LastAction.REMOVE_PERPENDICULARS, {"perpendicular_line_ids": old_perpendicular_data})
+        self._redraw()
+        
+    def _update_perpendiculars(self):
+        for poly in self.polygons:
+            if poly.perpendicular_line_ids:
+                try:
+                    poly.update_perpendiculars()
+                except Exception as e:
+                    messagebox.showerror("Error", str(e))
+        self._redraw()
+        
+        
+    def _redraw_or_update_perpendiculars(self, poly: PolygonModel = None):
+        if poly and poly.perpendicular_line_ids:
+            self._update_perpendiculars()
+        else:
+            self._redraw()
+
 
 
     def drag_vertex(self, lx: float, ly: float):
@@ -209,6 +260,7 @@ class PolygonController:
 
         poly.move_point(self._moving_vertex_index, (lx, ly))
         self._redraw_or_update_skeleton(poly)
+        self._redraw_or_update_perpendiculars(poly)
 
 
     def delete_vertex(self, poly_index: int, vertex_index: int):
@@ -233,6 +285,7 @@ class PolygonController:
             "deleted_point": deleted_point
         })
         self._redraw_or_update_skeleton(poly)
+        self._redraw_or_update_perpendiculars(poly)
 
 
     def delete_selected_vertex(self):
@@ -271,6 +324,7 @@ class PolygonController:
             "new_point": new_point
         })
         self._redraw_or_update_skeleton(poly)
+        self._redraw_or_update_perpendiculars(poly)
 
 
     def undo_last_action(self):
@@ -387,10 +441,3 @@ class PolygonController:
         if found_poly_idx is not None:
             return (found_poly_idx, found_vertex_idx, best_dist_sq)
         return None
-
-
-    def _redraw_or_update_skeleton(self, poly: PolygonModel = None):
-        if poly and poly.skeleton_line_ids:
-            self._update_skeleton()
-        else:
-            self._redraw()

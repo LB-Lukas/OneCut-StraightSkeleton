@@ -1,10 +1,11 @@
 import geometry
-from geometry import StraightSkeleton, Point
+from geometry import StraightSkeleton, Point, TestStraightSkeleton, TestPoint, PerpendicularFinder
 
 class PolygonModel:
     def __init__(self, points=None):
         self.points = points.copy() if points else []
         self.skeleton_line_ids = []  # List of dicts with key "coords"
+        self.perpendicular_line_ids = []
 
 
     def add_point(self, point: tuple[float, float]):
@@ -27,8 +28,9 @@ class PolygonModel:
 
     def generate_skeleton(self):
         try:
-            points_obj = [Point(x, y) for x, y in self.points]
-            skeleton = StraightSkeleton(points_obj)
+            points_obj = [TestPoint(x, y) for x, y in self.points]
+            # skeleton = StraightSkeleton(points_obj)
+            skeleton = TestStraightSkeleton(points_obj)
             edges = skeleton.get_edges()
             self.skeleton_line_ids = []
             if edges:
@@ -45,6 +47,28 @@ class PolygonModel:
     def update_skeleton(self):
         if self.skeleton_line_ids:
             self.generate_skeleton()
+            
+            
+    def generate_perpendiculars(self):
+        try:
+            points_obj = [TestPoint(x, y) for x, y in self.points]
+            skeleton = TestStraightSkeleton(points_obj)
+            finder = PerpendicularFinder(skeleton)
+            edges = finder.find_perpendiculars()
+            self.perpendicular_line_ids = []
+            if edges:
+                for edge in edges:
+                    src, tgt = edge
+                    self.perpendicular_line_ids.append({
+                        "coords": (src.x(), src.y(), tgt.x(), tgt.y())
+                    })
+            return True
+        except Exception as e:
+            raise RuntimeError(f"Error generating perpendiculars: {e}")
+        
+    def update_perpendiculars(self):
+        if self.perpendicular_line_ids:
+            self.generate_perpendiculars()
 
 
     @staticmethod

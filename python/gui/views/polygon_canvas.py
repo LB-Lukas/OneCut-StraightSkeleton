@@ -98,6 +98,11 @@ class CanvasView(tk.Frame):
                 cax1, cay1 = self.logic_to_canvas(sx1, sy1)
                 cax2, cay2 = self.logic_to_canvas(sx2, sy2)
                 self.canvas.create_line(cax1, cay1, cax2, cay2, fill="green", width=3)
+            for per in poly.perpendicular_line_ids:
+                px1, py1, px2, py2 = per["coords"]
+                cpx1, cpy1 = self.logic_to_canvas(px1, py1)
+                cpx2, cpy2 = self.logic_to_canvas(px2, py2)
+                self.canvas.create_line(cpx1, cpy1, cpx2, cpy2, fill="blue", width=3)
 
         # Draw in-progress polygon edges.
         if len(in_progress_points) > 1:
