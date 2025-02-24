@@ -2,7 +2,7 @@
 
 namespace TestSkeleton {
 
-TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_points) : originalPolygonPoints(polygon_points) {
+TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point2D>& polygon_points) : originalPolygonPoints(polygon_points) {
     // Construct the polygon from the input points
     Polygon_2 polygon;
     for (const auto& p : polygon_points) {
@@ -28,7 +28,7 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     faces = skeletonToFaces(iss_);
 
     // Map to store graph vertices corresponding to each skeleton point.
-    std::map<Point, SurfaceMesh::Vertex_index> vertex_map;
+    std::map<Point2D, SurfaceMesh::Vertex_index> vertex_map;
 
     // Iterate over the skeleton’s halfedges.
     // (Each edge appears twice, so process one representative from each pair.)
@@ -36,8 +36,8 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
         std::cout << "Processing halfedge: " << &(*he) << std::endl;
         // Use a simple trick to avoid duplicates:
         if (he < he->opposite()) {
-            Point src = he->vertex()->point();
-            Point tgt = he->opposite()->vertex()->point();
+            Point2D src = he->vertex()->point();
+            Point2D tgt = he->opposite()->vertex()->point();
             std::cout << "Halfedge passes duplicate check. Source: " << src << ", Target: " << tgt << std::endl;
 
             // Add source vertex if not already added
@@ -67,8 +67,8 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     }
 }
 
-std::vector<std::pair<Point, Point>> TestStraightSkeleton::getEdges() const {
-    std::vector<std::pair<Point, Point>> edges;
+std::vector<std::pair<Point2D, Point2D>> TestStraightSkeleton::getEdges() const {
+    std::vector<std::pair<Point2D, Point2D>> edges;
     for (auto e : graph.edges()) {
         auto h = graph.halfedge(e);
         auto src = graph.point(graph.source(h));
@@ -114,13 +114,13 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
         Ss::Halfedge_handle start = face->halfedge();
         Ss::Halfedge_handle halfedgeIterator = start;
 
-        std::vector<Point> points;
+        std::vector<Point2D> points;
         std::vector<int> adjacentFaces;
 
         do {
             // 3. for each halfedge get first point and second point and get the opposite face
-            Point startPoint = halfedgeIterator->prev()->vertex()->point();
-            Point endPoint = halfedgeIterator->vertex()->point();
+            Point2D startPoint = halfedgeIterator->prev()->vertex()->point();
+            Point2D endPoint = halfedgeIterator->vertex()->point();
             std::cout << "startPoint: " << startPoint << std::endl;
             std::cout << "endPoint " << endPoint << std::endl;
 
@@ -149,9 +149,9 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
             }
         } while (halfedgeIterator != start);
 
-        std::vector<straight_skeleton::Point> epeckPoints;
+        std::vector<straight_skeleton::Point2D> epeckPoints;
         epeckPoints.reserve(points.size());
-        for (const Point& point : points) {
+        for (const Point2D& point : points) {
             epeckPoints.emplace_back(convertPoint(point));
         }
 
@@ -193,6 +193,6 @@ bool TestStraightSkeleton::isOuterFace(const Ss::Face_handle& face) const {
     return false;
 }
 
-straight_skeleton::Point TestStraightSkeleton::convertPoint(const Point& point) const { return straight_skeleton::Point(point.x(), point.y()); }
+straight_skeleton::Point2D TestStraightSkeleton::convertPoint(const Point2D& point) const { return straight_skeleton::Point2D(point.x(), point.y()); }
 
 }  // namespace TestSkeleton

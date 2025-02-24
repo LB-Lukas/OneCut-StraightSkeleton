@@ -19,19 +19,19 @@ namespace straight_skeleton {
 PYBIND11_MODULE(geometry, m) {
 
     // Expose the Point_2 type to Python
-    py::class_<Point>(m, "Point").def(py::init<double, double>()).def("x", [](const Point& p) { return CGAL::to_double(p.x()); }).def("y", [](const Point& p) {
+    py::class_<Point2D>(m, "Point2D").def(py::init<double, double>()).def("x", [](const Point2D& p) { return CGAL::to_double(p.x()); }).def("y", [](const Point2D& p) {
         return CGAL::to_double(p.y());
     });
 
-    py::class_<TestSkeleton::Point>(m, "TestPoint")
+    py::class_<TestSkeleton::Point2D>(m, "TestPoint")
         .def(py::init<double, double>())
-        .def("x", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.x()); })
-        .def("y", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.y()); });
+        .def("x", [](const TestSkeleton::Point2D& p) { return CGAL::to_double(p.x()); })
+        .def("y", [](const TestSkeleton::Point2D& p) { return CGAL::to_double(p.y()); });
 
     py::class_<PlanarGraph>(m, "PlanarGraph")
         .def(py::init<>())
         .def("add_vertex",
-             [](PlanarGraph& graph, const Point& p) {
+             [](PlanarGraph& graph, const Point2D& p) {
                  auto vi = graph.add_vertex(p);
                  // cast the vertex index to size_t to return as a Python integer
                  return static_cast<size_t>(vi);
@@ -50,7 +50,7 @@ PYBIND11_MODULE(geometry, m) {
              })
         .def("point", [](const PlanarGraph& graph, size_t v) { return graph.point(PlanarGraph::Vertex_index(v)); })
         .def("edges", [](const PlanarGraph& graph) {
-            std::vector<std::pair<Point, Point>> edges;
+            std::vector<std::pair<Point2D, Point2D>> edges;
             for (auto e : graph.edges()) {
                 auto h = graph.halfedge(e);
                 auto src = graph.point(graph.source(h));
@@ -62,10 +62,10 @@ PYBIND11_MODULE(geometry, m) {
     // Add parallel methods for add_edge, etc. if needed
 
     py::class_<straight_skeleton::StraightSkeleton, std::shared_ptr<straight_skeleton::StraightSkeleton>>(m, "StraightSkeleton")
-        .def(py::init<const std::vector<straight_skeleton::Point>&>(), py::arg("vertices"))
+        .def(py::init<const std::vector<straight_skeleton::Point2D>&>(), py::arg("vertices"))
         .def("get_edges",
              [](const straight_skeleton::StraightSkeleton& ss) {
-                 std::vector<std::pair<straight_skeleton::Point, straight_skeleton::Point>> edges;
+                 std::vector<std::pair<straight_skeleton::Point2D, straight_skeleton::Point2D>> edges;
                  for (auto e : ss.graph.edges()) {
                      auto h = ss.graph.halfedge(e, true);  // Adjust the second parameter if necessary
                      if (h != straight_skeleton::PlanarGraph::null_halfedge()) {
@@ -80,7 +80,7 @@ PYBIND11_MODULE(geometry, m) {
              [](const straight_skeleton::StraightSkeleton& ss) { return "<StraightSkeleton with " + std::to_string(ss.graph.edges().size()) + " edges>"; });
 
     py::class_<TestSkeleton::TestStraightSkeleton>(m, "TestStraightSkeleton")
-        .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"))
+        .def(py::init<const std::vector<TestSkeleton::Point2D>&>(), py::arg("vertices"))
         .def("get_edges", &TestSkeleton::TestStraightSkeleton::getEdges)
         .def("__repr__", [](const TestSkeleton::TestStraightSkeleton& tss) {
             return "<TestStraightSkeleton with " + std::to_string(tss.graph.edges().size()) + " edges>";
@@ -90,7 +90,7 @@ PYBIND11_MODULE(geometry, m) {
         .def(py::init<TestSkeleton::TestStraightSkeleton&>(), py::arg("skeleton"))
         .def("find_perpendiculars",
             []( straight_skeleton::PerpendicularFinder& pf) {
-                std::vector<std::pair<straight_skeleton::Point, straight_skeleton::Point>> edges;
+                std::vector<std::pair<straight_skeleton::Point2D, straight_skeleton::Point2D>> edges;
                 std::vector<PerpChain> chains = pf.findPerpendiculars();
                 for (const auto& chain : chains) {
                     for (const auto& seg : chain) {

@@ -23,18 +23,18 @@ protected:
 
     // Setup Skeleton for rectangle    
     // Define Points for a larger, centered rectangle
-    Point p0(0, 200);
-    Point p1(400, 200);
-    Point p2(400, 0);
-    Point p3(0, 0);
-    Point s0(100, 100);
-    Point s1(300, 100);
+    Point2D p0(0, 200);
+    Point2D p1(400, 200);
+    Point2D p2(400, 0);
+    Point2D p3(0, 0);
+    Point2D s0(100, 100);
+    Point2D s1(300, 100);
 
     // Define Skeleton Faces
-    std::vector<Point> f0 = {p0, p1, s1, s0};
-    std::vector<Point> f1 = {p1, p2, s1};
-    std::vector<Point> f2 = {p2, p3, s0, s1};
-    std::vector<Point> f3 = {p3, p0, s0};
+    std::vector<Point2D> f0 = {p0, p1, s1, s0};
+    std::vector<Point2D> f1 = {p1, p2, s1};
+    std::vector<Point2D> f2 = {p2, p3, s0, s1};
+    std::vector<Point2D> f3 = {p3, p0, s0};
 
     // Define Adjacent Faces
     SkeletonFace face0(f0, {-1, 1, 2, 3});
@@ -46,14 +46,14 @@ protected:
 
 
     //Setup Skeleton for triangle
-    Point a(0, 0);
-    Point b(200, 0);
-    Point c(100, sqrt(3) * 100);
-    Point ts(100, sqrt(3)/3 *100);
+    Point2D a(0, 0);
+    Point2D b(200, 0);
+    Point2D c(100, sqrt(3) * 100);
+    Point2D ts(100, sqrt(3)/3 *100);
 
-    std::vector<Point> tf0 = {a, b, ts};
-    std::vector<Point> tf1 = {b, c, ts};
-    std::vector<Point> tf2 = {c, a, ts};
+    std::vector<Point2D> tf0 = {a, b, ts};
+    std::vector<Point2D> tf1 = {b, c, ts};
+    std::vector<Point2D> tf2 = {c, a, ts};
 
     SkeletonFace tface0(tf0, {-1, 1, 2});
     SkeletonFace tface1(tf1, {-1, 2, 0});
@@ -66,7 +66,7 @@ protected:
     void TearDown() override {
     }
 
-    void draw_polygon(const std::vector<Point>& points, cairo_t* cr, double r, double g, double b) {
+    void draw_polygon(const std::vector<Point2D>& points, cairo_t* cr, double r, double g, double b) {
         if (points.size() < 2) return;
 
         cairo_set_source_rgb(cr, r, g, b);

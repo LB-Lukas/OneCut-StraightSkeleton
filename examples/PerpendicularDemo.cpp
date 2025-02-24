@@ -6,17 +6,17 @@
 
 namespace straight_skeleton {
 
-std::vector<Point> getPerpendiculars() {
-    Point p1(0, 0);
-    Point p2(2, 0);
-    Point p3(2, 2);
-    Point p4(0, 2);
-    Point center(1, 1);
+std::vector<Point2D> getPerpendiculars() {
+    Point2D p1(0, 0);
+    Point2D p2(2, 0);
+    Point2D p3(2, 2);
+    Point2D p4(0, 2);
+    Point2D center(1, 1);
 
-    std::vector<Point> f0 = {p1, p2, center};
-    std::vector<Point> f1 = {p2, p3, center};
-    std::vector<Point> f2 = {p3, p4, center};
-    std::vector<Point> f3 = {p4, p1, center};
+    std::vector<Point2D> f0 = {p1, p2, center};
+    std::vector<Point2D> f1 = {p2, p3, center};
+    std::vector<Point2D> f2 = {p3, p4, center};
+    std::vector<Point2D> f3 = {p4, p1, center};
 
     SkeletonFace face0(f0, {-1, 1, 3});
     SkeletonFace face1(f1, {-1, 2, 0});
@@ -30,7 +30,7 @@ std::vector<Point> getPerpendiculars() {
     std::vector<PerpChain> chains = finder.findPerpendiculars();
 
     // Collect the segment endpoints
-    std::vector<Point> points;
+    std::vector<Point2D> points;
     for (const auto& chain : chains) {
         for (const auto& seg : chain) {
             points.push_back(seg.start);

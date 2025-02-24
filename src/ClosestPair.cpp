@@ -118,8 +118,8 @@ std::pair<R, B> ClosestPair<R, B, d>::extractMinPair() {
 
 
 template class straight_skeleton::ClosestPair<
-    Point,
-    Point,
+    Point2D,
+    Point2D,
     straight_skeleton::EuclideanDistance
 >;
 

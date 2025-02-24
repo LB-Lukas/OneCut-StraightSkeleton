@@ -9,11 +9,11 @@
 namespace straight_skeleton {
 
 void demo_close_pair() {
-    ClosestPair<Point, Point, EuclideanDistance> cp;
+    ClosestPair<Point2D, Point2D, EuclideanDistance> cp;
 
-    Point r0(0, 0);
-    Point r1(0, 1);
-    Point r2(0, -1);
+    Point2D r0(0, 0);
+    Point2D r1(0, 1);
+    Point2D r2(0, -1);
 
     cp.insertFirst(r0);
     cp.insertFirst(r1);
@@ -21,8 +21,8 @@ void demo_close_pair() {
     std::cout << "First set size: " << cp.firstSetSize() << std::endl;
     std::cout << "Second set size: " << cp.secondSetSize() << std::endl;
 
-    Point b0(1, 500);
-    Point b1(1, 1);
+    Point2D b0(1, 500);
+    Point2D b1(1, 1);
 
     cp.insertSecond(b0);
     cp.insertSecond(b1);

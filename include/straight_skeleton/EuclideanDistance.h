@@ -14,7 +14,7 @@ class EuclideanDistance {
     * @param b the second point
     * @return double the Euclidean distance between the two points.
     */
-    double operator()(const Point& a, const Point& b) const {
+    double operator()(const Point2D& a, const Point2D& b) const {
         double dx = CGAL::to_double(a.x() - b.x());
         double dy = CGAL::to_double(a.y() - b.y());
         return std::sqrt(dx * dx + dy * dy);

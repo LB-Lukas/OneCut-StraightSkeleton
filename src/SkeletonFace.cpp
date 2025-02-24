@@ -2,17 +2,17 @@
 
 namespace straight_skeleton {
 
-SkeletonFace::SkeletonFace(const std::vector<Point>& vertices, const std::vector<int>& adjacentFaces) : vertices(vertices), adjacentFaces(adjacentFaces) {}
+SkeletonFace::SkeletonFace(const std::vector<Point2D>& vertices, const std::vector<int>& adjacentFaces) : vertices(vertices), adjacentFaces(adjacentFaces) {}
 
 size_t SkeletonFace::vertexCount() const {
     return vertices.size();
 }
 
-Point SkeletonFace::vertex(size_t i) const {
+Point2D SkeletonFace::vertex(size_t i) const {
     return vertices[i];
 }
 
-std::vector<Point> SkeletonFace::getVertices() const {
+std::vector<Point2D> SkeletonFace::getVertices() const {
     return vertices;
 }
 

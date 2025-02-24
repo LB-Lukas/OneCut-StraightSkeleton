@@ -13,9 +13,9 @@ public:
 
     virtual size_t vertexCount() const = 0;
 
-    virtual Point vertex(size_t i) const = 0;
+    virtual Point2D vertex(size_t i) const = 0;
 
-    virtual std::vector<Point> getVertices() const = 0;
+    virtual std::vector<Point2D> getVertices() const = 0;
 
     virtual std::vector <int> getAdjacentFaces() const = 0;
 

@@ -27,7 +27,7 @@ protected:
     }
 
     // Draws a polygon given its points.
-    void draw_polygon(const std::vector<TestSkeleton::Point>& points, double r, double g, double b) {
+    void draw_polygon(const std::vector<TestSkeleton::Point2D>& points, double r, double g, double b) {
         auto cr = std::unique_ptr<cairo_t, decltype(&cairo_destroy)>(cairo_create(surface.get()), &cairo_destroy);
         cairo_set_source_rgb(cr.get(), r, g, b);
         cairo_set_line_width(cr.get(), 1.0);
@@ -42,7 +42,7 @@ protected:
     }
 
     // Draws the skeleton edges.
-    void draw_skeleton(const std::vector<std::pair<TestSkeleton::Point, TestSkeleton::Point>>& edges, double r, double g, double b) {
+    void draw_skeleton(const std::vector<std::pair<TestSkeleton::Point2D, TestSkeleton::Point2D>>& edges, double r, double g, double b) {
         auto cr = std::unique_ptr<cairo_t, decltype(&cairo_destroy)>(cairo_create(surface.get()), &cairo_destroy);
         cairo_set_source_rgb(cr.get(), r, g, b);
         cairo_set_line_width(cr.get(), 1.0);
@@ -71,20 +71,20 @@ protected:
     }
 
     // Utility function to generate a random convex polygon.
-    std::vector<TestSkeleton::Point> generate_random_convex_polygon(int num_points) {
+    std::vector<TestSkeleton::Point2D> generate_random_convex_polygon(int num_points) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<double> dist(0.0, 500.0);
 
-        std::vector<TestSkeleton::Point> random_points;
+        std::vector<TestSkeleton::Point2D> random_points;
         random_points.reserve(num_points);
         for (int i = 0; i < num_points; ++i) {
             double x = dist(gen);
             double y = dist(gen);
-            random_points.push_back(TestSkeleton::Point(x, y));
+            random_points.push_back(TestSkeleton::Point2D(x, y));
         }
 
-        std::vector<TestSkeleton::Point> hull;
+        std::vector<TestSkeleton::Point2D> hull;
         hull.reserve(num_points);
         CGAL::convex_hull_2(random_points.begin(), random_points.end(), std::back_inserter(hull));
         return hull;
@@ -145,11 +145,11 @@ protected:
 TEST_F(RectangleSkeletonTest, Rectangle) {
     auto cr = std::unique_ptr<cairo_t, decltype(&cairo_destroy)>(cairo_create(surface.get()), &cairo_destroy);
 
-    TestSkeleton::Point p0(0, 200);
-    TestSkeleton::Point p1(400, 200);
-    TestSkeleton::Point p2(400, 0);
-    TestSkeleton::Point p3(0, 0);
-    std::vector<TestSkeleton::Point> rectangle = {p0, p1, p2, p3};
+    TestSkeleton::Point2D p0(0, 200);
+    TestSkeleton::Point2D p1(400, 200);
+    TestSkeleton::Point2D p2(400, 0);
+    TestSkeleton::Point2D p3(0, 0);
+    std::vector<TestSkeleton::Point2D> rectangle = {p0, p1, p2, p3};
 
     TestSkeleton::TestStraightSkeleton t_skeleton(rectangle);
     EXPECT_FALSE(t_skeleton.getEdges().empty()) << "No edges in the skeleton.";
