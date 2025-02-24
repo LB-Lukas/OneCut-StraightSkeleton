@@ -1,5 +1,4 @@
 #include "straight_skeleton/StraightSkeleton.h"
-#include "straight_skeleton/Folding.h"
 #include "straight_skeleton/event_management/SkeletonEventTriangle.h"
 #include "straight_skeleton/event_management/EventHeap.h"
 #include <map>

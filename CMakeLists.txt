@@ -117,11 +117,6 @@ if(BUILD_TESTS)
     message(STATUS "Building tests")
     enable_testing()
 
-    #Test: folding_test
-    add_executable(folding_test tests/FoldingTest.cpp $<TARGET_OBJECTS:common>)
-    target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-    gtest_discover_tests(folding_test)
-
     # Test: SkeletonEventTriangleTest
     add_executable(triangle_test tests/SkeletonEventTriangleTest.cpp $<TARGET_OBJECTS:common>)
     target_link_libraries(triangle_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
@@ -141,11 +136,6 @@ if(BUILD_TESTS)
     add_executable(naive_closest_pair_test tests/NaiveClosestPairTest.cpp $<TARGET_OBJECTS:common>)
     target_link_libraries(naive_closest_pair_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(naive_closest_pair_test)
-
-    # Test: GraphUtilsTest
-    add_executable(graph_utils_test tests/GraphUtilsTest.cpp $<TARGET_OBJECTS:common>)
-    target_link_libraries(graph_utils_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-    gtest_discover_tests(graph_utils_test)
 
     # Test: StraightSkeletonTest
     add_executable(straight_skeleton_test tests/StraightSkeletonTest.cpp $<TARGET_OBJECTS:common>)

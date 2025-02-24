@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include "straight_skeleton/StraightSkeletonTypes.h"
-#include "straight_skeleton/Folding.h"
 #include "straight_skeleton/StraightSkeleton.h"
 
 #include <CGAL/convex_hull_2.h>

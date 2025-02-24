@@ -7,32 +7,16 @@
 
 #include <memory>
 
-#include "../include/straight_skeleton/Folding.h"
 #include "../include/straight_skeleton/PerpendicularFinder.h"
 #include "../include/straight_skeleton/StraightSkeletonTypes.h"
 #include "../include/straight_skeleton/TestStraightSkeleton.h"
+#include "../include/straight_skeleton/StraightSkeleton.h"
 
 namespace py = pybind11;
 
 namespace straight_skeleton {
 
 PYBIND11_MODULE(geometry, m) {
-    // py::class_<Geometry::StraightSkeleton, std::shared_ptr<Geometry::StraightSkeleton>>(m, "StraightSkeleton")
-    //     .def(py::init<const std::vector<Point>&>(), py::arg("vertices"));
-
-    py::enum_<straight_skeleton::FoldType>(m, "FoldType")
-        .value("Convex", straight_skeleton::FoldType::Convex)
-        .value("Reflex", straight_skeleton::FoldType::Reflex)
-        .export_values();
-
-    // Expose the Folding class to Python
-    py::class_<straight_skeleton::Folding>(m, "Folding")
-        .def(py::init<>())  // Expose the default constructor
-        // Add additional methods or members to expose if necessary
-        .def("getVertices", &straight_skeleton::Folding::getVertices)
-        .def("getMountains", &Folding::getMountains)
-        .def("getValleys", &Folding::getValleys)
-        .def("getFolding", Folding::getFolding);
 
     // Expose the Point_2 type to Python
     py::class_<Point>(m, "Point").def(py::init<double, double>()).def("x", [](const Point& p) { return CGAL::to_double(p.x()); }).def("y", [](const Point& p) {

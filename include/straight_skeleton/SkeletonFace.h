@@ -1,8 +1,6 @@
 #pragma once
 
 #include "StraightSkeletonTypes.h"
-#include "GraphClassification.h"
-#include "GraphUtils.h"
 #include "ISkeletonFace.h"
 #include <iostream>
 
