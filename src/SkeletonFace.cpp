@@ -24,10 +24,10 @@ int SkeletonFace::adjacentFaceIndex(int i) const {
     return adjacentFaces[i];
 }
 
-std::ostream& operator<<(std::ostream& os, const SkeletonFace& face) {
+std::ostream& SkeletonFace::print(std::ostream& os) const {
     os << "{ \"vertices\": [";
     {
-        const auto& verts = face.getVertices();
+        const auto& verts = this->getVertices();
         for (size_t i = 0; i < verts.size(); ++i) {
             os << verts[i];
             if (i != verts.size() - 1)
@@ -36,7 +36,7 @@ std::ostream& operator<<(std::ostream& os, const SkeletonFace& face) {
     }
     os << "], \"adjacentFaces\": [";
     {
-        const auto& adjFaces = face.getAdjacentFaces();
+        const auto& adjFaces = this->getAdjacentFaces();
         for (size_t i = 0; i < adjFaces.size(); ++i) {
             os << adjFaces[i];
             if (i != adjFaces.size() - 1)

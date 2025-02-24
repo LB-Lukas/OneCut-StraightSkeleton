@@ -87,6 +87,8 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
     faces.reserve(this->originalPolygonPoints.size());
 
     std::map<Ss::Face_handle, int> faceIndexMap;
+    std::vector<std::pair<int, straight_skeleton::SkeletonFace>> indexedFaces;
+
 
     // iterate through all faces of the skeleton
     int counter = 0;
@@ -125,13 +127,13 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
             Ss::Face_handle oppositeFace = halfedgeIterator->opposite()->face();
             if (oppositeFace == nullptr){
                 // Opposite face is null <=> the halfedge is a border edge
-                std::cout << std::endl << "FUCKING SKIP: oppositeFace == nullptr" << std::endl;
+                std::cout << std::endl << "SKIP: oppositeFace == nullptr" << std::endl;
                 points.push_back(startPoint);
                 adjacentFaces.push_back(-1);
                 halfedgeIterator = halfedgeIterator->next();
                 continue;
             } else if (oppositeFace == face) {
-                std::cout << std::endl << "FUCKING SKIP: oppositeFace == face" << std::endl;
+                std::cout << std::endl << "SKIP: oppositeFace == face" << std::endl;
                 halfedgeIterator = halfedgeIterator->next();
                 continue;               
             } else {
@@ -153,14 +155,22 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
             epeckPoints.emplace_back(convertPoint(point));
         }
 
-        faces.emplace_back(epeckPoints, adjacentFaces);
-
+        //faces.emplace_back(epeckPoints, adjacentFaces);
+        straight_skeleton::SkeletonFace sFace(epeckPoints, adjacentFaces);
+        indexedFaces.emplace_back(faceIndexPair.second, sFace);
         // 3. for each halfedge get first point and second point and get the opposite face
         // 4. use the opposite face to lookup the face index in the map
         // 5. insert the points of the face in a vector
         // 6. insert the index of the adjacent face in a vector (for points (0,1) the element 0 in the vector should be the face that is adjacent regarding that
         // edge)
     }
+    std::sort(indexedFaces.begin(), indexedFaces.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+
+    for (const auto& pair : indexedFaces) {
+        faces.push_back(pair.second);
+    }
+    
+
     std::cout <<  std::endl <<"FACES: " << std::endl;
     for (const straight_skeleton::SkeletonFace& face : faces) {
         std::cout << face << std::endl;

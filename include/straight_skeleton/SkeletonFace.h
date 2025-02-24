@@ -18,7 +18,7 @@ public:
     std::vector<int> getAdjacentFaces() const override;
     int adjacentFaceIndex(int i) const override;
 
-    friend std::ostream& operator<<(std::ostream& os, const SkeletonFace& face);
+    std::ostream& print(std::ostream& os) const override;
 
 
 private:

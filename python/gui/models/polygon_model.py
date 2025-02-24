@@ -28,8 +28,9 @@ class PolygonModel:
 
     def generate_skeleton(self):
         try:
-            points_obj = [TestPoint(x, y) for x, y in self.points]
+            # points_obj = [Point(x, y) for x, y in self.points]
             # skeleton = StraightSkeleton(points_obj)
+            points_obj = [TestPoint(x, y) for x, y in self.points]
             skeleton = TestStraightSkeleton(points_obj)
             edges = skeleton.get_edges()
             self.skeleton_line_ids = []
