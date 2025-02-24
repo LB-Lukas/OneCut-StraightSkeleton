@@ -91,6 +91,10 @@ target_link_libraries(common PRIVATE ${CGAL_LIBRARIES})
 add_executable(PerpendicularDemo examples/PerpendicularDemo.cpp $<TARGET_OBJECTS:common>)
 target_link_libraries(PerpendicularDemo PRIVATE ${CGAL_LIBRARIES})
 
+# Build ClosestPairDemo
+add_executable(ClosestPairDemo examples/ClosestPairDemo.cpp $<TARGET_OBJECTS:common>)
+target_link_libraries(ClosestPairDemo PRIVATE ${CGAL_LIBRARIES})
+
 #----------------------------------------------#
 #---------------Pybind11-Modul-----------------#
 #----------------------------------------------#
