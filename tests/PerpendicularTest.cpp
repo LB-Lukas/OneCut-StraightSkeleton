@@ -102,7 +102,7 @@ protected:
 };
 
 TEST_F(PerpendicularTest, PerpendicularFinderRectangle) {
-    const std::string rectangle_filename = "/home/lukas/Documents/workspace/OneStraightCut/test-output/PerpendicularTest_Rectangle.pdf";
+    const std::string rectangle_filename = "/home/lukas/Documents/workspace/OneCut-StraightSkeleton/test-output/PerpendicularTest_Rectangle.pdf";
     std::unique_ptr<cairo_surface_t, decltype(&cairo_surface_destroy)> surface{
         cairo_pdf_surface_create(rectangle_filename.c_str(), 500, 500), &cairo_surface_destroy
     };
@@ -129,7 +129,7 @@ TEST_F(PerpendicularTest, PerpendicularFinderRectangle) {
 }
 
 TEST_F(PerpendicularTest, PerpendicularFinderTriangle) {
-    const std::string triangle_filename = "/home/lukas/Documents/workspace/OneStraightCut/test-output/PerpendicularTest_Triangle.pdf";
+    const std::string triangle_filename = "/home/lukas/Documents/workspace/OneCut-StraightSkeleton/test-output/PerpendicularTest_Triangle.pdf";
     std::unique_ptr<cairo_surface_t, decltype(&cairo_surface_destroy)> surface{
         cairo_pdf_surface_create(triangle_filename.c_str(), 500, 500), &cairo_surface_destroy
     };

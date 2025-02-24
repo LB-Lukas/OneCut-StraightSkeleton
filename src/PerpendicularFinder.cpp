@@ -15,6 +15,7 @@ std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
     for (int f = 0; f < faceCount; f++) {
         const ISkeletonFace& face = skeleton.face(f);
         std::cout << "Processing face: " << f << std::endl;
+        std::cout << "FACE: " << face << std::endl;
 
         // Vertex 0 and 1 form the cut Edge
         for (int v = 2; v < face.vertexCount(); v++) {

@@ -4,6 +4,7 @@
 #include "GraphClassification.h"
 #include "GraphUtils.h"
 #include "ISkeletonFace.h"
+#include <iostream>
 
 namespace straight_skeleton {
 
@@ -16,6 +17,8 @@ public:
     std::vector<Point> getVertices() const override;
     std::vector<int> getAdjacentFaces() const override;
     int adjacentFaceIndex(int i) const override;
+
+    std::ostream& print(std::ostream& os) const override;
 
 
 private:
