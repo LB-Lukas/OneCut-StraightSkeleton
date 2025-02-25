@@ -13,6 +13,12 @@ set(CMAKE_BUILD_TYPE Debug)
 # Disable CGAL build warnings about the CMake build type
 set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
 
+
+# Check for AddressSanitizer support
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
+
+
 #----------------------------------------------#
 #----- Platform-Specific Configuration --------#
 #----------------------------------------------#
@@ -126,6 +132,12 @@ if(BUILD_TESTS)
     add_executable(basic_ss_p_test tests/BasicSkeletonPerpendicularTest.cpp $<TARGET_OBJECTS:common>)
     target_link_libraries(basic_ss_p_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(basic_ss_p_test)
+
+    # Test: TriangleTest
+    add_executable(triangle_test tests/TriangleTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(triangle_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(triangle_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()

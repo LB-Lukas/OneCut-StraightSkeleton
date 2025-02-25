@@ -10,7 +10,6 @@
 #include "../include/straight_skeleton/PerpendicularFinder.h"
 #include "../include/straight_skeleton/StraightSkeletonTypes.h"
 #include "../include/straight_skeleton/TestStraightSkeleton.h"
-#include "../include/straight_skeleton/StraightSkeleton.h"
 
 namespace py = pybind11;
 
@@ -59,25 +58,7 @@ PYBIND11_MODULE(geometry, m) {
             }
             return edges;
         });
-    // Add parallel methods for add_edge, etc. if needed
 
-    py::class_<straight_skeleton::StraightSkeleton, std::shared_ptr<straight_skeleton::StraightSkeleton>>(m, "StraightSkeleton")
-        .def(py::init<const std::vector<straight_skeleton::Point2D>&>(), py::arg("vertices"))
-        .def("get_edges",
-             [](const straight_skeleton::StraightSkeleton& ss) {
-                 std::vector<std::pair<straight_skeleton::Point2D, straight_skeleton::Point2D>> edges;
-                 for (auto e : ss.graph.edges()) {
-                     auto h = ss.graph.halfedge(e, true);  // Adjust the second parameter if necessary
-                     if (h != straight_skeleton::PlanarGraph::null_halfedge()) {
-                         auto src = ss.graph.source(h);
-                         auto tgt = ss.graph.target(h);
-                         edges.emplace_back(ss.graph.point(src), ss.graph.point(tgt));
-                     }
-                 }
-                 return edges;
-             })
-        .def("__repr__",
-             [](const straight_skeleton::StraightSkeleton& ss) { return "<StraightSkeleton with " + std::to_string(ss.graph.edges().size()) + " edges>"; });
 
     py::class_<TestSkeleton::TestStraightSkeleton>(m, "TestStraightSkeleton")
         .def(py::init<const std::vector<TestSkeleton::Point2D>&>(), py::arg("vertices"))

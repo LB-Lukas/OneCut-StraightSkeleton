@@ -1,9 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <map>
 #include <utility>
 #include <vector>
-#include <map>
-#include <iostream>
 
 // CGAL headers for kernel and surface mesh
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -13,8 +13,8 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/draw_straight_skeleton_2.h>
 
-#include "SkeletonFace.h"
 #include "IStraightSkeleton.h"
+#include "SkeletonFace.h"
 
 namespace TestSkeleton {
 
@@ -40,7 +40,7 @@ class TestStraightSkeleton : public straight_skeleton::IStraightSkeleton {
 
     SurfaceMesh graph;
 
-    private:
+   private:
     SsPtr iss_;
     std::vector<straight_skeleton::SkeletonFace> faces;
     std::vector<Point2D> originalPolygonPoints;
@@ -50,7 +50,6 @@ class TestStraightSkeleton : public straight_skeleton::IStraightSkeleton {
     straight_skeleton::Point2D convertPoint(const Point2D& point) const;
 
     bool isOuterFace(const Ss::Face_handle& face) const;
-  
-    };
+};
 
 }  // namespace TestSkeleton

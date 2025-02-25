@@ -23,6 +23,9 @@ cmake-build-debug/
 Testing
 test-output
 
+# PDF
+*.pdf
+
 # Binary files
 *.so
 
