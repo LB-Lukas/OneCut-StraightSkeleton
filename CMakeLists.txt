@@ -138,6 +138,11 @@ if(BUILD_TESTS)
     target_link_libraries(triangle_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(triangle_test)
 
+    # Test: RayTest
+    add_executable(ray_test tests/RayTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(ray_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(ray_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()
