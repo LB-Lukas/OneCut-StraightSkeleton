@@ -1,11 +1,13 @@
 #pragma once
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
+#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Line_2.h>
 #include <CGAL/Point_2.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
+#include <CGAL/intersections.h>
 
 /**
  * @brief: type-aliases for frequently used types
@@ -21,6 +23,7 @@ using Vector3D = K::Vector_3;
 using Direction3D = K::Direction_3;
 using Triangle3D = CGAL::Triangle_3<K>;
 using Ray3D = CGAL::Ray_3<K>;
+using Segment3D = CGAL::Segment_3<K>;
 using PlanarGraph = CGAL::Surface_mesh<Point2D>;
 using VertexIndex = PlanarGraph::Vertex_index;
 using FaceIndex = PlanarGraph::Face_index;

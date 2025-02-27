@@ -15,11 +15,10 @@ class RayTriangleUtil {
 
    /**
     * @brief 
-    * @see <a href="https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm">Intersection Line Triangle</a>
     * 
     * @param ray 
     * @param triangle 
-    * @return std::optional<std::pair<double, Point3D>> 
+    * @return std::optional<std::pair<double, Point3D>> Returns a pair of the parameter t and the intersection point
     */
    static std::optional<std::pair<double, Point3D>> intersectRayTriangle(const Ray3D& ray, const Triangle3D& triangle);
 };
