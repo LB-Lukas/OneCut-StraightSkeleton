@@ -153,6 +153,16 @@ if(BUILD_TESTS)
     target_link_libraries(event_queue_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(event_queue_test)
 
+    # Test: RayTriangleUtilTest
+    add_executable(ray_triangle_util_test tests/RayTriangleUtilTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(ray_triangle_util_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(ray_triangle_util_test)
+
+    # Test: NaiveLowestIntersectionQueryTest
+    add_executable(naive_lowest_intersection_query_test tests/NaiveLowestIntersectionQueryTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(naive_lowest_intersection_query_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(naive_lowest_intersection_query_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()
