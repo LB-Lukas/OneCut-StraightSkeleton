@@ -143,6 +143,16 @@ if(BUILD_TESTS)
     target_link_libraries(ray_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(ray_test)
 
+    # Test: EventTest
+    add_executable(event_test tests/EventTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(event_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(event_test)
+
+    # Test: EventQueueTest
+    add_executable(event_queue_test tests/EventQueueTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(event_queue_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(event_queue_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()
