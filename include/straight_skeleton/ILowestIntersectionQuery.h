@@ -1,25 +1,18 @@
 #pragma once
 
 #include <optional>
-#include <vector>
 
 #include "Ray.h"
 #include "StraightSkeletonTypes.h"
 #include "Triangle.h"
+#include "IDataStructure.h"
 
 namespace straight_skeleton {
 
-struct IntersectionResult {
-    bool hasIntersection{false};
-    Ray intersectedRay;
-    Point3D intersectionPoint;
-    double parameterT;
-
-    IntersectionResult() = default;
-};
+struct IntersectionResult;
 
 // Interface for the lowest intersection query
-class ILowestIntersectionQuery {
+class ILowestIntersectionQuery : public IDataStructure {
    public:
     virtual ~ILowestIntersectionQuery() = default;
 

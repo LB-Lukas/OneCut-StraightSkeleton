@@ -4,10 +4,11 @@
 #include <queue>
 
 #include "Event.h"
+#include "IDataStructure.h"
 
 namespace straight_skeleton {
 
-class EventQueue {
+class EventQueue : public IDataStructure {
    public:
     EventQueue();
 
@@ -17,9 +18,9 @@ class EventQueue {
 
     virtual Event top() const;
 
-    virtual bool isEmpty() const;
+    bool isEmpty() const override;
 
-    virtual size_t size() const;
+    size_t size() const override;
 
     std::ostream& print(std::ostream& os) const;
 

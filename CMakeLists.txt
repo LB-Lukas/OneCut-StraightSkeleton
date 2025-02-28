@@ -163,6 +163,11 @@ if(BUILD_TESTS)
     target_link_libraries(naive_lowest_intersection_query_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(naive_lowest_intersection_query_test)
 
+    # Test: NaiveRayShootingQueryTest
+    add_executable(naive_ray_shooting_query_test tests/NaiveRayShootingQueryTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(naive_ray_shooting_query_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(naive_ray_shooting_query_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()

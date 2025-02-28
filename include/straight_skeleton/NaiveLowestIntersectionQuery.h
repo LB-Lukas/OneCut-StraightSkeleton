@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <algorithm>
 #include <limits>
 
@@ -16,6 +17,8 @@ class NaiveLowestIntersectionQuery : public ILowestIntersectionQuery {
     void addRay(const Ray& ray) override;
     void removeRay(const Ray& ray) override;
     IntersectionResult findLowestIntersection(const Triangle& triangle) const override;
+    bool isEmpty() const override;
+    size_t size() const override; 
 
    private:
     std::vector<Ray> rays;

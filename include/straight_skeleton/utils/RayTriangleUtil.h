@@ -6,6 +6,16 @@
 
 namespace straight_skeleton {
 
+    struct IntersectionResult {
+        bool hasIntersection{false};
+        Ray intersectedRay;
+        Triangle intersectedTriangle;
+        Point3D intersectionPoint;
+        double parameterT;
+    
+        IntersectionResult() = default;
+    };
+
 class RayTriangleUtil {
    public:
 

@@ -1,24 +1,24 @@
-#include "straight_skeleton/NaiveLowestIntersectionQuery.h"
+#include "straight_skeleton/NaiveRayShootingQuery.h"
 
 namespace straight_skeleton {
 
-void NaiveLowestIntersectionQuery::addRay(const Ray& ray) {
-    rays.push_back(ray);
+void NaiveRayShootingQuery::addTriangle(const Triangle& triangle) {
+    triangles.push_back(triangle);
 }
 
-void NaiveLowestIntersectionQuery::removeRay(const Ray& ray) {
-    // Naive approach: find array and remove it
-    auto it = std::find(rays.begin(), rays.end(), ray);
-    if (it != rays.end()) {
-        rays.erase(it);
+void NaiveRayShootingQuery::removeTriangle(const Triangle& triangle) {
+    // Naive approach: find element in array and remove it
+    auto it = std::find(triangles.begin(), triangles.end(), triangle);
+    if (it != triangles.end()) {
+        triangles.erase(it);
     }
 }
 
-IntersectionResult NaiveLowestIntersectionQuery::findLowestIntersection(const Triangle& triangle) const {
+IntersectionResult NaiveRayShootingQuery::findRayIntersection(const Ray& ray) const {
     IntersectionResult result;
     result.hasIntersection = false;
     double bestValue = std::numeric_limits<double>::infinity();
-    for (const auto& ray : rays) {
+    for (const auto& triangle : triangles) {
         auto intersection =
             RayTriangleUtil::intersectRayTriangle(RayTriangleUtil::getRay(ray), RayTriangleUtil::getTriangle(triangle));
         if (intersection.has_value()) {
@@ -33,16 +33,14 @@ IntersectionResult NaiveLowestIntersectionQuery::findLowestIntersection(const Tr
             }
         }
     }
-
     return result;
 }
 
-bool NaiveLowestIntersectionQuery::isEmpty() const {
-    return rays.empty();
+bool NaiveRayShootingQuery::isEmpty() const {
+    return triangles.empty();
 }
 
-size_t NaiveLowestIntersectionQuery::size() const {
-    return rays.size();
+size_t NaiveRayShootingQuery::size() const {
+    return triangles.size();
 }
-
-}  // namespace straight_skeleton
+}  // namespace  straight_skeleton
