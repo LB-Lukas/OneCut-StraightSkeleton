@@ -6,17 +6,29 @@ Triangle::Triangle() : baseA(Point3D()), baseB(Point3D()), apex(Point3D()) {}
 
 Triangle::Triangle(const Point3D& a, const Point3D& b, const Point3D& c) : baseA(a), baseB(b), apex(c) {}
 
-Point3D Triangle::getBaseA() const { return baseA; }
+Point3D Triangle::getBaseA() const {
+    return baseA;
+}
 
-Point3D Triangle::getBaseB() const { return baseB; }
+Point3D Triangle::getBaseB() const {
+    return baseB;
+}
 
-Point3D Triangle::getApex() const { return apex; }
+Point3D Triangle::getApex() const {
+    return apex;
+}
 
-std::pair<Point3D, Point3D> Triangle::getBase() const { return std::make_pair(baseA, baseB); }
+std::pair<Point3D, Point3D> Triangle::getBase() const {
+    return std::make_pair(baseA, baseB);
+}
 
-TrianglePtr Triangle::getClockwiseNeighbour() const { return clockwiseNeighbour; }
+TrianglePtr Triangle::getClockwiseNeighbour() const {
+    return clockwiseNeighbour;
+}
 
-TrianglePtr Triangle::getCounterclockwiseNeighbour() const { return counterclockwiseNeighbour; }
+TrianglePtr Triangle::getCounterclockwiseNeighbour() const {
+    return counterclockwiseNeighbour;
+}
 
 void Triangle::setClockwiseNeighbour(const TrianglePtr& newNeighbour) {
     // Allow setting to nullptr
@@ -53,6 +65,11 @@ bool Triangle::operator==(const Triangle& other) const {
         return true;
     }
     return false;
+}
+
+std::ostream& Triangle::print(std::ostream& os) const {
+    os << "Triangle: BaseA " << baseA << ", BaseB " << baseB << ", Apex: " << apex;
+    return os;
 }
 
 }  // namespace straight_skeleton
