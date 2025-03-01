@@ -1,8 +1,15 @@
+#pragma once
+#include <vector>
+#include <cmath>
+
 #include "Event.h"
 #include "EventQueue.h"
 #include "IStraightSkeleton.h"
 #include "SkeletonFace.h"
 #include "StraightSkeletonTypes.h"
+#include "Triangle.h"
+#include "Ray.h"
+#include "utils/SkeletonGeometryUtil.h"
 
 namespace straight_skeleton {
 
@@ -20,6 +27,8 @@ class StraightSkeleton : public IStraightSkeleton {
     std::vector<straight_skeleton::SkeletonFace> faces;
     std::vector<Point2D> originalPolygonPoints;
     EventQueue eventQueue;
+    Polygon2D polygon;
+    PlanarGraph graph;
 
     void initialize();
 

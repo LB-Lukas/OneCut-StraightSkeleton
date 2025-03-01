@@ -168,6 +168,11 @@ if(BUILD_TESTS)
     target_link_libraries(naive_ray_shooting_query_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(naive_ray_shooting_query_test)
 
+    # Test: SkeletonGeometryUtilTest
+    add_executable(skeleton_geometry_util_test tests/SkeletonGeometryUtilTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(skeleton_geometry_util_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(skeleton_geometry_util_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()

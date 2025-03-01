@@ -4,6 +4,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Line_2.h>
 #include <CGAL/Point_2.h>
+#include <CGAL/Polygon_2.h>
 #include <CGAL/Surface_mesh.h>
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
@@ -16,8 +17,10 @@ namespace straight_skeleton {
 using K = CGAL::Exact_predicates_exact_constructions_kernel;
 using Point2D = K::Point_2;
 using Line2D = K::Line_2;
+using Segment2D = K::Segment_2;
 using Vector2D = K::Vector_2;
 using Direction2D = K::Direction_2;
+using Polygon2D = CGAL::Polygon_2<K>;
 using Point3D = K::Point_3;
 using Vector3D = K::Vector_3;
 using Direction3D = K::Direction_3;

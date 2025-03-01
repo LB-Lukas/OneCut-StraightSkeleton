@@ -137,7 +137,7 @@ int PerpendicularFinder::findEdgeIndex(const ISkeletonFace& face, const Point2D&
 
 Vector2D PerpendicularFinder::rotate90(const Vector2D& v) const { return Vector2D(-v.y(), v.x()); }
 
-IntersectionResult PerpendicularFinder::intersectRaySegment(const Point2D& origin, const Vector2D& direction, const Point2D& segmentStart,
+PerpIntersectionResult PerpendicularFinder::intersectRaySegment(const Point2D& origin, const Vector2D& direction, const Point2D& segmentStart,
                                                             const Point2D& segmentEnd) const {
     // standard 2D line intersection
     Vector2D s = segmentEnd - segmentStart;

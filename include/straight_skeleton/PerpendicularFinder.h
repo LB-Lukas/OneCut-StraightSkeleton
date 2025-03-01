@@ -17,7 +17,7 @@ struct PerpHelperResult {
     int edgeIndex;
 };
 
-struct IntersectionResult {
+struct PerpIntersectionResult {
     bool valid;
     double t; // distance along ray
     double u; // distance along segment
@@ -41,7 +41,7 @@ private:
 
     Vector2D rotate90(const Vector2D& v) const;
 
-    IntersectionResult intersectRaySegment(const Point2D& origin, const Vector2D& direction, const Point2D& segmentStart, const Point2D& segmentEnd) const;
+    PerpIntersectionResult intersectRaySegment(const Point2D& origin, const Vector2D& direction, const Point2D& segmentStart, const Point2D& segmentEnd) const;
 
     double cross(const Vector2D& a, const Vector2D& b) const;
 

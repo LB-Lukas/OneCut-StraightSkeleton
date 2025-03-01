@@ -36,8 +36,15 @@ const ISkeletonFace& StraightSkeleton::face(size_t i) const {
 }
 
 void StraightSkeleton::initialize() {
-    // create Triangles for each edge
-    // create Rays for each reflex vertex
+    // create polygon from points
+    polygon = Polygon2D(originalPolygonPoints.begin(), originalPolygonPoints.end());
+
+    // create Triangle for each edge
+    std::vector<Triangle> triangles;
+    triangles.reserve(polygon.edges().size());
+    for (size_t i = 0; i < polygon.edges().size(); ++i) {
+        triangles.push_back(SkeletonGeometryUtil::makeTriangle(i, polygon));
+    }
 }
 
 void StraightSkeleton::handleEdgeEvent(const Event& event) {
