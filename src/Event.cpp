@@ -4,10 +4,11 @@ namespace straight_skeleton {
 
 Event::Event() : type(UndefinedEvent), time(0.0) {}
 
-Event::Event(const EventType& type, const double& time, const TrianglePtr& triangle)
-    : type(type), time(time), triangle(triangle) {}
+Event::Event(const EventType& type, const double& time, const TrianglePtr& triangle, const bool& valid)
+    : type(type), time(time), triangle(triangle), valid(valid) {}
 
-Event::Event(const EventType& type, const double& time, const RayPtr& ray) : type(type), time(time), ray(ray) {}
+Event::Event(const EventType& type, const double& time, const RayPtr& ray, const bool& valid)
+    : type(type), time(time), ray(ray), valid(valid) {}
 
 EventType Event::getType() const {
     return type;
@@ -25,6 +26,14 @@ TrianglePtr Event::getTriangle() const {
 // TODO: maybe add a check for nullptr or throw an exception
 RayPtr Event::getRay() const {
     return ray;
+}
+
+bool Event::isValid() const {
+    return valid;
+}
+
+void Event::setValid(bool valid) {
+    this->valid = valid;
 }
 
 bool Event::operator==(const Event& other) const {
@@ -60,8 +69,7 @@ std::ostream& Event::print(std::ostream& os) const {
                                                           {VertexEvent, "VertexEvent"}};
     auto it = eventTypeToString.find(type);
     std::string typeStr = (it != eventTypeToString.end()) ? it->second : "Error";
-    os << "{type: " << typeStr << ", time: " << time << ", triangle: " << triangle
-       << ", ray: " << ray << "}";
+    os << "{type: " << typeStr << ", time: " << time << ", triangle: " << triangle << ", ray: " << ray << "}";
     return os;
 }
 

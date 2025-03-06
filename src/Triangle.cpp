@@ -6,6 +6,9 @@ Triangle::Triangle() : baseA(Point3D()), baseB(Point3D()), apex(Point3D()) {}
 
 Triangle::Triangle(const Point3D& a, const Point3D& b, const Point3D& c) : baseA(a), baseB(b), apex(c) {}
 
+Triangle::Triangle(const Point3D& a, const Point3D& b, const Point3D& c, const bool& valid)
+    : baseA(a), baseB(b), apex(c), valid(valid) {}
+
 Point3D Triangle::getBaseA() const {
     return baseA;
 }
@@ -16,6 +19,14 @@ Point3D Triangle::getBaseB() const {
 
 Point3D Triangle::getApex() const {
     return apex;
+}
+
+bool Triangle::isValid() const {
+    return valid;
+}
+
+void Triangle::setValid(const bool& isValid) {
+    valid = isValid;
 }
 
 std::pair<Point3D, Point3D> Triangle::getBase() const {

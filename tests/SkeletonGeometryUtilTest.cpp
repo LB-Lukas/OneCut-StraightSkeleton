@@ -41,4 +41,15 @@ TEST(SkeletonGeometryUtilTest, Normalize) {
     EXPECT_EQ(CGAL::to_double(normalizedVec.y()), 1.0);
 }
 
+TEST(SkeletonGeometryUtilTest, ArePointsUnique) {
+    std::vector<Point2D> points;
+    Point2D p0(1, 2);
+    Point2D p1(1, 1);
+    Point2D p2(213, 123);
+    points.push_back(p0);
+    points.push_back(p1);
+    points.push_back(p2);
+    EXPECT_TRUE(SkeletonGeometryUtil::areAllPointsUnique(points, 1e-6));
+}
+
 }  // namespace straight_skeleton

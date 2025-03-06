@@ -15,6 +15,16 @@ Ray3D RayTriangleUtil::getRay(const Ray& ray) {
     return Ray3D(ray.getOrigin(), ray.getDirection().vector());
 }
 
+Triangle RayTriangleUtil::getTriangleProjected(const Triangle& triangle) {
+    return Triangle(Point3D(triangle.getBaseA().x(), triangle.getBaseA().y(), 0),
+                    Point3D(triangle.getBaseB().x(), triangle.getBaseB().y(), 0),
+                    Point3D(triangle.getApex().x(), triangle.getApex().y(), 0));
+}
+
+Point2D RayTriangleUtil::getProjection(const Point3D& point) {
+    return Point2D(point.x(), point.y());
+}
+
 std::optional<std::pair<double, Point3D>> RayTriangleUtil::intersectRayTriangle(const Ray3D& ray,
                                                                                 const Triangle3D& triangle) {
     const auto intersection = CGAL::intersection(ray, triangle);

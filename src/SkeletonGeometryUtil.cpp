@@ -29,7 +29,24 @@ Triangle SkeletonGeometryUtil::makeTriangle(const size_t& edgeIndex, const Polyg
     Point3D baseB = Point3D(baseQ.x(), baseQ.y(), 0);
     Point3D apex = Point3D(intersection.x(), intersection.y(), t);
 
-    return Triangle(baseA, baseB, apex);
+    return Triangle(baseA, baseB, apex, true);
+}
+
+Triangle SkeletonGeometryUtil::makeNewClockwiseTriangle(const TrianglePtr& collapsedEdge, const TrianglePtr& oldCW) {
+    Point3D collapsePoint = collapsedEdge->getApex();
+    double distance = CGAL::to_double(CGAL::squared_distance(collapsePoint, collapsedEdge->getBaseB()));
+    Vector3D direction = normalize(oldCW->getApex()-oldCW->getBaseB());
+    Point3D newPoint = oldCW->getBaseB() + distance * direction;
+    return Triangle(collapsePoint, newPoint, oldCW->getApex(), true);
+}
+
+Triangle SkeletonGeometryUtil::makeNewCounterClockwiseTriangle(const TrianglePtr& collapsedEdge,
+                                                                  const TrianglePtr& oldCCW) {
+    Point3D collapsePoint = collapsedEdge->getApex();
+    double distance = CGAL::to_double(CGAL::squared_distance(collapsePoint, collapsedEdge->getBaseA()));
+    Vector3D direction = normalize(oldCCW->getApex()-oldCCW->getBaseA());
+    Point3D newPoint = oldCCW->getBaseA() + distance * direction;
+    return Triangle(newPoint, collapsePoint, oldCCW->getApex(), true);
 }
 
 Vector2D SkeletonGeometryUtil::computeBisector(const Point2D& prev, const Point2D& point, const Point2D& next) {
@@ -64,8 +81,31 @@ Vector2D SkeletonGeometryUtil::normalize(const Vector2D& vec) {
     return vec / std::sqrt(CGAL::to_double(vec.squared_length()));
 }
 
+Vector3D SkeletonGeometryUtil::normalize(const Vector3D& vec) {
+    return vec / std::sqrt(CGAL::to_double(vec.squared_length()));
+}
+
 double SkeletonGeometryUtil::perpendicularDistance(const Point2D& point, const Line2D& line) {
     return std::sqrt(CGAL::to_double(CGAL::squared_distance(point, line)));
+}
+
+double SkeletonGeometryUtil::computeEventTime(const Triangle& triangle) {
+    return CGAL::to_double(triangle.getApex().z());
+}
+
+bool SkeletonGeometryUtil::areAllPointsUnique(const std::vector<Point2D>& points, double epsilon) {
+    for (size_t i = 0; i < points.size(); i++) {
+        for (size_t j = i + 1; j < points.size(); j++) {
+            // Compute absolute differences FIRST, then compare to epsilon
+            const double dx = CGAL::to_double(points[i].x() - points[j].x());
+            const double dy = CGAL::to_double(points[i].y() - points[j].y());
+
+            if (std::abs(dx) <= epsilon && std::abs(dy) <= epsilon) {
+                return false;  // Found a near-duplicate
+            }
+        }
+    }
+    return true;  // All points are unique
 }
 
 }  // namespace straight_skeleton

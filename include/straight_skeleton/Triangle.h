@@ -13,12 +13,16 @@ class Triangle {
    public:
     Triangle();
     Triangle(const Point3D& a, const Point3D& b, const Point3D& c);
+    Triangle(const Point3D& a, const Point3D& b, const Point3D& c, const bool& valid);
 
     Point3D getBaseA() const;
     Point3D getBaseB() const;
     Point3D getApex() const;
 
     std::pair<Point3D, Point3D> getBase() const;
+
+    bool isValid() const;
+    void setValid(const bool& isValid);
 
     TrianglePtr getClockwiseNeighbour() const;
     TrianglePtr getCounterclockwiseNeighbour() const;
@@ -33,6 +37,7 @@ class Triangle {
     Point3D baseA;
     Point3D baseB;
     Point3D apex;
+    bool valid;
 
     TrianglePtr clockwiseNeighbour;
     TrianglePtr counterclockwiseNeighbour;

@@ -8,15 +8,22 @@
 
 namespace straight_skeleton {
 
+struct EventCompare {
+    bool operator()(const std::shared_ptr<Event>& a, const std::shared_ptr<Event>& b) const {
+        // Compare the underlying Event by time, type, etc.
+        return (*a > *b);
+    }
+};
+
 class EventQueue : public IDataStructure {
    public:
     EventQueue();
 
-    virtual void push(const Event& event);
+    virtual void push(const std::shared_ptr<Event>& event);
 
-    virtual Event pop();
+    virtual std::shared_ptr<Event> pop();
 
-    virtual Event top() const;
+    virtual std::shared_ptr<Event> top() const;
 
     bool isEmpty() const override;
 
@@ -25,7 +32,7 @@ class EventQueue : public IDataStructure {
     std::ostream& print(std::ostream& os) const;
 
    private:
-    std::priority_queue<Event, std::vector<Event>, std::greater<Event>> events;
+    std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventCompare> events;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const EventQueue& queue) {

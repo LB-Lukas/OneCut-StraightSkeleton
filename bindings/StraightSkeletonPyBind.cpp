@@ -10,6 +10,7 @@
 #include "../include/straight_skeleton/PerpendicularFinder.h"
 #include "../include/straight_skeleton/StraightSkeletonTypes.h"
 #include "../include/straight_skeleton/TestStraightSkeleton.h"
+#include "../include/straight_skeleton/StraightSkeleton.h"
 
 namespace py = pybind11;
 
@@ -58,6 +59,12 @@ PYBIND11_MODULE(geometry, m) {
             }
             return edges;
         });
+
+    py::class_<StraightSkeleton>(m, "StraightSkeleton")
+        .def(py::init<const std::vector<Point2D>&>(), py::arg("polygon"))
+        .def("compute_skeleton", &StraightSkeleton::computeSkeleton)
+        .def("face_count", &StraightSkeleton::faceCount)
+        .def("get_edges", &StraightSkeleton::getEdges);
 
 
     py::class_<TestSkeleton::TestStraightSkeleton>(m, "TestStraightSkeleton")

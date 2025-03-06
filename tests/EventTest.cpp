@@ -20,7 +20,7 @@ TEST(EventTest, ConstructorWithTriangle) {
     Triangle counterclockwiseNeighbour(Point3D(1, 2, 0), Point3D(1, 0, 0), Point3D(1, 0, 0));
     triangle.setClockwiseNeighbour(std::make_shared<Triangle>(clockwiseNeighbour));
     triangle.setCounterclockwiseNeighbour(std::make_shared<Triangle>(counterclockwiseNeighbour));
-    Event event(EdgeEvent, 1.0, std::make_shared<Triangle>(triangle));
+    Event event(EdgeEvent, 1.0, std::make_shared<Triangle>(triangle), true);
 
     EXPECT_EQ(event.getType(), EdgeEvent);
     EXPECT_EQ(event.getTime(), 1.0);
@@ -30,7 +30,7 @@ TEST(EventTest, ConstructorWithTriangle) {
 
 TEST(EventTest, ConstructorWithRay) {
     Ray ray(Point3D(1, 0, 0), Direction3D(0, 1, 0));
-    Event event(SplitEvent, 2.0, std::make_shared<Ray>(ray));
+    Event event(SplitEvent, 2.0, std::make_shared<Ray>(ray), true);
 
     EXPECT_EQ(event.getType(), SplitEvent);
     EXPECT_EQ(event.getTime(), 2.0);
@@ -43,10 +43,10 @@ TEST(EventTest, EqualityOperator) {
     TrianglePtr trianglePtr = std::make_shared<Triangle>(triangle);
     TrianglePtr otherPointer = trianglePtr;
     Ray ray(Point3D(1, 0, 0), Direction3D(0, 1, 0));
-    Event event1(EdgeEvent, 1.0, trianglePtr);
-    Event event2(EdgeEvent, 1.0, trianglePtr);
-    Event event3(EdgeEvent, 1.0, std::make_shared<Ray>(ray));
-    Event event4(EdgeEvent, 1.0, otherPointer);
+    Event event1(EdgeEvent, 1.0, trianglePtr, true);
+    Event event2(EdgeEvent, 1.0, trianglePtr, true);
+    Event event3(EdgeEvent, 1.0, std::make_shared<Ray>(ray), true);
+    Event event4(EdgeEvent, 1.0, otherPointer, true);
 
     EXPECT_TRUE(event1 == event2);
     EXPECT_FALSE(event1 == event3);
@@ -58,18 +58,18 @@ TEST(EventTest, EqualityOperator) {
 
 TEST(EventTest, LessThanOperator) {
     Triangle triangle(Point3D(1, 0, 0), Point3D(0, 1, 0), Point3D(0, 0, 1));
-    Event event1(EdgeEvent, 1.0, std::make_shared<Triangle>(triangle));
-    Event event2(EdgeEvent, 2.0, std::make_shared<Triangle>(triangle));
+    Event event1(EdgeEvent, 1.0, std::make_shared<Triangle>(triangle), true);
+    Event event2(EdgeEvent, 2.0, std::make_shared<Triangle>(triangle), true);
 
     EXPECT_TRUE(event1 < event2);
     EXPECT_FALSE(event2 < event1);
 
-    Event event3(EdgeEvent, 1.0, std::make_shared<Triangle>(triangle));
+    Event event3(EdgeEvent, 1.0, std::make_shared<Triangle>(triangle), true);
     EXPECT_FALSE(event1 < event3);
 }
 
 TEST(EventTest, PrintEvent) {
-    Event event(EdgeEvent, 1.0, std::shared_ptr<Triangle>(nullptr));
+    Event event(EdgeEvent, 1.0, std::shared_ptr<Triangle>(nullptr), true);
     std::cout << event << std::endl;
     std::ostringstream oss;
     event.print(oss);

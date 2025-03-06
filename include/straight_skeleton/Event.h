@@ -42,7 +42,7 @@ class Event {
      * @param time Simulation time at which the event occurs.
      * @param triangle Associated triangle in the skeleton mesh (if applicable).
      */
-    Event(const EventType& type, const double& time, const TrianglePtr& triangle);
+    Event(const EventType& type, const double& time, const TrianglePtr& triangle, const bool& valid);
 
 
     /**
@@ -52,7 +52,11 @@ class Event {
      * @param time Simulation time at which the event occurs.
      * @param ray Associated ray causing the event (if applicable).
      */
-    Event(const EventType& type, const double& time, const RayPtr& ray);
+    Event(const EventType& type, const double& time, const RayPtr& ray, const bool& valid);
+
+    bool isValid() const;
+
+    void setValid(bool valid);
 
     /**
      * @brief Get the event type.
@@ -121,6 +125,7 @@ class Event {
    private:
     EventType type;
     double time;
+    bool valid;
     TrianglePtr triangle;
     RayPtr ray;
 };

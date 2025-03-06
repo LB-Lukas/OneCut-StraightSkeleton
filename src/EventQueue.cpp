@@ -4,17 +4,17 @@ namespace straight_skeleton {
 
     EventQueue::EventQueue() {}
 
-    void EventQueue::push(const Event& event) {
+    void EventQueue::push(const std::shared_ptr<Event>& event) {
         events.push(event);
     }
 
-    Event EventQueue::pop() {
-        Event event = events.top();
+    std::shared_ptr<Event> EventQueue::pop() {
+        std::shared_ptr<Event> event = events.top();
         events.pop();
         return event;
     }
 
-    Event EventQueue::top() const {
+    std::shared_ptr<Event> EventQueue::top() const {
         return events.top();
     }
 
@@ -27,10 +27,10 @@ namespace straight_skeleton {
     }
 
     std::ostream& EventQueue::print(std::ostream& os) const {
-        std::priority_queue<Event, std::vector<Event>, std::greater<Event>> tempQueue = events;
+        std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventCompare> tempQueue = events;
         while (!tempQueue.empty()) {
-            const Event& event = tempQueue.top();
-            os << "Priority/Time: " << event.getTime() << " | " << event << "\n";
+            const std::shared_ptr<Event>& event = tempQueue.top();
+            os << "Priority/Time: " << event->getTime() << " | " << *event << "\n";
             tempQueue.pop();
         }
         return os;
