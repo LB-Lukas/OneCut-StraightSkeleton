@@ -20,10 +20,12 @@ public:
 
     std::ostream& print(std::ostream& os) const override;
 
-
-private:
     std::vector<Point> vertices;
     std::vector<int> adjacentFaces;
+
+
+private:
+
 };
 
 

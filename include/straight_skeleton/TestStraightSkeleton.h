@@ -1,9 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <map>
 #include <utility>
 #include <vector>
-#include <map>
-#include <iostream>
 
 // CGAL headers for kernel and surface mesh
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -13,8 +13,8 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/draw_straight_skeleton_2.h>
 
-#include "SkeletonFace.h"
 #include "IStraightSkeleton.h"
+#include "SkeletonFace.h"
 
 namespace TestSkeleton {
 
@@ -40,18 +40,23 @@ class TestStraightSkeleton : public straight_skeleton::IStraightSkeleton {
 
     SurfaceMesh graph;
 
-    private:
+   private:
     SsPtr iss_;
     SsPtr oss_;
     std::vector<straight_skeleton::SkeletonFace> faces;
     std::vector<Point> originalPolygonPoints;
 
-    std::vector<straight_skeleton::SkeletonFace> skeletonToFaces(SsPtr skeleton) const;
+    std::vector<straight_skeleton::SkeletonFace> skeletonToFaces(
+        SsPtr skeleton, const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const;
 
     straight_skeleton::Point convertPoint(const Point& point) const;
 
+    std::set<std::pair<Point, Point>, std::less<>> computePolygonBoundaryEdges() const;
+
+    void matchPolygonEdges(std::vector<straight_skeleton::SkeletonFace>& faces,
+                           const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const;
+
     bool isOuterFace(const Ss::Face_handle& face) const;
-  
-    };
+};
 
 }  // namespace TestSkeleton

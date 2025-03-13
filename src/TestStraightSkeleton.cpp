@@ -2,6 +2,21 @@
 
 namespace TestSkeleton {
 
+struct PointComparator {
+    bool operator()(const Point& a, const Point& b) const {
+        if (a.x() != b.x()) return a.x() < b.x();
+        return a.y() < b.y();
+    }
+};
+
+// A helper to form a normalized edge key from two points.
+std::pair<Point, Point> make_normalized_edge(const Point& a, const Point& b) {
+    if (PointComparator()(a, b))
+        return {a, b};
+    else
+        return {b, a};
+}
+
 TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_points)
     : originalPolygonPoints(polygon_points) {
     // Construct the polygon from the input points
@@ -20,7 +35,7 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     iss_ = CGAL::create_interior_straight_skeleton_2(polygon.vertices_begin(), polygon.vertices_end());
     std::cout << "Straight skeleton computed." << std::endl;
     std::cout << "Computing exterior skeleton" << std::endl;
-    oss_ = CGAL::create_exterior_straight_skeleton_2(600, polygon.vertices_begin(), polygon.vertices_end());
+    oss_ = CGAL::create_exterior_straight_skeleton_2(1000, polygon.vertices_begin(), polygon.vertices_end());
     std::cout << "Exterior skeleton computed." << std::endl;
 
     if (!iss_) {
@@ -35,17 +50,28 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     }
     CGAL::Straight_skeletons_2::IO::print_straight_skeleton(*oss_);
 
+    auto polygonBoundaryEdges = computePolygonBoundaryEdges();
 
-    // TODO Change this logic
-    faces = skeletonToFaces(iss_);
+    std::vector<straight_skeleton::SkeletonFace> innerFaces = skeletonToFaces(iss_, polygonBoundaryEdges);
+    std::vector<straight_skeleton::SkeletonFace> outerFaces = skeletonToFaces(oss_, polygonBoundaryEdges);
 
+    // TODO insert only outer faces that are incident to the polygon boundary
+    std::vector<straight_skeleton::SkeletonFace> allFaces;
+    allFaces.insert(allFaces.end(), innerFaces.begin(), innerFaces.end());
+    allFaces.insert(allFaces.end(), outerFaces.begin(), outerFaces.end());
+
+    // Fix the adjacent face indices for polygon boundary edges.
+    matchPolygonEdges(allFaces, polygonBoundaryEdges);
+
+    // Now store the merged faces for later processing.
+    faces = allFaces;
 
     // Map to store graph vertices corresponding to each skeleton point.
     std::map<Point, SurfaceMesh::Vertex_index> vertex_map;
 
     // Iterate over the skeleton’s halfedges.
     // (Each edge appears twice, so process one representative from each pair.)
-    for (auto he = oss_->halfedges_begin(); he != oss_->halfedges_end(); ++he) {
+    for (auto he = oss_->halfedges_begin(); he != oss_->halfedges_end(); ++he) {  // Outer skeleotn
         std::cout << "Processing halfedge: " << &(*he) << std::endl;
         // Use a simple trick to avoid duplicates:
         if (he < he->opposite()) {
@@ -79,39 +105,39 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
         }
     }
 
-        for (auto he = iss_->halfedges_begin(); he != iss_->halfedges_end(); ++he) {
-            std::cout << "Processing halfedge: " << &(*he) << std::endl;
-            // Use a simple trick to avoid duplicates:
-            if (he < he->opposite()) {
-                Point src = he->vertex()->point();
-                Point tgt = he->opposite()->vertex()->point();
-                std::cout << "Halfedge passes duplicate check. Source: " << src << ", Target: " << tgt << std::endl;
+    for (auto he = iss_->halfedges_begin(); he != iss_->halfedges_end(); ++he) {  // Inner skeleton
+        std::cout << "Processing halfedge: " << &(*he) << std::endl;
+        // Use a simple trick to avoid duplicates:
+        if (he < he->opposite()) {
+            Point src = he->vertex()->point();
+            Point tgt = he->opposite()->vertex()->point();
+            std::cout << "Halfedge passes duplicate check. Source: " << src << ", Target: " << tgt << std::endl;
 
-                // Add source vertex if not already added
-                if (vertex_map.find(src) == vertex_map.end()) {
-                    SurfaceMesh::Vertex_index v = graph.add_vertex();
-                    graph.point(v) = src;
-                    vertex_map[src] = v;
-                    std::cout << "Added source vertex: " << src << std::endl;
-                } else {
-                    std::cout << "Source vertex already exists: " << src << std::endl;
-                }
-
-                // Add target vertex if not already added
-                if (vertex_map.find(tgt) == vertex_map.end()) {
-                    SurfaceMesh::Vertex_index v = graph.add_vertex();
-                    graph.point(v) = tgt;
-                    vertex_map[tgt] = v;
-                    std::cout << "Added target vertex: " << tgt << std::endl;
-                } else {
-                    std::cout << "Target vertex already exists: " << tgt << std::endl;
-                }
-
-                // Add an edge connecting the two vertices in the graph.
-                graph.add_edge(vertex_map[src], vertex_map[tgt]);
-                std::cout << "Added edge connecting source: " << src << " and target: " << tgt << std::endl;
+            // Add source vertex if not already added
+            if (vertex_map.find(src) == vertex_map.end()) {
+                SurfaceMesh::Vertex_index v = graph.add_vertex();
+                graph.point(v) = src;
+                vertex_map[src] = v;
+                std::cout << "Added source vertex: " << src << std::endl;
+            } else {
+                std::cout << "Source vertex already exists: " << src << std::endl;
             }
+
+            // Add target vertex if not already added
+            if (vertex_map.find(tgt) == vertex_map.end()) {
+                SurfaceMesh::Vertex_index v = graph.add_vertex();
+                graph.point(v) = tgt;
+                vertex_map[tgt] = v;
+                std::cout << "Added target vertex: " << tgt << std::endl;
+            } else {
+                std::cout << "Target vertex already exists: " << tgt << std::endl;
+            }
+
+            // Add an edge connecting the two vertices in the graph.
+            graph.add_edge(vertex_map[src], vertex_map[tgt]);
+            std::cout << "Added edge connecting source: " << src << " and target: " << tgt << std::endl;
         }
+    }
 }
 
 std::vector<std::pair<Point, Point>> TestStraightSkeleton::getEdges() const {
@@ -133,87 +159,77 @@ const straight_skeleton::SkeletonFace& TestStraightSkeleton::face(size_t i) cons
     return faces[i];
 }
 
-std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFaces(SsPtr skeleton) const {
+std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFaces(
+    SsPtr skeleton, const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const {
     std::vector<straight_skeleton::SkeletonFace> faces;
     faces.reserve(this->originalPolygonPoints.size());
 
     std::map<Ss::Face_handle, int> faceIndexMap;
-    std::vector<std::pair<int, straight_skeleton::SkeletonFace>> indexedFaces;
 
     // iterate through all faces of the skeleton
     int counter = 0;
     for (auto face = skeleton->faces_begin(); face != skeleton->faces_end(); face++) {
-        // TODO: check if the face is an outer face
-        if (false) {
-            faceIndexMap.emplace(face, -1);
-        } else {
-            faceIndexMap.emplace(face, counter);
-            counter++;
-        }
+        faceIndexMap.emplace(face, counter);
+        counter++;
     }
-    std::cout << "Counter: " << counter << std::endl;
+    std::cout << "Assigned " << counter << " face indices." << std::endl;
     std::cout << "Map Size: " << faceIndexMap.size() << std::endl;
 
-    // get the adjacent faces of the face for every face in the map
-    for (const auto& faceIndexPair : faceIndexMap) {
-        std::cout << "Face with Index: " << faceIndexPair.second << std::endl;
-        // 1. get the face
-        Ss::Face_handle face = faceIndexPair.first;
+    // for each face, collect its vertices and adjacent face indices
+    // for border edges (opposite face == nullptr) that lie on the polygon boundary,
+    // push -2 to mark that we want to later update it
+    std::vector<std::pair<int, straight_skeleton::SkeletonFace>> indexedFaces;
 
-        // 2. go through the face halfedges in a circle
+    // get the adjacent faces of the face for every face in the map
+    for (const auto& facePair : faceIndexMap) {
+        Ss::Face_handle face = facePair.first;
+        int currentFaceIndex = facePair.second;
         Ss::Halfedge_handle start = face->halfedge();
-        Ss::Halfedge_handle halfedgeIterator = start;
+        Ss::Halfedge_handle he = start;
 
         std::vector<Point> points;
         std::vector<int> adjacentFaces;
 
-        do {
-            // 3. for each halfedge get first point and second point and get the opposite face
-            Point startPoint = halfedgeIterator->prev()->vertex()->point();
-            Point endPoint = halfedgeIterator->vertex()->point();
-            std::cout << "startPoint: " << startPoint << std::endl;
-            std::cout << "endPoint " << endPoint << std::endl;
+        std::cout << "Face with Index: " << currentFaceIndex << std::endl;
 
-            Ss::Face_handle oppositeFace = halfedgeIterator->opposite()->face();
-            if (oppositeFace == nullptr) {
-                // Opposite face is null <=> the halfedge is a border edge
-                std::cout << std::endl << "SKIP: oppositeFace == nullptr" << std::endl;
+        do {
+            Point startPoint = he->prev()->vertex()->point();
+            Point endPoint = he->vertex()->point();
+            // Compute the normalized edge key.
+            auto edgeKey = make_normalized_edge(startPoint, endPoint);
+
+            Ss::Face_handle oppFace = he->opposite()->face();
+            if (oppFace == nullptr) {
+                // This is a border halfedge.
+                // If the edge is part of the original polygon boundary then mark it as pending (-2)
+                if (polygonBoundaryEdges.find(edgeKey) != polygonBoundaryEdges.end()) {
+                    adjacentFaces.push_back(-2);  // pending update (should be replaced by matching face index)
+                } else {
+                    adjacentFaces.push_back(-1);  // truly outer
+                }
                 points.push_back(startPoint);
-                adjacentFaces.push_back(-1);
-                halfedgeIterator = halfedgeIterator->next();
-                continue;
-            } else if (oppositeFace == face) {
-                std::cout << std::endl << "SKIP: oppositeFace == face" << std::endl;
-                halfedgeIterator = halfedgeIterator->next();
+            } else if (oppFace == face) {
+                // Should not happen; skip if the opposite face is the same
+                he = he->next();
                 continue;
             } else {
-                std::cout << std::endl << "NO SKIP: default face" << std::endl;
-                // 4. use the opposite face to lookup the face index in the map
-                int oppositeFaceIndex = faceIndexMap[oppositeFace];
-                // 5. insert the points of the face in a vector
+                // Regular interior edge.
+                int oppIndex = faceIndexMap.at(oppFace);
+                adjacentFaces.push_back(oppIndex);
                 points.push_back(startPoint);
-                // 6. insert the index of the adjacent face in a vector (for points (0,1) the element 0 in the vector
-                // should be the face that is adjacent regarding that edge)
-                adjacentFaces.push_back(oppositeFaceIndex);
-                halfedgeIterator = halfedgeIterator->next();
             }
-        } while (halfedgeIterator != start);
+            he = he->next();
+        } while (he != start);
 
-        std::vector<straight_skeleton::Point> epeckPoints;
-        epeckPoints.reserve(points.size());
-        for (const Point& point : points) {
-            epeckPoints.emplace_back(convertPoint(point));
+        std::vector<straight_skeleton::Point> convertedPoints;
+        convertedPoints.reserve(points.size());
+        for (const Point& p : points) {
+            convertedPoints.emplace_back(convertPoint(p));
         }
-
-        // faces.emplace_back(epeckPoints, adjacentFaces);
-        straight_skeleton::SkeletonFace sFace(epeckPoints, adjacentFaces);
-        indexedFaces.emplace_back(faceIndexPair.second, sFace);
-        // 3. for each halfedge get first point and second point and get the opposite face
-        // 4. use the opposite face to lookup the face index in the map
-        // 5. insert the points of the face in a vector
-        // 6. insert the index of the adjacent face in a vector (for points (0,1) the element 0 in the vector should be
-        // the face that is adjacent regarding that edge)
+        straight_skeleton::SkeletonFace sFace(convertedPoints, adjacentFaces);
+        indexedFaces.emplace_back(currentFaceIndex, sFace);
     }
+
     std::sort(indexedFaces.begin(), indexedFaces.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
 
     for (const auto& pair : indexedFaces) {
@@ -226,6 +242,66 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
     }
 
     return faces;
+}
+
+std::set<std::pair<Point, Point>, std::less<>> TestStraightSkeleton::computePolygonBoundaryEdges() const {
+    std::set<std::pair<Point, Point>, std::less<>> boundaryEdges;
+    size_t n = originalPolygonPoints.size();
+    for (size_t i = 0; i < n; i++) {
+        const Point& a = originalPolygonPoints[i];
+        const Point& b = originalPolygonPoints[(i + 1) % n];
+        boundaryEdges.insert(make_normalized_edge(a, b));
+    }
+    return boundaryEdges;
+}
+
+void TestStraightSkeleton::matchPolygonEdges(
+    std::vector<straight_skeleton::SkeletonFace>& faces,
+    const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const {
+    // Map from normalized edge to vector of (faceIndex, localEdgeIndex)
+    std::map<std::pair<Point, Point>, std::vector<std::pair<int, int>>> edgeMatches;
+
+    // Iterate over all faces.
+    for (size_t i = 0; i < faces.size(); i++) {
+        const straight_skeleton::SkeletonFace& face = faces[i];
+        const std::vector<straight_skeleton::Point>& pts = face.vertices;
+        size_t m = pts.size();
+        for (size_t j = 0; j < m; j++) {
+            // If the adjacent face marker is pending (-2)
+            if (face.adjacentFaces[j] == -2) {
+                // Get the edge from pts[j] to pts[(j+1)%m]
+                // (Assume you can convert back to Point if needed; if not, store raw Points too)
+                // For this example we assume straight_skeleton::Point can be compared with Point.
+                // Otherwise, you might want to store the original Points as well.
+                Point p1(CGAL::to_double(pts[j].x()), CGAL::to_double(pts[j].y()));
+                Point p2(CGAL::to_double(pts[(j + 1) % m].x()), CGAL::to_double(pts[(j + 1) % m].y()));
+                auto key = make_normalized_edge(p1, p2);
+                // Only process if this edge is actually on the polygon boundary.
+                if (polygonBoundaryEdges.find(key) != polygonBoundaryEdges.end()) {
+                    edgeMatches[key].push_back({static_cast<int>(i), static_cast<int>(j)});
+                }
+            }
+        }
+    }
+
+    // Now go through each edge in edgeMatches.
+    for (const auto& entry : edgeMatches) {
+        const auto& occurrences = entry.second;
+        if (occurrences.size() == 2) {
+            // Exactly two faces share this polygon boundary edge.
+            int f1 = occurrences[0].first;
+            int e1 = occurrences[0].second;
+            int f2 = occurrences[1].first;
+            int e2 = occurrences[1].second;
+            faces[f1].adjacentFaces[e1] = f2;
+            faces[f2].adjacentFaces[e2] = f1;
+        } else {
+            // If only one face has this boundary edge, leave it as outer (-1)
+            int f1 = occurrences[0].first;
+            int e1 = occurrences[0].second;
+            faces[f1].adjacentFaces[e1] = -1;
+        }
+    }
 }
 
 bool TestStraightSkeleton::isOuterFace(const Ss::Face_handle& face) const {
