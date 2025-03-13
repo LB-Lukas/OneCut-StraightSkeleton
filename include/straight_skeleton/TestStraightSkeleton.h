@@ -42,6 +42,7 @@ class TestStraightSkeleton : public straight_skeleton::IStraightSkeleton {
 
     private:
     SsPtr iss_;
+    SsPtr oss_;
     std::vector<straight_skeleton::SkeletonFace> faces;
     std::vector<Point> originalPolygonPoints;
 
