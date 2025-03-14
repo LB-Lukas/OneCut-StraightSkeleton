@@ -26,6 +26,7 @@ class PolygonController:
         self.selected_vertex: tuple[int, int] = None  # (polygon_index, vertex_index)
         self.show_skeleton: bool = False
         self.show_perpendiculars: bool = False
+        self.show_crease_pattern: bool = False
 
         # For dragging a vertex.
         self._moving_poly_index: int = None
@@ -106,17 +107,13 @@ class PolygonController:
         self.polygons.append(new_poly)
         self.current_points = []  # reset in-progress polygon
 
-        if self.show_skeleton:
+
+        if self.show_crease_pattern or self.show_skeleton or self.show_perpendiculars:
             try:
-                new_poly.generate_skeleton()
+                new_poly.generate_creases()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
-                
-        if self.show_perpendiculars:
-            try:
-                new_poly.generate_perpendiculars()
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
+                print(e)
 
         self._record_action(LastAction.FINISH_POLYGON, {"polygon": new_poly})
         self._redraw()
@@ -140,82 +137,66 @@ class PolygonController:
         offset = 5
         new_point = (new_x + offset, new_y + offset)
         self.insert_vertex(poly_index, next_vertex_index, new_point)
-
-
-    def toggle_skeleton(self):
+        
+    def update_drawing_mode(self, mode: str):
+        print(f"Drawing mode changed to: {mode}")
+        
         if not self.polygons:
-            messagebox.showinfo("Info", "No polygon available to toggle skeleton.")
+            messagebox.showinfo("Info", "no polygon available to toggle skeleton.")
             return
 
-        self.show_skeleton = not self.show_skeleton
-        if self.show_skeleton:
-            for poly in self.polygons:
-                try:
-                    poly.generate_skeleton()
-                except Exception as e:
-                    messagebox.showerror("Error", str(e))
-        else:
-            old_skeleton_data = [poly.skeleton_line_ids.copy() for poly in self.polygons]
-            for poly in self.polygons:
-                poly.skeleton_line_ids.clear()
-            self._record_action(LastAction.REMOVE_SKELETON, {"skeleton_line_ids": old_skeleton_data})
-        self._redraw()
-
-
-    def _update_skeleton(self):
-        for poly in self.polygons:
-            if poly.skeleton_line_ids:
-                try:
-                    poly.update_skeleton()
-                except Exception as e:
-                    messagebox.showerror("Error", str(e))
-        self._redraw()
-        
-        
-    def _redraw_or_update_skeleton(self, poly: PolygonModel = None):
-        if poly and poly.skeleton_line_ids:
-            self._update_skeleton()
-        else:
+        if mode == "None":
+            self.show_crease_pattern = False
+            self.show_skeleton = False
+            self.show_perpendiculars = False
             self._redraw()
-
-        
-        
-    def toggle_perpendiculars(self):
-        if not self.polygons:
-            messagebox.showinfo("Info", "No polygon available to toggle perpendiculars")
             return
         
-        self.show_perpendiculars = not self.show_perpendiculars
-        if self.show_perpendiculars:
-            for poly in self.polygons:
-                try:
-                    poly.generate_perpendiculars()
-                except Exception as e:
-                    messagebox.showerror("Error", str(e))
-        else:
-            old_perpendicular_data = [poly.perpendicular_line_ids.copy() for poly in self.polygons]
-            for poly in self.polygons:
-                poly.perpendicular_line_ids.clear()
-            self._record_action(LastAction.REMOVE_PERPENDICULARS, {"perpendicular_line_ids": old_perpendicular_data})
-        self._redraw()
-        
-    def _update_perpendiculars(self):
         for poly in self.polygons:
-            if poly.perpendicular_line_ids:
+            try:
+                poly.generate_creases()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        if mode == "Foldpattern":
+            self.show_crease_pattern = True
+            self.show_skeleton = False
+            self.show_perpendiculars = False
+            self._redraw()
+        elif mode == "Skeleton":
+            self.show_crease_pattern = False
+            self.show_skeleton = True
+            self.show_perpendiculars = False
+            self._redraw()
+        elif mode == "Perpendiculars":
+            self.show_crease_pattern = False
+            self.show_skeleton = False
+            self.show_perpendiculars = True
+            self._redraw()
+        elif mode == "Skeleton and Perpendiculars":
+            self.show_crease_pattern = False
+            self.show_skeleton = True
+            self.show_perpendiculars = True
+            self._redraw()
+        else:
+            messagebox.showerror("Error", "Drawing mode not available")
+            return
+        
+    def _redraw_or_update_creases(self, polygon=None):
+        if polygon is not None:
+            try:
+                polygon.update_creases()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+                print(e)
+        else:
+            for poly in self.polygons:
                 try:
-                    poly.update_perpendiculars()
+                    poly.update_creases()
                 except Exception as e:
                     messagebox.showerror("Error", str(e))
+                    print(e)
         self._redraw()
         
-        
-    def _redraw_or_update_perpendiculars(self, poly: PolygonModel = None):
-        if poly and poly.perpendicular_line_ids:
-            self._update_perpendiculars()
-        else:
-            self._redraw()
-
-
 
     def drag_vertex(self, lx: float, ly: float):
         if self._moving_poly_index is None:
@@ -259,8 +240,7 @@ class PolygonController:
                         return
 
         poly.move_point(self._moving_vertex_index, (lx, ly))
-        self._redraw_or_update_skeleton(poly)
-        self._redraw_or_update_perpendiculars(poly)
+        self._redraw_or_update_creases()
 
 
     def delete_vertex(self, poly_index: int, vertex_index: int):
@@ -284,8 +264,7 @@ class PolygonController:
             "vertex_index": vertex_index,
             "deleted_point": deleted_point
         })
-        self._redraw_or_update_skeleton(poly)
-        self._redraw_or_update_perpendiculars(poly)
+        self._redraw_or_update_creases(poly)
 
 
     def delete_selected_vertex(self):
@@ -323,8 +302,7 @@ class PolygonController:
             "vertex_index": vertex_index,
             "new_point": new_point
         })
-        self._redraw_or_update_skeleton(poly)
-        self._redraw_or_update_perpendiculars(poly)
+        self._redraw_or_update_creases(poly)
 
 
     def undo_last_action(self):
