@@ -33,7 +33,7 @@ class MainView(tk.Frame):
 
         help_menu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Help", menu=help_menu)
-        help_menu.add_command(label="About", command=lambda: webbrowser.open("https://github.com/OsterfeldTom/OneStraightCut"))
+        help_menu.add_command(label="About", command=lambda: webbrowser.open("https://github.com/LB-Lukas/OneCut-StraightSkeleton"))
 
 
     def _create_widgets(self):
