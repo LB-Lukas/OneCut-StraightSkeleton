@@ -23,7 +23,17 @@ class MainView(tk.Frame):
         file_menu.add_command(label="Save As")
         file_menu.add_separator()
         file_menu.add_command(label="Import")
-        file_menu.add_command(label="Export")
+        
+        
+        export_menu = tk.Menu(file_menu, tearoff=0)
+        file_menu.add_cascade(label="Export", menu=export_menu)
+        # In MainView's _create_menu method
+        export_menu.add_command(label="Export as PDF",command=lambda: self.app.file_controller.export_to_pdf(self.canvas_view))
+        export_menu.add_command(label="Export as PNG",command=lambda: self.app.file_controller.export_to_png(self.canvas_view))
+        
+        
+        
+        
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=root.quit)
 

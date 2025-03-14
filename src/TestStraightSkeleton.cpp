@@ -68,8 +68,6 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     }
 
 
-
-
     std::vector<straight_skeleton::SkeletonFace> filteredOuterFaces;
     for (const auto& face : outerFaces) {
         bool incident = false;
