@@ -52,13 +52,48 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
 
     auto polygonBoundaryEdges = computePolygonBoundaryEdges();
 
+
+
+    // TODO: this approach is not completely correct. Many faces are adjacent to faces with index -2 ???
     std::vector<straight_skeleton::SkeletonFace> innerFaces = skeletonToFaces(iss_, polygonBoundaryEdges);
     std::vector<straight_skeleton::SkeletonFace> outerFaces = skeletonToFaces(oss_, polygonBoundaryEdges);
+
+    std::cout << std::endl << "INNER FACES: " << std::endl;
+    for (const straight_skeleton::SkeletonFace& face : innerFaces) {
+        std::cout << face << std::endl;
+    }
+    std::cout << std::endl << "OUTER FACES: " << std::endl;
+    for (const straight_skeleton::SkeletonFace& face : outerFaces) {
+        std::cout << face << std::endl;
+    }
+
+
+
+
+    std::vector<straight_skeleton::SkeletonFace> filteredOuterFaces;
+    for (const auto& face : outerFaces) {
+        bool incident = false;
+        for (int adj : face.adjacentFaces) {
+            if (adj == -2) {  // pending marker means this edge lies on the polygon boundary.
+                incident = true;
+                break;
+            }
+        }
+        if (incident) {
+            filteredOuterFaces.push_back(face);
+        }
+    }
 
     // TODO insert only outer faces that are incident to the polygon boundary
     std::vector<straight_skeleton::SkeletonFace> allFaces;
     allFaces.insert(allFaces.end(), innerFaces.begin(), innerFaces.end());
-    allFaces.insert(allFaces.end(), outerFaces.begin(), outerFaces.end());
+    allFaces.insert(allFaces.end(), filteredOuterFaces.begin(), filteredOuterFaces.end());
+
+
+    std::cout << std::endl << "ALL FACES: " << std::endl;
+    for (const straight_skeleton::SkeletonFace& face : allFaces) {
+        std::cout << face << std::endl;
+    }
 
     // Fix the adjacent face indices for polygon boundary edges.
     matchPolygonEdges(allFaces, polygonBoundaryEdges);
