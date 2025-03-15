@@ -2,22 +2,26 @@
 
 #include <utility>
 #include <vector>
+#include <cmath>
+#include <utility>
 
-#include "PerpendicularFinder.h"
-#include "TestStraightSkeleton.h"
 #include "Crease.h"
+#include "PerpendicularFinder.h"
+#include "SkeletonBuilder.h"
+#include "StraightSkeleton.h"
+#include "StraightSkeletonTypes.h"
 
 namespace straight_skeleton {
 
 class FoldManager {
    public:
-
     FoldManager(const std::vector<TestSkeleton::Point>& polygon);
 
     std::vector<Crease> getCreases();
 
    private:
-    TestSkeleton::TestStraightSkeleton skeletonBuilder;
+    TestSkeleton::SkeletonBuilder skeletonBuilder;
+    StraightSkeleton skeleton;
     PerpendicularFinder perpendicularFinder;
 };
 

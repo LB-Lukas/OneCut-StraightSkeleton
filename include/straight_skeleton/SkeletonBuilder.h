@@ -13,8 +13,9 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/draw_straight_skeleton_2.h>
 
-#include "IStraightSkeleton.h"
 #include "SkeletonFace.h"
+#include "StraightSkeleton.h"
+#include "Crease.h"
 
 namespace TestSkeleton {
 
@@ -27,17 +28,12 @@ typedef CGAL::Straight_skeleton_2<K> Ss;
 typedef std::shared_ptr<Ss> SsPtr;
 typedef CGAL::Surface_mesh<Point> SurfaceMesh;
 
-class TestStraightSkeleton : public straight_skeleton::IStraightSkeleton {
+class SkeletonBuilder {
    public:
     /// Construct the straight skeleton from the input polygon (vertices in counterclockwise order)
-    explicit TestStraightSkeleton(const std::vector<Point>& polygon_points);
+    explicit SkeletonBuilder(const std::vector<Point>& polygon_points);
 
-    /// Returns a vector of edges (each as a pair of Points) in the computed skeleton.
-    std::vector<std::pair<Point, Point>> getEdges() const;
-
-    size_t faceCount() const override;
-    const straight_skeleton::SkeletonFace& face(size_t i) const override;
-
+    straight_skeleton::StraightSkeleton buildSkeleton();
     SurfaceMesh graph;
 
    private:
@@ -55,8 +51,6 @@ class TestStraightSkeleton : public straight_skeleton::IStraightSkeleton {
 
     void matchPolygonEdges(std::vector<straight_skeleton::SkeletonFace>& faces,
                            const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const;
-
-    bool isOuterFace(const Ss::Face_handle& face) const;
 };
 
 }  // namespace TestSkeleton

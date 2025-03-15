@@ -1,5 +1,5 @@
 import geometry
-from geometry import TestStraightSkeleton, TestPoint, PerpendicularFinder, Crease,  FoldManager, FoldType, Origin
+from geometry import SkeletonBuilder, TestPoint, PerpendicularFinder, Crease,  FoldManager, FoldType, Origin
 
 class PolygonModel:
     def __init__(self, points=None):

@@ -10,8 +10,9 @@
 #include "../include/straight_skeleton/Crease.h"
 #include "../include/straight_skeleton/FoldManager.h"
 #include "../include/straight_skeleton/PerpendicularFinder.h"
+#include "../include/straight_skeleton/SkeletonBuilder.h"
+#include "../include/straight_skeleton/StraightSkeleton.h"
 #include "../include/straight_skeleton/StraightSkeletonTypes.h"
-#include "../include/straight_skeleton/TestStraightSkeleton.h"
 
 namespace py = pybind11;
 
@@ -61,15 +62,14 @@ PYBIND11_MODULE(geometry, m) {
             return edges;
         });
 
-    py::class_<TestSkeleton::TestStraightSkeleton>(m, "TestStraightSkeleton")
+    py::class_<TestSkeleton::SkeletonBuilder>(m, "SkeletonBuilder")
         .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"))
-        .def("get_edges", &TestSkeleton::TestStraightSkeleton::getEdges)
-        .def("__repr__", [](const TestSkeleton::TestStraightSkeleton& tss) {
-            return "<TestStraightSkeleton with " + std::to_string(tss.graph.edges().size()) + " edges>";
+        .def("__repr__", [](const TestSkeleton::SkeletonBuilder& tss) {
+            return "<SkeletonBuilder with " + std::to_string(tss.graph.edges().size()) + " edges>";
         });
 
     py::class_<straight_skeleton::PerpendicularFinder>(m, "PerpendicularFinder")
-        .def(py::init<TestSkeleton::TestStraightSkeleton&>(), py::arg("skeleton"))
+        .def(py::init<straight_skeleton::StraightSkeleton&>(), py::arg("skeleton"))
         .def("find_perpendiculars", [](straight_skeleton::PerpendicularFinder& pf) {
             std::vector<std::pair<straight_skeleton::Point, straight_skeleton::Point>> edges;
             std::vector<PerpChain> chains = pf.findPerpendiculars();

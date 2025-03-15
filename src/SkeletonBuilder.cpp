@@ -1,4 +1,4 @@
-#include "straight_skeleton/TestStraightSkeleton.h"
+#include "straight_skeleton/SkeletonBuilder.h"
 
 namespace TestSkeleton {
 
@@ -17,8 +17,7 @@ std::pair<Point, Point> make_normalized_edge(const Point& a, const Point& b) {
         return {b, a};
 }
 
-TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_points)
-    : originalPolygonPoints(polygon_points) {
+SkeletonBuilder::SkeletonBuilder(const std::vector<Point>& polygon_points) : originalPolygonPoints(polygon_points) {
     // Construct the polygon from the input points
     Polygon_2 polygon;
     for (const auto& p : polygon_points) {
@@ -52,8 +51,6 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
 
     auto polygonBoundaryEdges = computePolygonBoundaryEdges();
 
-
-
     // TODO: this approach is not completely correct. Many faces are adjacent to faces with index -2 ???
     std::vector<straight_skeleton::SkeletonFace> innerFaces = skeletonToFaces(iss_, polygonBoundaryEdges);
     std::vector<straight_skeleton::SkeletonFace> outerFaces = skeletonToFaces(oss_, polygonBoundaryEdges);
@@ -66,7 +63,6 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     for (const straight_skeleton::SkeletonFace& face : outerFaces) {
         std::cout << face << std::endl;
     }
-
 
     std::vector<straight_skeleton::SkeletonFace> filteredOuterFaces;
     for (const auto& face : outerFaces) {
@@ -86,7 +82,6 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     std::vector<straight_skeleton::SkeletonFace> allFaces;
     allFaces.insert(allFaces.end(), innerFaces.begin(), innerFaces.end());
     allFaces.insert(allFaces.end(), filteredOuterFaces.begin(), filteredOuterFaces.end());
-
 
     std::cout << std::endl << "ALL FACES: " << std::endl;
     for (const straight_skeleton::SkeletonFace& face : allFaces) {
@@ -173,26 +168,11 @@ TestStraightSkeleton::TestStraightSkeleton(const std::vector<Point>& polygon_poi
     }
 }
 
-std::vector<std::pair<Point, Point>> TestStraightSkeleton::getEdges() const {
-    std::vector<std::pair<Point, Point>> edges;
-    for (auto e : graph.edges()) {
-        auto h = graph.halfedge(e);
-        auto src = graph.point(graph.source(h));
-        auto tgt = graph.point(graph.target(h));
-        edges.emplace_back(src, tgt);
-    }
-    return edges;
+straight_skeleton::StraightSkeleton SkeletonBuilder::buildSkeleton() {
+    return straight_skeleton::StraightSkeleton(faces);
 }
 
-size_t TestStraightSkeleton::faceCount() const {
-    return faces.size();
-}
-
-const straight_skeleton::SkeletonFace& TestStraightSkeleton::face(size_t i) const {
-    return faces[i];
-}
-
-std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFaces(
+std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::skeletonToFaces(
     SsPtr skeleton, const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const {
     std::vector<straight_skeleton::SkeletonFace> faces;
     faces.reserve(this->originalPolygonPoints.size());
@@ -277,7 +257,7 @@ std::vector<straight_skeleton::SkeletonFace> TestStraightSkeleton::skeletonToFac
     return faces;
 }
 
-std::set<std::pair<Point, Point>, std::less<>> TestStraightSkeleton::computePolygonBoundaryEdges() const {
+std::set<std::pair<Point, Point>, std::less<>> SkeletonBuilder::computePolygonBoundaryEdges() const {
     std::set<std::pair<Point, Point>, std::less<>> boundaryEdges;
     size_t n = originalPolygonPoints.size();
     for (size_t i = 0; i < n; i++) {
@@ -288,7 +268,7 @@ std::set<std::pair<Point, Point>, std::less<>> TestStraightSkeleton::computePoly
     return boundaryEdges;
 }
 
-void TestStraightSkeleton::matchPolygonEdges(
+void SkeletonBuilder::matchPolygonEdges(
     std::vector<straight_skeleton::SkeletonFace>& faces,
     const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const {
     // Map from normalized edge to vector of (faceIndex, localEdgeIndex)
@@ -337,20 +317,7 @@ void TestStraightSkeleton::matchPolygonEdges(
     }
 }
 
-bool TestStraightSkeleton::isOuterFace(const Ss::Face_handle& face) const {
-    Ss::Halfedge_handle halfedgeIterator = face->halfedge();
-    Ss::Halfedge_handle start = halfedgeIterator;
-
-    do {
-        if (halfedgeIterator->is_border()) {
-            return true;
-        }
-        halfedgeIterator = halfedgeIterator->next();
-    } while (halfedgeIterator != start);
-    return false;
-}
-
-straight_skeleton::Point TestStraightSkeleton::convertPoint(const Point& point) const {
+straight_skeleton::Point SkeletonBuilder::convertPoint(const Point& point) const {
     return straight_skeleton::Point(point.x(), point.y());
 }
 

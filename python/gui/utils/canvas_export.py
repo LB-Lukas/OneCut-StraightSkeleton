@@ -5,7 +5,7 @@ import os
 import tempfile
 
 SCALE_FACTOR = 5  # 600x600 * 5 = 3000x3000 
-LINE_WIDTH_MULTIPLIER = 2  # Scale line widths for better visibility
+LINE_WIDTH_MULTIPLIER = 3  # Scale line widths for better visibility
 
 class CanvasExport:
     def __init__(self, canvas_view):
