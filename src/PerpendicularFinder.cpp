@@ -86,8 +86,8 @@ PerpHelperResult PerpendicularFinder::perpHelper(const Point& vertex, const ISke
     }
 
     Vector baseVector = face.vertex(1) - face.vertex(0);
-    Vector directionRay = rotate90(baseVector);
-    directionRay = normalize(directionRay);
+    Vector directionRay = GeometryUtil::rotate90(baseVector);
+    directionRay = GeometryUtil::normalize(directionRay);
 
     Point vE0 = face.vertex(edgeIndex);
     Point vE1 = face.vertex((edgeIndex + 1) % face.vertexCount());
@@ -135,48 +135,47 @@ int PerpendicularFinder::findEdgeIndex(const ISkeletonFace& face, const Point& s
     return -1;
 }
 
-Vector PerpendicularFinder::rotate90(const Vector& v) const { return Vector(-v.y(), v.x()); }
 
 IntersectionResult PerpendicularFinder::intersectRaySegment(const Point& origin, const Vector& direction, const Point& segmentStart,
                                                             const Point& segmentEnd) const {
     // standard 2D line intersection
     Vector s = segmentEnd - segmentStart;
-    double rayCrossS = cross(direction, s);
+    double rayCrossS = CGAL::to_double(GeometryUtil::cross(direction, s));
     Vector qMinusP = Vector(segmentStart.x() - origin.x(), segmentStart.y() - origin.y());
-    double qMinusPCrossS = cross(qMinusP, direction);
+    double qMinusPCrossS = CGAL::to_double(GeometryUtil::cross(qMinusP, direction));
 
     if (std::fabs(rayCrossS) < 1e-13) {
         // ray and segment are nearly parallel
         return {false, 0, 0};
     }
 
-    double t = cross(qMinusP, s) / rayCrossS;
+    double t = CGAL::to_double(GeometryUtil::cross(qMinusP, s) / rayCrossS);
     double u = qMinusPCrossS / rayCrossS;
 
     return {true, t, u};
 }
 
-double PerpendicularFinder::cross(const Vector& a, const Vector& b) const {
-    // Convert x() and y() of CGAL's number types to double
-    double ax = CGAL::to_double(a.x());
-    double ay = CGAL::to_double(a.y());
-    double bx = CGAL::to_double(b.x());
-    double by = CGAL::to_double(b.y());
+// double PerpendicularFinder::cross(const Vector& a, const Vector& b) const {
+//     // Convert x() and y() of CGAL's number types to double
+//     double ax = CGAL::to_double(a.x());
+//     double ay = CGAL::to_double(a.y());
+//     double bx = CGAL::to_double(b.x());
+//     double by = CGAL::to_double(b.y());
 
-    return ax * by - ay * bx;
-}
+//     return ax * by - ay * bx;
+// }
 
-Vector PerpendicularFinder::normalize(const Vector& v) const {
-    // For length, we can do sqrt( to_double( squared_length() ) )
-    double length = std::sqrt(CGAL::to_double(v.squared_length()));
-    if (length == 0) {
-        // handle zero-length vector, returning an unchanged or zero vector
-        return v;
-    }
-    // Now we divide each coordinate by length, which is a double
-    double vx = CGAL::to_double(v.x());
-    double vy = CGAL::to_double(v.y());
-    return Vector(vx / length, vy / length);
-}
+// Vector PerpendicularFinder::normalize(const Vector& v) const {
+//     // For length, we can do sqrt( to_double( squared_length() ) )
+//     double length = std::sqrt(CGAL::to_double(v.squared_length()));
+//     if (length == 0) {
+//         // handle zero-length vector, returning an unchanged or zero vector
+//         return v;
+//     }
+//     // Now we divide each coordinate by length, which is a double
+//     double vx = CGAL::to_double(v.x());
+//     double vy = CGAL::to_double(v.y());
+//     return Vector(vx / length, vy / length);
+// }
 
 }  // namespace straight_skeleton

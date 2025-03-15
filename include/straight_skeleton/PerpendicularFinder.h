@@ -2,6 +2,7 @@
 
 #include "StraightSkeletonTypes.h"
 #include "IStraightSkeleton.h"
+#include "utils/GeometryUtil.h"
 
 namespace straight_skeleton {
 
@@ -27,7 +28,7 @@ typedef std::vector<PerpSegment> PerpChain;
 
 class PerpendicularFinder {
 public:
-    static const int MAX_PERP_PROGRESSION = 20;
+    static const int MAX_PERP_PROGRESSION = 5;
     PerpendicularFinder(const IStraightSkeleton& skeleton);
 
     std::vector<PerpChain> findPerpendiculars();
@@ -39,13 +40,13 @@ private:
 
     int findEdgeIndex(const ISkeletonFace& face, const Point& startPoint) const;
 
-    Vector rotate90(const Vector& v) const;
+   // Vector rotate90(const Vector& v) const;
 
     IntersectionResult intersectRaySegment(const Point& origin, const Vector& direction, const Point& segmentStart, const Point& segmentEnd) const;
 
-    double cross(const Vector& a, const Vector& b) const;
+    // double cross(const Vector& a, const Vector& b) const;
 
-    Vector normalize(const Vector& v) const;
+    // Vector normalize(const Vector& v) const;
 
 };
 
