@@ -113,7 +113,9 @@ class CanvasView(tk.Frame):
             for j in range(n):
                 x1, y1 = self.logic_to_canvas(*pts[j])
                 x2, y2 = self.logic_to_canvas(*pts[(j + 1) % n])
-                self.canvas.create_line(x1, y1, x2, y2, fill="black", width=5)
+                is_selected = (self.app.polygon_controller.selected_edge is not None and self.app.polygon_controller.selected_edge[0] == i and self.app.polygon_controller.selected_edge[1] == j)
+                line_color = "gray" if is_selected else "black"
+                self.canvas.create_line(x1, y1, x2, y2, fill=line_color, width=5)
             # Draw polygon vertices.
             for j, (lx, ly) in enumerate(pts):
                 cx, cy = self.logic_to_canvas(lx, ly)
@@ -259,13 +261,24 @@ class CanvasView(tk.Frame):
         canvas_y = self.canvas.canvasy(event.y)
         lx, ly = self.canvas_to_logic(canvas_x, canvas_y)
         # 1) Attempt to select the nearest vertex.
-        selected = self.app.polygon_controller.select_vertex(lx, ly)
+        vertex_selected = self.app.polygon_controller.select_vertex(lx, ly)
+        edge_selected = False
 
-        # 2) Redraw to show the updated selection highlight.
+        # 2) If no vertex selected, check for edge
+        if not vertex_selected:
+            edge_selected = self.app.polygon_controller.select_edge(lx, ly)
+
+        # Clear the other selection type
+        if vertex_selected:
+            self.app.polygon_controller.selected_edge = None
+        elif edge_selected:
+            self.app.polygon_controller.selected_vertex = None
+
+        # Redraw to show the updated selection highlight.
         self._redraw()
 
         # 3) If a vertex was found, record the move vertex action.
-        if selected:
+        if vertex_selected:
             self.app.polygon_controller.begin_move_vertex(lx, ly)
             self._dragging_vertex = True
         else:

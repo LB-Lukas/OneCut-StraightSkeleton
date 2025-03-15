@@ -24,6 +24,7 @@ class PolygonController:
         self.undo_manager = UndoManager()
         self.intersection_helper = IntersectionHelper()
         self.selected_vertex: tuple[int, int] = None  # (polygon_index, vertex_index)
+        self.selected_edge: tuple[int, int] = None  # (polygon_index, edge_index)
         self.show_skeleton: bool = False
         self.show_perpendiculars: bool = False
         self.show_crease_pattern: bool = False
@@ -46,9 +47,21 @@ class PolygonController:
         if result:
             poly_idx, vertex_idx, _ = result
             self.selected_vertex = (poly_idx, vertex_idx)
+            self.selected_edge = None
             return True
         else:
             self.selected_vertex = None
+            return False
+        
+    def select_edge(self, lx: float, ly: float) -> bool:
+        result = self._get_closest_edge(lx, ly)
+        if result:
+            poly_idx, vertex_idx, _ = result
+            self.selected_edge = (poly_idx, vertex_idx)
+            self.selected_vertex = None
+            return True
+        else:
+            self.selected_edge = None
             return False
 
 
@@ -124,19 +137,19 @@ class PolygonController:
             messagebox.showinfo("Info", "No polygon available to add point.")
             return
 
-        if self.selected_vertex is None:
+        if self.selected_edge is None:
             return
 
-        poly_index, vertex_index = self.selected_vertex
+        poly_index, edge_index = self.selected_edge
         poly = self.polygons[poly_index]
-        next_vertex_index = vertex_index + 1 if vertex_index + 1 < len(poly.points) else 0
-        vx1, vy1 = poly.points[vertex_index]
-        vx2, vy2 = poly.points[next_vertex_index]
-        new_x = (vx1 + vx2) / 2
-        new_y = (vy1 + vy2) / 2
-        offset = 5
-        new_point = (new_x + offset, new_y + offset)
-        self.insert_vertex(poly_index, next_vertex_index, new_point)
+        p1 = poly.points[edge_index]
+        p2 = poly.points[(edge_index + 1) % len(poly.points)]
+        new_x = (p1[0] + p2[0]) / 2
+        new_y = (p1[1] + p2[1]) / 2
+        new_point = (new_x, new_y)
+        self.insert_vertex(poly_index, edge_index + 1, new_point)
+        self.selected_edge = None
+        
         
     def update_drawing_mode(self, mode: str):
         print(f"Drawing mode changed to: {mode}")
@@ -276,10 +289,13 @@ class PolygonController:
 
 
     def delete_selected_polygon(self):
-        if self.selected_vertex is None:
-            return
-        poly_index, _ = self.selected_vertex
-        self.delete_polygon(poly_index)
+        if self.selected_edge is not None:
+            poly_index, _ = self.selected_edge
+            self.delete_polygon(poly_index)
+            self.selected_edge = None
+        elif self.selected_vertex is not None:
+            poly_index, _ = self.selected_vertex
+            self.delete_polygon(poly_index)
 
 
     def delete_polygon(self, poly_index: int):
@@ -418,4 +434,43 @@ class PolygonController:
 
         if found_poly_idx is not None:
             return (found_poly_idx, found_vertex_idx, best_dist_sq)
+        return None
+    
+    
+    def _distance_to_segment_squared(self, px: float, py: float, a: tuple[float, float], b: tuple[float, float]) -> float:
+        ax, ay = a
+        bx, by = b
+        abx = bx - ax
+        aby = by - ay
+        apx = px - ax
+        apy = py - ay
+        dot_product = apx * abx + apy * aby
+        if dot_product <= 0.0:
+            return (px - ax)**2 + (py - ay)**2
+        ab_len_sq = abx**2 + aby**2
+        if dot_product >= ab_len_sq:
+            return (px - bx)**2 + (py - by)**2
+        t = dot_product / ab_len_sq
+        proj_x = ax + t * abx
+        proj_y = ay + t * aby
+        return (px - proj_x)**2 + (py - proj_y)**2
+
+
+    def _get_closest_edge(self, lx: float, ly: float, threshold: float = 10.0) -> tuple[int, int, float] | None:
+        best_dist_sq = threshold ** 2
+        found_poly_idx = None
+        found_edge_idx = None
+        for poly_idx, poly in enumerate(self.polygons):
+            points = poly.points
+            n = len(points)
+            for edge_idx in range(n):
+                p1 = points[edge_idx]
+                p2 = points[(edge_idx + 1) % n]
+                dist_sq = self._distance_to_segment_squared(lx, ly, p1, p2)
+                if dist_sq < best_dist_sq:
+                    best_dist_sq = dist_sq
+                    found_poly_idx = poly_idx
+                    found_edge_idx = edge_idx
+        if found_poly_idx is not None:
+            return (found_poly_idx, found_edge_idx, best_dist_sq)
         return None
