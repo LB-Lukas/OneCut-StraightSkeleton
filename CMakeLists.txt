@@ -1,5 +1,5 @@
 #----------------------------------------------#
-#-----Konfiguration des Buildsystems CMake-----#
+#------------- CMake Configuration ------------#
 #----------------------------------------------#
 
 cmake_minimum_required(VERSION 3.29)
@@ -31,7 +31,7 @@ else()
 endif()
 
 #----------------------------------------------#
-#----------------- Abhängigkeiten -------------#
+#----------------- Dependencies ---------------#
 #----------------------------------------------#
 
 # CGAL
@@ -57,7 +57,7 @@ enable_testing()
 
 
 #----------------------------------------------#
-#---------------Verwende Pybind11--------------#
+#----------------- Use Pybind11 ---------------#
 #----------------------------------------------#
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
@@ -65,15 +65,15 @@ find_package(CGAL QUIET COMPONENTS Core)
 
 
 #----------------------------------------------#
-#---------------Erzeuge Projekt----------------#
+#----------------Create Project----------------#
 #----------------------------------------------#
 
-# Selbsgeschriebene Includes
+# own Includes
 include_directories(include)
-# Externe Includes
+# external Includes
 include_directories(external)
 
-# Quelle für das Projekt
+# sources for the project
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 add_library(common OBJECT ${SRC_FILES})
@@ -88,7 +88,7 @@ add_executable(SkeletonBuilderDemo examples/SkeletonBuilderDemo.cpp $<TARGET_OBJ
 target_link_libraries(SkeletonBuilderDemo PRIVATE ${CGAL_LIBRARIES})
 
 #----------------------------------------------#
-#---------------Pybind11-Modul-----------------#
+#---------------Pybind11-Module----------------#
 #----------------------------------------------#
 
 pybind11_add_module(geometry
@@ -109,6 +109,10 @@ if(BUILD_TESTS)
     message(STATUS "Building tests")
     enable_testing()
 
+    # Test: PerpendicularTest
+    # add_executable(perpendicular_test tests/PerpendicularTest.cpp $<TARGET_OBJECTS:common>)
+    # target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
+    # gtest_discover_tests(perpendicular_test)
 
 else()
     message(STATUS "Skipping tests")

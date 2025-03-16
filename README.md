@@ -51,12 +51,7 @@ conda activate onecut
 ### Step 3: Build the Project
 To be able to build the project you need to have CGAL installed on your system. If you have not installed CGAL yet, you can find the installation instructions [here](https://doc.cgal.org/latest/Manual/usage.html#title4) and [here](https://doc.cgal.org/latest/Manual/installation.html).
 
-Run the build script (add execute permissions first):
-```bash
-chmod +x scripts/build_project.sh
-./scripts/build_project.sh 
-```
-If using the build script fails, you can manually build the project using CMake:
+Build the project using CMake:
 ```bash
 cmake -S . -B build && cmake --build build && cmake --install build
 ```
@@ -85,13 +80,14 @@ This will open the GUI Window.
 
 ---
 
-## **Running the Tests**
-Our project uses Google Test for unit testing.
-To run the tests, first activate the Conda environment:
+## **~~Running the Tests~~**
+~~Our project uses Google Test for unit testing.~~
+~~To run the tests, first activate the Conda environment:~~
 ```bash
 conda activate onecut
 ```
-Then you can run each test individually (e.g. for Perpendicular Test):
+~~Then you can run each test individually (e.g. for Perpendicular Test):~~
 ```bash
 ./build/tests/perpendicular_test
 ```
+
