@@ -63,10 +63,7 @@ PYBIND11_MODULE(geometry, m) {
         });
 
     py::class_<TestSkeleton::SkeletonBuilder>(m, "SkeletonBuilder")
-        .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"))
-        .def("__repr__", [](const TestSkeleton::SkeletonBuilder& tss) {
-            return "<SkeletonBuilder with " + std::to_string(tss.graph.edges().size()) + " edges>";
-        });
+        .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"));
 
     py::class_<straight_skeleton::PerpendicularFinder>(m, "PerpendicularFinder")
         .def(py::init<straight_skeleton::StraightSkeleton&>(), py::arg("skeleton"))

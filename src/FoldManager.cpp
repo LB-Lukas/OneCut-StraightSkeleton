@@ -3,11 +3,14 @@
 namespace straight_skeleton {
 
 static double sclar_project(const Vector& a, const Vector& axis) {
-    const double axis_squared_length = CGAL::to_double(axis.squared_length());
+    auto dot_product = CGAL::scalar_product(a, axis);
+    auto axis_squared_length = axis.squared_length();
+
     if (axis_squared_length == 0) {
-        return 0;
+        return 0.0;  // Avoid division by zero
     }
-    return CGAL::to_double(CGAL::scalar_product(a, axis) / std::sqrt(axis_squared_length));
+
+    return CGAL::to_double(dot_product) / std::sqrt(CGAL::to_double(axis_squared_length));
 }
 
 FoldManager::FoldManager(const std::vector<TestSkeleton::Point>& polygon)
@@ -20,7 +23,8 @@ std::vector<Crease> FoldManager::getCreases() {
     for (int f = 0; f < skeleton.faceCount(); f++) {
         for (int v = 1; v < skeleton.face(f).vertexCount(); v++) {
             auto adj = skeleton.face(f).adjacentFaces[v];
-            auto fold = std::make_pair(skeleton.face(f).vertices[v], skeleton.face(f).vertices[(v + 1) % skeleton.face(f).vertexCount()]);
+            auto fold = std::make_pair(skeleton.face(f).vertices[v],
+                                       skeleton.face(f).vertices[(v + 1) % skeleton.face(f).vertexCount()]);
             if (adj > f) {
                 Crease crease;
                 auto adjEdge = std::make_pair(skeleton.face(adj).vertices[0], skeleton.face(adj).vertices[1]);
@@ -31,7 +35,7 @@ std::vector<Crease> FoldManager::getCreases() {
 
                 auto sidedness = sclar_project(adjVec, edgeVec);
 
-                if(sidedness > 0) {
+                if (sidedness > 1e-6) {
                     crease.foldType = FoldType::MOUNTAIN;
                 } else {
                     crease.foldType = FoldType::VALLEY;
@@ -39,7 +43,6 @@ std::vector<Crease> FoldManager::getCreases() {
                 crease.edge = fold;
                 crease.origin = Origin::SKELETON;
                 creases.push_back(crease);
-
             }
         }
     }
