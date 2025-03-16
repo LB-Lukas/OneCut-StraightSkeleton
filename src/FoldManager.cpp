@@ -2,17 +2,6 @@
 
 namespace straight_skeleton {
 
-static double sclar_project(const Vector& a, const Vector& axis) {
-    auto dot_product = CGAL::scalar_product(a, axis);
-    auto axis_squared_length = axis.squared_length();
-
-    if (axis_squared_length == 0) {
-        return 0.0;  // Avoid division by zero
-    }
-
-    return CGAL::to_double(dot_product) / std::sqrt(CGAL::to_double(axis_squared_length));
-}
-
 FoldManager::FoldManager(const std::vector<TestSkeleton::Point>& polygon)
     : skeletonBuilder(TestSkeleton::SkeletonBuilder(polygon)),
       skeleton(skeletonBuilder.buildSkeleton()),
@@ -33,7 +22,7 @@ std::vector<Crease> FoldManager::getCreases() {
                 auto adjVec = skeleton.face(adj).vertices[1] - skeleton.face(adj).vertices[0];
                 auto foldVec = fold.second - fold.first;
 
-                auto sidedness = sclar_project(adjVec, foldVec);
+                auto sidedness = GeometryUtil::scalarProjection(adjVec, foldVec);
 
                 if (skeleton.face(f).isOuter) {
                     if (sidedness > -0.0001) {
@@ -48,7 +37,7 @@ std::vector<Crease> FoldManager::getCreases() {
                         crease.foldType = FoldType::VALLEY;
                     }
                 }
-                
+
                 crease.edge = fold;
                 crease.origin = Origin::SKELETON;
                 creases.push_back(crease);
@@ -74,6 +63,7 @@ std::vector<Crease> FoldManager::getCreases() {
     //     creases.push_back(crease);
     // }
 
+    // TODO: proper fold assignment
     // Add perpendicular creases
     std::vector<PerpChain> chains = perpendicularFinder.findPerpendiculars();
     for (const auto& chain : chains) {

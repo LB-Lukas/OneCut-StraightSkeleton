@@ -1,15 +1,15 @@
 #pragma once
 
-#include <utility>
-#include <vector>
 #include <cmath>
 #include <utility>
+#include <vector>
 
 #include "Crease.h"
 #include "PerpendicularFinder.h"
 #include "SkeletonBuilder.h"
 #include "StraightSkeleton.h"
 #include "StraightSkeletonTypes.h"
+#include "utils/GeometryUtil.h"
 
 namespace straight_skeleton {
 
