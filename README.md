@@ -36,8 +36,8 @@ Ensure the following dependencies are installed before proceeding:
 ## **Installation**
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/OsterfeldTom/OneStraightCut.git
-cd OneStraightCut
+git clone https://github.com/LB-Lukas/OneCut-StraightSkeleton.git
+cd OneCut-StraightSkeleton
 ```
 You are now in the project root directory. All further commands should be run from this location.
 
