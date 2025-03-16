@@ -1,6 +1,6 @@
 import tkinter as tk
 import webbrowser
-from views.polygon_canvas import CanvasView
+from views.canvas_view import CanvasView
 
 
 class MainView(tk.Frame):
@@ -23,7 +23,17 @@ class MainView(tk.Frame):
         file_menu.add_command(label="Save As")
         file_menu.add_separator()
         file_menu.add_command(label="Import")
-        file_menu.add_command(label="Export")
+        
+        
+        export_menu = tk.Menu(file_menu, tearoff=0)
+        file_menu.add_cascade(label="Export", menu=export_menu)
+        # In MainView's _create_menu method
+        export_menu.add_command(label="Export as PDF",command=lambda: self.app.file_controller.export_to_pdf(self.canvas_view))
+        export_menu.add_command(label="Export as PNG",command=lambda: self.app.file_controller.export_to_png(self.canvas_view))
+        
+        
+        
+        
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=root.quit)
 
@@ -33,7 +43,7 @@ class MainView(tk.Frame):
 
         help_menu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Help", menu=help_menu)
-        help_menu.add_command(label="About", command=lambda: webbrowser.open("https://github.com/OsterfeldTom/OneStraightCut"))
+        help_menu.add_command(label="About", command=lambda: webbrowser.open("https://github.com/LB-Lukas/OneCut-StraightSkeleton"))
 
 
     def _create_widgets(self):
@@ -47,18 +57,15 @@ class MainView(tk.Frame):
         self.side_pane = tk.Frame(parent, width=200, bg="lightgray")
         self.side_pane.grid(row=0, column=0, sticky="ns")
         
+        self.polygon_editor_label = tk.Label(self.side_pane, text="Polygon Tools:")
+        self.polygon_editor_label.pack(pady=(10,0), padx=5, fill="x")
+        
         # Create and pack buttons for the side pane
         self.toggle_grid_button = tk.Button(self.side_pane, wraplength=100, text="Toggle Grid")
         self.toggle_grid_button.pack(pady=5, padx=5, fill="x")
         
         self.finish_polygon_button = tk.Button(self.side_pane, wraplength=100, text="Finish Polygon")
         self.finish_polygon_button.pack(pady=5, padx=5, fill="x")
-        
-        self.toggle_skeleton_button = tk.Button(self.side_pane, wraplength=100, text="Toggle Skeleton")
-        self.toggle_skeleton_button.pack(pady=5, padx=5, fill="x")
-        
-        self.toggle_perpendiculars_button = tk.Button(self.side_pane, wraplength=100, text="Toggle Perpendiculars")
-        self.toggle_perpendiculars_button.pack(pady=5, padx=5, fill="x")
         
         self.delete_vertex_button = tk.Button(self.side_pane, wraplength=100, text="Delete Point")
         self.delete_vertex_button.pack(pady=5, padx=5, fill="x")
@@ -68,6 +75,24 @@ class MainView(tk.Frame):
         
         self.delete_polygon_button = tk.Button(self.side_pane, wraplength=100, text="Delete Polygon")
         self.delete_polygon_button.pack(pady=5, padx=5, fill="x")
+
+        # Drop Down menu for different crease drawing modes
+        self.drawing_mode_label = tk.Label(self.side_pane, text="Draw Creases:")
+        self.drawing_mode_label.pack(pady=(10,0), padx=5, fill="x")
+        
+        self.drawing_mode = tk.StringVar(self.side_pane)
+        self.drawing_mode.set("None") # default
+        self.drawing_mode_options = [
+            "None",
+            "Foldpattern",
+            "Skeleton",
+            "Perpendiculars",
+            "Skeleton and Perpendiculars"
+        ]
+        max_text_length = max(len(option) for option in self.drawing_mode_options)
+        self.drawing_mode_menu = tk.OptionMenu(self.side_pane, self.drawing_mode, *self.drawing_mode_options, command=self.app.polygon_controller.update_drawing_mode)
+        self.drawing_mode_menu.config(width=max_text_length)
+        self.drawing_mode_menu.pack(pady=5, padx=5, fill="x")
 
 
     def _create_canvas_area(self, parent: tk.Frame):

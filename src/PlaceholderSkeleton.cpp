@@ -12,5 +12,4 @@ const SkeletonFace& PlaceholderSkeleton::face(size_t i) const {
     return faces[i];
 }
 
-
 }

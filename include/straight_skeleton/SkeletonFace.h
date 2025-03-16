@@ -1,8 +1,6 @@
 #pragma once
 
 #include "StraightSkeletonTypes.h"
-#include "GraphClassification.h"
-#include "GraphUtils.h"
 #include "ISkeletonFace.h"
 #include <iostream>
 
@@ -20,10 +18,12 @@ public:
 
     std::ostream& print(std::ostream& os) const override;
 
-
-private:
     std::vector<Point> vertices;
     std::vector<int> adjacentFaces;
+
+
+private:
+
 };
 
 
