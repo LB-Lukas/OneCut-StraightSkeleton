@@ -59,6 +59,34 @@ class CanvasView(tk.Frame):
         lx = (cx - self.camera_offset_x) / self.camera_scale
         ly = (cy - self.camera_offset_y) / self.camera_scale
         return (lx, ly)
+    
+    
+    def clip_line(self, x1, y1, x2, y2, x_min=0, y_min=0, x_max=600, y_max=600):
+        dx = x2 - x1
+        dy = y2 - y1
+        t0, t1 = 0.0, 1.0
+        
+        for p, q in ((-dx, x1 - x_min), (dx, x_max - x1), (-dy, y1 - y_min), (dy, y_max - y1)):
+            if p == 0:
+                if q < 0:
+                    return None
+            else:
+                t = q / p
+                if p < 0:
+                    if t > t1:
+                        return None
+                    if t > t0:
+                        t0 = t
+                else:
+                    if t < t0:
+                        return None
+                    if t < t1:
+                        t1 = t
+                        
+        if t0 > t1:
+            return None
+        
+        return (x1 + t0 * dx, y1 + t0 * dy, x1 + t1 * dx, y1 + t1 * dy)
 
 
     def redraw_all(self, polygons, in_progress_points):
@@ -76,6 +104,19 @@ class CanvasView(tk.Frame):
         point_scale_factor = max(0.5, min(2.0, math.sqrt(self.camera_scale)))
 
         selected_vertex = self.app.polygon_controller.selected_vertex
+        
+        # Draw grid lines if enabled
+        if self.app.polygon_controller.grid_enabled:
+            grid_spacing = self.app.polygon_controller.GRID_SPACING
+            for x in range(0, CANVAS_WIDTH +1, grid_spacing):
+                start_x, start_y = self.logic_to_canvas(x, 0)
+                end_x, end_y = self.logic_to_canvas(x, CANVAS_HEIGHT)
+                self.canvas.create_line(start_x, start_y, end_x, end_y, fill="lightgray", dash=(2, 2))
+            for y in range(0, CANVAS_HEIGHT +1, grid_spacing):
+                start_x, start_y = self.logic_to_canvas(0, y)
+                end_x, end_y = self.logic_to_canvas(CANVAS_WIDTH, y)
+                self.canvas.create_line(start_x, start_y, end_x, end_y, fill="lightgray", dash=(2, 2))
+        
 
         # Draw completed polygons.
         for i, poly in enumerate(polygons):  # poly is now a PolygonModel instance.
@@ -85,19 +126,49 @@ class CanvasView(tk.Frame):
             for j in range(n):
                 x1, y1 = self.logic_to_canvas(*pts[j])
                 x2, y2 = self.logic_to_canvas(*pts[(j + 1) % n])
-                self.canvas.create_line(x1, y1, x2, y2, fill="black", width=5)
+                is_selected = (self.app.polygon_controller.selected_edge is not None and self.app.polygon_controller.selected_edge[0] == i and self.app.polygon_controller.selected_edge[1] == j)
+                line_color = "gray" if is_selected else "black"
+                self.canvas.create_line(x1, y1, x2, y2, fill=line_color, width=5)
             # Draw polygon vertices.
             for j, (lx, ly) in enumerate(pts):
                 cx, cy = self.logic_to_canvas(lx, ly)
                 r = BASE_RADIUS * point_scale_factor
                 color = "gray" if selected_vertex == (i, j) else "black"
                 self.canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill=color)
-            # Draw skeleton lines (if any).
-            for sk in poly.skeleton_line_ids:
-                sx1, sy1, sx2, sy2 = sk["coords"]
-                cax1, cay1 = self.logic_to_canvas(sx1, sy1)
-                cax2, cay2 = self.logic_to_canvas(sx2, sy2)
-                self.canvas.create_line(cax1, cay1, cax2, cay2, fill="green", width=3)
+            # Draw skeleton/perpendicular/mountain/valley lines
+            if self.app.polygon_controller.show_skeleton:
+                for sk in poly.skeleton_line_ids:
+                    sx1, sy1, sx2, sy2 = sk["coords"]
+                    clipped = self.clip_line(sx1, sy1, sx2, sy2)
+                    if clipped:
+                        cax1, cay1 = self.logic_to_canvas(clipped[0], clipped[1])
+                        cax2, cay2 = self.logic_to_canvas(clipped[2], clipped[3])
+                        self.canvas.create_line(cax1, cay1, cax2, cay2, fill="green", width=3)
+            if self.app.polygon_controller.show_perpendiculars:
+                 for per in poly.perpendicular_line_ids:
+                    px1, py1, px2, py2 = per["coords"]
+                    clipped = self.clip_line(px1, py1, px2, py2)
+                    if clipped:
+                        cpx1, cpy1 = self.logic_to_canvas(clipped[0], clipped[1])
+                        cpx2, cpy2 = self.logic_to_canvas(clipped[2], clipped[3])
+                        self.canvas.create_line(cpx1, cpy1, cpx2, cpy2, fill="purple", width=3)
+            if self.app.polygon_controller.show_crease_pattern:
+                for mountain in poly.mountain_line_ids:
+                    mx1, my1, mx2, my2 = mountain["coords"]
+                    clipped = self.clip_line(mx1, my1, mx2, my2)
+                    if clipped:
+                        cmx1, cmy1 = self.logic_to_canvas(clipped[0], clipped[1])
+                        cmx2, cmy2 = self.logic_to_canvas(clipped[2], clipped[3])
+                        self.canvas.create_line(cmx1, cmy1, cmx2, cmy2, fill="red", width=3)
+                for valley in poly.valley_line_ids:
+                    vx1, vy1, vx2, vy2 = valley["coords"]
+                    clipped = self.clip_line(vx1, vy1, vx2, vy2)
+                    if clipped:
+                        cvx1, cvy1 = self.logic_to_canvas(clipped[0], clipped[1])
+                        cvx2, cvy2 = self.logic_to_canvas(clipped[2], clipped[3])
+                        self.canvas.create_line(cvx1, cvy1, cvx2, cvy2, fill="blue", width=3)    
+                
+                
 
         # Draw in-progress polygon edges.
         if len(in_progress_points) > 1:
@@ -110,6 +181,8 @@ class CanvasView(tk.Frame):
             cx, cy = self.logic_to_canvas(lx, ly)
             r = BASE_RADIUS * point_scale_factor
             self.canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill="black")
+                        
+        
 
         # Update scroll region.
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
@@ -201,13 +274,24 @@ class CanvasView(tk.Frame):
         canvas_y = self.canvas.canvasy(event.y)
         lx, ly = self.canvas_to_logic(canvas_x, canvas_y)
         # 1) Attempt to select the nearest vertex.
-        selected = self.app.polygon_controller.select_vertex(lx, ly)
+        vertex_selected = self.app.polygon_controller.select_vertex(lx, ly)
+        edge_selected = False
 
-        # 2) Redraw to show the updated selection highlight.
+        # 2) If no vertex selected, check for edge
+        if not vertex_selected:
+            edge_selected = self.app.polygon_controller.select_edge(lx, ly)
+
+        # Clear the other selection type
+        if vertex_selected:
+            self.app.polygon_controller.selected_edge = None
+        elif edge_selected:
+            self.app.polygon_controller.selected_vertex = None
+
+        # Redraw to show the updated selection highlight.
         self._redraw()
 
         # 3) If a vertex was found, record the move vertex action.
-        if selected:
+        if vertex_selected:
             self.app.polygon_controller.begin_move_vertex(lx, ly)
             self._dragging_vertex = True
         else:

@@ -15,6 +15,8 @@ class PolygonController:
     def __init__(self, app, max_polygons: int = 1):
         self.app = app
         self.max_polygons = max_polygons
+        self.grid_enabled = False
+        self.GRID_SPACING = 20
 
         # In-progress polygon (list of points)
         self.current_points: list[tuple[float, float]] = []
@@ -24,12 +26,19 @@ class PolygonController:
         self.undo_manager = UndoManager()
         self.intersection_helper = IntersectionHelper()
         self.selected_vertex: tuple[int, int] = None  # (polygon_index, vertex_index)
+        self.selected_edge: tuple[int, int] = None  # (polygon_index, edge_index)
         self.show_skeleton: bool = False
         self.show_perpendiculars: bool = False
+        self.show_crease_pattern: bool = False
 
         # For dragging a vertex.
         self._moving_poly_index: int = None
         self._moving_vertex_index: int = None
+        
+        
+    def toggle_grid(self):  # Add this method
+        self.grid_enabled = not self.grid_enabled
+        self._redraw()
 
 
     def _redraw(self):
@@ -45,9 +54,21 @@ class PolygonController:
         if result:
             poly_idx, vertex_idx, _ = result
             self.selected_vertex = (poly_idx, vertex_idx)
+            self.selected_edge = None
             return True
         else:
             self.selected_vertex = None
+            return False
+        
+    def select_edge(self, lx: float, ly: float) -> bool:
+        result = self._get_closest_edge(lx, ly)
+        if result:
+            poly_idx, vertex_idx, _ = result
+            self.selected_edge = (poly_idx, vertex_idx)
+            self.selected_vertex = None
+            return True
+        else:
+            self.selected_edge = None
             return False
 
 
@@ -59,6 +80,10 @@ class PolygonController:
         if len(self.polygons) >= self.max_polygons:
             messagebox.showinfo("Error", f"Maximum number of polygons is {self.max_polygons}")
             return
+        
+        if self.grid_enabled:
+            lx = round(lx / self.GRID_SPACING) * self.GRID_SPACING
+            ly = round(ly / self.GRID_SPACING) * self.GRID_SPACING
 
         if not (0 <= lx <= CANVAS_WIDTH and 0 <= ly <= CANVAS_HEIGHT):
             print("Point out of bounds")
@@ -106,11 +131,13 @@ class PolygonController:
         self.polygons.append(new_poly)
         self.current_points = []  # reset in-progress polygon
 
-        if self.show_skeleton:
+
+        if self.show_crease_pattern or self.show_skeleton or self.show_perpendiculars:
             try:
-                new_poly.generate_skeleton()
+                new_poly.generate_creases()
             except Exception as e:
                 messagebox.showerror("Error", str(e))
+                print(e)
 
         self._record_action(LastAction.FINISH_POLYGON, {"polygon": new_poly})
         self._redraw()
@@ -121,50 +148,79 @@ class PolygonController:
             messagebox.showinfo("Info", "No polygon available to add point.")
             return
 
-        if self.selected_vertex is None:
+        if self.selected_edge is None:
             return
 
-        poly_index, vertex_index = self.selected_vertex
+        poly_index, edge_index = self.selected_edge
         poly = self.polygons[poly_index]
-        next_vertex_index = vertex_index + 1 if vertex_index + 1 < len(poly.points) else 0
-        vx1, vy1 = poly.points[vertex_index]
-        vx2, vy2 = poly.points[next_vertex_index]
-        new_x = (vx1 + vx2) / 2
-        new_y = (vy1 + vy2) / 2
-        offset = 5
-        new_point = (new_x + offset, new_y + offset)
-        self.insert_vertex(poly_index, next_vertex_index, new_point)
-
-
-    def toggle_skeleton(self):
+        p1 = poly.points[edge_index]
+        p2 = poly.points[(edge_index + 1) % len(poly.points)]
+        new_x = (p1[0] + p2[0]) / 2
+        new_y = (p1[1] + p2[1]) / 2
+        new_point = (new_x, new_y)
+        self.insert_vertex(poly_index, edge_index + 1, new_point)
+        self.selected_edge = None
+        
+        
+    def update_drawing_mode(self, mode: str):
+        print(f"Drawing mode changed to: {mode}")
+        
         if not self.polygons:
-            messagebox.showinfo("Info", "No polygon available to toggle skeleton.")
+            messagebox.showinfo("Info", "no polygon available to toggle skeleton.")
             return
 
-        self.show_skeleton = not self.show_skeleton
-        if self.show_skeleton:
-            for poly in self.polygons:
-                try:
-                    poly.generate_skeleton()
-                except Exception as e:
-                    messagebox.showerror("Error", str(e))
-        else:
-            old_skeleton_data = [poly.skeleton_line_ids.copy() for poly in self.polygons]
-            for poly in self.polygons:
-                poly.skeleton_line_ids.clear()
-            self._record_action(LastAction.REMOVE_SKELETON, {"skeleton_line_ids": old_skeleton_data})
-        self._redraw()
-
-
-    def _update_skeleton(self):
+        if mode == "None":
+            self.show_crease_pattern = False
+            self.show_skeleton = False
+            self.show_perpendiculars = False
+            self._redraw()
+            return
+        
         for poly in self.polygons:
-            if poly.skeleton_line_ids:
+            try:
+                poly.generate_creases()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        if mode == "Foldpattern":
+            self.show_crease_pattern = True
+            self.show_skeleton = False
+            self.show_perpendiculars = False
+            self._redraw()
+        elif mode == "Skeleton":
+            self.show_crease_pattern = False
+            self.show_skeleton = True
+            self.show_perpendiculars = False
+            self._redraw()
+        elif mode == "Perpendiculars":
+            self.show_crease_pattern = False
+            self.show_skeleton = False
+            self.show_perpendiculars = True
+            self._redraw()
+        elif mode == "Skeleton and Perpendiculars":
+            self.show_crease_pattern = False
+            self.show_skeleton = True
+            self.show_perpendiculars = True
+            self._redraw()
+        else:
+            messagebox.showerror("Error", "Drawing mode not available")
+            return
+        
+    def _redraw_or_update_creases(self, polygon=None):
+        if polygon is not None:
+            try:
+                polygon.update_creases()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+                print(e)
+        else:
+            for poly in self.polygons:
                 try:
-                    poly.update_skeleton()
+                    poly.update_creases()
                 except Exception as e:
                     messagebox.showerror("Error", str(e))
+                    print(e)
         self._redraw()
-
+        
 
     def drag_vertex(self, lx: float, ly: float):
         if self._moving_poly_index is None:
@@ -172,6 +228,10 @@ class PolygonController:
 
         lx = max(0, min(lx, CANVAS_WIDTH))
         ly = max(0, min(ly, CANVAS_HEIGHT))
+        
+        if self.grid_enabled:
+            lx = round(lx / self.GRID_SPACING) * self.GRID_SPACING
+            ly = round(ly / self.GRID_SPACING) * self.GRID_SPACING
 
         for i, poly in enumerate(self.polygons):
             if i != self._moving_poly_index and len(poly.points) >= 3:
@@ -208,7 +268,7 @@ class PolygonController:
                         return
 
         poly.move_point(self._moving_vertex_index, (lx, ly))
-        self._redraw_or_update_skeleton(poly)
+        self._redraw_or_update_creases()
 
 
     def delete_vertex(self, poly_index: int, vertex_index: int):
@@ -232,7 +292,7 @@ class PolygonController:
             "vertex_index": vertex_index,
             "deleted_point": deleted_point
         })
-        self._redraw_or_update_skeleton(poly)
+        self._redraw_or_update_creases(poly)
 
 
     def delete_selected_vertex(self):
@@ -244,10 +304,13 @@ class PolygonController:
 
 
     def delete_selected_polygon(self):
-        if self.selected_vertex is None:
-            return
-        poly_index, _ = self.selected_vertex
-        self.delete_polygon(poly_index)
+        if self.selected_edge is not None:
+            poly_index, _ = self.selected_edge
+            self.delete_polygon(poly_index)
+            self.selected_edge = None
+        elif self.selected_vertex is not None:
+            poly_index, _ = self.selected_vertex
+            self.delete_polygon(poly_index)
 
 
     def delete_polygon(self, poly_index: int):
@@ -270,7 +333,7 @@ class PolygonController:
             "vertex_index": vertex_index,
             "new_point": new_point
         })
-        self._redraw_or_update_skeleton(poly)
+        self._redraw_or_update_creases(poly)
 
 
     def undo_last_action(self):
@@ -387,10 +450,42 @@ class PolygonController:
         if found_poly_idx is not None:
             return (found_poly_idx, found_vertex_idx, best_dist_sq)
         return None
+    
+    
+    def _distance_to_segment_squared(self, px: float, py: float, a: tuple[float, float], b: tuple[float, float]) -> float:
+        ax, ay = a
+        bx, by = b
+        abx = bx - ax
+        aby = by - ay
+        apx = px - ax
+        apy = py - ay
+        dot_product = apx * abx + apy * aby
+        if dot_product <= 0.0:
+            return (px - ax)**2 + (py - ay)**2
+        ab_len_sq = abx**2 + aby**2
+        if dot_product >= ab_len_sq:
+            return (px - bx)**2 + (py - by)**2
+        t = dot_product / ab_len_sq
+        proj_x = ax + t * abx
+        proj_y = ay + t * aby
+        return (px - proj_x)**2 + (py - proj_y)**2
 
 
-    def _redraw_or_update_skeleton(self, poly: PolygonModel = None):
-        if poly and poly.skeleton_line_ids:
-            self._update_skeleton()
-        else:
-            self._redraw()
+    def _get_closest_edge(self, lx: float, ly: float, threshold: float = 10.0) -> tuple[int, int, float] | None:
+        best_dist_sq = threshold ** 2
+        found_poly_idx = None
+        found_edge_idx = None
+        for poly_idx, poly in enumerate(self.polygons):
+            points = poly.points
+            n = len(points)
+            for edge_idx in range(n):
+                p1 = points[edge_idx]
+                p2 = points[(edge_idx + 1) % n]
+                dist_sq = self._distance_to_segment_squared(lx, ly, p1, p2)
+                if dist_sq < best_dist_sq:
+                    best_dist_sq = dist_sq
+                    found_poly_idx = poly_idx
+                    found_edge_idx = edge_idx
+        if found_poly_idx is not None:
+            return (found_poly_idx, found_edge_idx, best_dist_sq)
+        return None

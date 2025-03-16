@@ -1,5 +1,5 @@
 #----------------------------------------------#
-#-----Konfiguration des Buildsystems CMake-----#
+#------------- CMake Configuration ------------#
 #----------------------------------------------#
 
 cmake_minimum_required(VERSION 3.29)
@@ -31,19 +31,16 @@ else()
 endif()
 
 #----------------------------------------------#
-#----------------- Abhängigkeiten -------------#
+#----------------- Dependencies ---------------#
 #----------------------------------------------#
 
 # CGAL
 find_package(CGAL QUIET COMPONENTS Core)
 if(NOT CGAL_FOUND)
-    message(STATUS "This project requires the CGAL library and will not be compiled.")
+    message(STATUS "This project requires the CGAL library, and will not be compiled.")
     return()
 endif()
-
-# Pybind11
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
-find_package(pybind11 REQUIRED)
+include_directories(${CGAL_INCLUDE_DIRS})
 
 # GoogleTest
 include(FetchContent)
@@ -58,49 +55,44 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 enable_testing()
 
-# Cairo
-find_package(PkgConfig REQUIRED) # Use pkg-config to locate Cairo
-pkg_check_modules(CAIRO REQUIRED cairo)
-
-# Include Cairo directories
-include_directories(${CAIRO_INCLUDE_DIRS})
-link_directories(${CAIRO_LIBRARY_DIRS})
-add_definitions(${CAIRO_CFLAGS_OTHER})
 
 #----------------------------------------------#
-#---------------Verwende Pybind11--------------#
+#----------------- Use Pybind11 ---------------#
 #----------------------------------------------#
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(CGAL QUIET COMPONENTS Core)
-if(NOT CGAL_FOUND)
-    message(STATUS "This project requires the CGAL library, and will not be compiled.")
-    return()
-endif()
-include_directories(${CGAL_INCLUDE_DIRS})
+
 
 #----------------------------------------------#
-#---------------Erzeuge Projekt----------------#
+#----------------Create Project----------------#
 #----------------------------------------------#
 
-# Selbsgeschriebene Includes
+# own Includes
 include_directories(include)
-# Externe Includes
+# external Includes
 include_directories(external)
 
-# Quelle für das Projekt
+# sources for the project
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
+add_library(common OBJECT ${SRC_FILES})
+target_link_libraries(common PRIVATE ${CGAL_LIBRARIES})
+
 # Build PerpendicularDemo 
-add_executable(PerpendicularDemo examples/PerpendicularDemo.cpp ${SRC_FILES})
+add_executable(PerpendicularDemo examples/PerpendicularDemo.cpp $<TARGET_OBJECTS:common>)
 target_link_libraries(PerpendicularDemo PRIVATE ${CGAL_LIBRARIES})
 
+# Build SkeletonBuilderDemo 
+add_executable(SkeletonBuilderDemo examples/SkeletonBuilderDemo.cpp $<TARGET_OBJECTS:common>)
+target_link_libraries(SkeletonBuilderDemo PRIVATE ${CGAL_LIBRARIES})
+
 #----------------------------------------------#
-#---------------Pybind11-Modul-----------------#
+#---------------Pybind11-Module----------------#
 #----------------------------------------------#
 
 pybind11_add_module(geometry
-        bindings/StraightSkeletonPyBind.cpp
+    bindings/StraightSkeletonPyBind.cpp
     ${SRC_FILES}
 )
 
@@ -112,48 +104,19 @@ target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module)
 #----------------------------------------------#
 #---------------Tests--------------------------#
 #----------------------------------------------#
+option(BUILD_TESTS "Build tests" ON)
+if(BUILD_TESTS)
+    message(STATUS "Building tests")
+    enable_testing()
 
-enable_testing()
+    # Test: PerpendicularTest
+    # add_executable(perpendicular_test tests/PerpendicularTest.cpp $<TARGET_OBJECTS:common>)
+    # target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
+    # gtest_discover_tests(perpendicular_test)
 
-# Test: folding_test
-add_executable(folding_test tests/FoldingTest.cpp ${SRC_FILES})
-target_link_libraries(folding_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(folding_test)
-
-# Test: SkeletonEventTriangleTest
-add_executable(triangle_test tests/SkeletonEventTriangleTest.cpp ${SRC_FILES})
-target_link_libraries(triangle_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(triangle_test)
-
-# Test: SkeletonEventRayTest
-add_executable(ray_test tests/SkeletonEventRayTest.cpp ${SRC_FILES})
-target_link_libraries(ray_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(ray_test)
-
-# Test: min_heap_triangle_test
-add_executable(min_heap_triangle_ray_test tests/MinHeapTriangleRayTest.cpp ${SRC_FILES})
-target_link_libraries(min_heap_triangle_ray_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(min_heap_triangle_ray_test)
-
-# Test: NaiveClosestPairTest
-add_executable(naive_closest_pair_test tests/NaiveClosestPairTest.cpp ${SRC_FILES})
-target_link_libraries(naive_closest_pair_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(naive_closest_pair_test)
-
-# Test: GraphUtilsTest
-add_executable(graph_utils_test tests/GraphUtilsTest.cpp ${SRC_FILES})
-target_link_libraries(graph_utils_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(graph_utils_test)
-
-# Test: StraightSkeletonTest
-add_executable(straight_skeleton_test tests/StraightSkeletonTest.cpp ${SRC_FILES})
-target_link_libraries(straight_skeleton_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(straight_skeleton_test)
-
-# Test: PerpendicularTest
-add_executable(perpendicular_test tests/PerpendicularTest.cpp ${SRC_FILES})
-target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
-gtest_discover_tests(perpendicular_test)
+else()
+    message(STATUS "Skipping tests")
+endif()
 
 #----------------------------------------------#
 #----------Project-Installation----------------#

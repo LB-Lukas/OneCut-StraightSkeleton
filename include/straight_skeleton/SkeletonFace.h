@@ -1,9 +1,8 @@
 #pragma once
 
 #include "StraightSkeletonTypes.h"
-#include "GraphClassification.h"
-#include "GraphUtils.h"
 #include "ISkeletonFace.h"
+#include <iostream>
 
 namespace straight_skeleton {
 
@@ -17,10 +16,14 @@ public:
     std::vector<int> getAdjacentFaces() const override;
     int adjacentFaceIndex(int i) const override;
 
+    std::ostream& print(std::ostream& os) const override;
 
-private:
     std::vector<Point> vertices;
     std::vector<int> adjacentFaces;
+
+
+private:
+
 };
 
 

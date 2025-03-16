@@ -5,9 +5,8 @@ from utils.fold_file_manager import FoldFileManager
 
 
 class FileController:
-    def __intit__(self, canvas: tk.Canvas, polygon_controller):
-        self.canvas = canvas
-        self.polygon_controller = polygon_controller
+    def __intit__(self):
+        pass
         
         
     def open_file(self):
@@ -27,24 +26,21 @@ class FileController:
         pass
     
     
-    def export_to_pdf(self):
-        filename = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
-        
-        if not filename:
-            return
-        
-        exporter = CanvasExport(self.canvas)
-        exporter.export_as_pdf(filename)
+    def export_to_pdf(self, canvas_view):  # Changed parameter
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")]
+        )
+        if file_path:
+            CanvasExport(canvas_view).export_as_pdf(filepath=file_path, creator=canvas_view.app.root.title())
 
 
-    def export_to_png(self):
-        filename = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
-        
-        if not filename:
-            return
-        
-        exporter = CanvasExport(self.canvas)
-        exporter.export_as_image(filename)
-        
+    def export_to_png(self, canvas_view):  # Changed parameter
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png")]
+        )
+        if file_path:
+            CanvasExport(canvas_view).export_as_image(file_path)
     
     

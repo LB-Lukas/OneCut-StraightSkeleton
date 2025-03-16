@@ -1,10 +1,13 @@
 import geometry
-from geometry import StraightSkeleton, Point
+from geometry import SkeletonBuilder, TestPoint, PerpendicularFinder, Crease,  FoldManager, FoldType, Origin
 
 class PolygonModel:
     def __init__(self, points=None):
         self.points = points.copy() if points else []
         self.skeleton_line_ids = []  # List of dicts with key "coords"
+        self.perpendicular_line_ids = []
+        self.mountain_line_ids = []
+        self.valley_line_ids = []
 
 
     def add_point(self, point: tuple[float, float]):
@@ -23,28 +26,36 @@ class PolygonModel:
 
     def move_point(self, index: int, new_point: tuple[float, float]):
         self.points[index] = new_point
-
-
-    def generate_skeleton(self):
+        
+        
+    def generate_creases(self):
         try:
-            points_obj = [Point(x, y) for x, y in self.points]
-            skeleton = StraightSkeleton(points_obj)
-            edges = skeleton.get_edges()
+            points_obj = [TestPoint(x,y) for x,y in self.points]
+            fold_manager = FoldManager(points_obj)
+            creases = fold_manager.get_creases()
             self.skeleton_line_ids = []
-            if edges:
-                for edge in edges:
-                    src, tgt = edge
-                    self.skeleton_line_ids.append({
-                        "coords": (src.x(), src.y(), tgt.x(), tgt.y())
-                    })
+            self.perpendicular_line_ids = []
+            self.mountain_line_ids = []
+            self.valley_line_ids = []
+            if creases:
+                for crease in creases:
+                    src, tgt = crease.edge
+                    if crease.foldType == FoldType.MOUNTAIN:
+                        self.mountain_line_ids.append({"coords": (src.x(), src.y(), tgt.x(), tgt.y())})
+                    elif crease.foldType == FoldType.VALLEY:
+                        self.valley_line_ids.append({"coords": (src.x(), src.y(), tgt.x(), tgt.y())})
+                    if crease.origin == Origin.SKELETON:
+                        self.skeleton_line_ids.append({"coords": (src.x(), src.y(), tgt.x(), tgt.y())})
+                    elif crease.origin == Origin.PERPENDICULAR:
+                         self.perpendicular_line_ids.append({"coords": (src.x(), src.y(), tgt.x(), tgt.y())})
             return True
         except Exception as e:
-            raise RuntimeError(f"Error generating skeleton: {e}")
-
-
-    def update_skeleton(self):
-        if self.skeleton_line_ids:
-            self.generate_skeleton()
+            raise RuntimeError(f"Error retrieving creases: {e}")
+        
+        
+    def update_creases(self):
+        if self.valley_line_ids and self.mountain_line_ids:
+            self.generate_creases()
 
 
     @staticmethod

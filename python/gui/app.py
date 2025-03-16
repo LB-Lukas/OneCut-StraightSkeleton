@@ -20,11 +20,12 @@ class StraightSkeletonApp:
         self.main_view.finish_polygon_button.config(command=self.polygon_controller.finish_polygon)
         # self.main_view.export_pdf_button.config(command=self.file_controller.export_to_pdf) removed this button from the GUI #TODO: rework this functionality
         # self.main_view.export_png_button.config(command=self.file_controller.export_to_png) removed this button from the GUI #TODO: rework this funcitonality
-        self.main_view.toggle_skeleton_button.config(command=self.polygon_controller.toggle_skeleton)
+        #self.main_view.toggle_skeleton_button.config(command=self.polygon_controller.toggle_skeleton)
         #self.main_view.toggle_perpendiculars_button.config(command=self.polygon_controller.toggle_perpendiculars) #TODO: has to be implemented
         self.main_view.delete_vertex_button.config(command=self.polygon_controller.delete_selected_vertex)
         self.main_view.add_vertex_button.config(command=self.polygon_controller.add_point_to_polygon)
         self.main_view.delete_polygon_button.config(command=self.polygon_controller.delete_selected_polygon)
+        self.main_view.toggle_grid_button.config(command=self.polygon_controller.toggle_grid)
 
         canvas = self.main_view.canvas_view.canvas
         canvas.bind("<Shift-Button-1>", self._on_shift_left_click)                                      # Shift+LeftClick to add a point

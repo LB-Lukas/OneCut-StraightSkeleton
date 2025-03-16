@@ -2,6 +2,7 @@
 
 #include "StraightSkeletonTypes.h"
 #include <vector>
+#include <iostream>
 
 namespace straight_skeleton {
 
@@ -19,8 +20,14 @@ public:
     virtual std::vector <int> getAdjacentFaces() const = 0;
 
     virtual int adjacentFaceIndex(int i) const = 0;
+
+    virtual std::ostream& print(std::ostream& os) const = 0;
     
 };
+
+inline std::ostream& operator<<(std::ostream& os, const ISkeletonFace& face) {
+    return face.print(os);
+}
 
 
 }

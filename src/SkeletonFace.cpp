@@ -24,4 +24,27 @@ int SkeletonFace::adjacentFaceIndex(int i) const {
     return adjacentFaces[i];
 }
 
+std::ostream& SkeletonFace::print(std::ostream& os) const {
+    os << "{ \"vertices\": [";
+    {
+        const auto& verts = this->getVertices();
+        for (size_t i = 0; i < verts.size(); ++i) {
+            os << verts[i];
+            if (i != verts.size() - 1)
+                os << ", ";
+        }
+    }
+    os << "], \"adjacentFaces\": [";
+    {
+        const auto& adjFaces = this->getAdjacentFaces();
+        for (size_t i = 0; i < adjFaces.size(); ++i) {
+            os << adjFaces[i];
+            if (i != adjFaces.size() - 1)
+                os << ", ";
+        }
+    }
+    os << "] }";
+    return os;
+}
+
 }  // namespace straight_skeleton

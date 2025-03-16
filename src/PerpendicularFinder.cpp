@@ -1,6 +1,7 @@
 #include "straight_skeleton/PerpendicularFinder.h"
 
 #include <CGAL/number_utils.h>  // for CGAL::to_double
+
 #include <iostream>  // for std::cout
 
 namespace straight_skeleton {
@@ -15,16 +16,19 @@ std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
     for (int f = 0; f < faceCount; f++) {
         const ISkeletonFace& face = skeleton.face(f);
         std::cout << "Processing face: " << f << std::endl;
+        std::cout << "FACE: " << face << std::endl;
 
         // Vertex 0 and 1 form the cut Edge
         for (int v = 2; v < face.vertexCount(); v++) {
             std::cout << "Processing vertex: " << v << std::endl;
             if (face.adjacentFaceIndex(v) == -1) {
-                std::cout << "Skipping vertex[case 1]: " << v << " due to missing adjacent face at index " << v << std::endl;
+                std::cout << "Skipping vertex[case 1]: " << v << " due to missing adjacent face at index " << v
+                          << std::endl;
                 continue;
             }
             if (face.adjacentFaceIndex(v - 1) == -1) {
-                std::cout << "Skipping vertex[case 2]: " << v << " due to missing adjacent face at index " << (v - 1) << std::endl;
+                std::cout << "Skipping vertex[case 2]: " << v << " due to missing adjacent face at index " << (v - 1)
+                          << std::endl;
                 continue;
             }
 
@@ -39,7 +43,7 @@ std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
 
             std::cout << "Starting new chain from vertex: " << v << std::endl;
 
-            for (int step = 0; step < MAX_PERP_PROGRESSION; step++) {
+            for (int step = 0; step < MAX_ITERATIONS; step++) {
                 std::cout << "Step: " << step << std::endl;
                 PerpHelperResult phrResult = perpHelper(currentVertex, skeleton.face(currentFace), currentEdge);
 
@@ -58,7 +62,8 @@ std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
                     break;
                 }
 
-                Point nextEdgeStart = skeleton.face(currentFace).vertex((phrResult.edgeIndex + 1) % skeleton.face(currentFace).vertexCount());
+                Point nextEdgeStart = skeleton.face(currentFace)
+                                          .vertex((phrResult.edgeIndex + 1) % skeleton.face(currentFace).vertexCount());
                 int nextEdge = findEdgeIndex(skeleton.face(nextFaceIndex), nextEdgeStart);
                 if (nextEdge < 0) {
                     std::cerr << "Error: Adjacent face mismatch" << std::endl;
@@ -85,8 +90,8 @@ PerpHelperResult PerpendicularFinder::perpHelper(const Point& vertex, const ISke
     }
 
     Vector baseVector = face.vertex(1) - face.vertex(0);
-    Vector directionRay = rotate90(baseVector);
-    directionRay = normalize(directionRay);
+    Vector directionRay = GeometryUtil::rotate90(baseVector);
+    directionRay = GeometryUtil::normalize(directionRay);
 
     Point vE0 = face.vertex(edgeIndex);
     Point vE1 = face.vertex((edgeIndex + 1) % face.vertexCount());
@@ -110,7 +115,8 @@ PerpHelperResult PerpendicularFinder::perpHelper(const Point& vertex, const ISke
         Point p2 = face.vertex((e + 1) % face.vertexCount());
 
         auto intersection = intersectRaySegment(vertex, directionRay, p1, p2);
-        if (intersection.valid && intersection.t > 0 && intersection.t < bestT && intersection.u >= 0 && intersection.u <= 1) {
+        if (intersection.valid && intersection.t > 0 && intersection.t < bestT && intersection.u >= 0 &&
+            intersection.u <= 1) {
             bestT = intersection.t;
             bestEdge = e;
             bestPoint = Point(vertex.x() + directionRay.x() * bestT, vertex.y() + directionRay.y() * bestT);
@@ -134,48 +140,23 @@ int PerpendicularFinder::findEdgeIndex(const ISkeletonFace& face, const Point& s
     return -1;
 }
 
-Vector PerpendicularFinder::rotate90(const Vector& v) const { return Vector(-v.y(), v.x()); }
-
-IntersectionResult PerpendicularFinder::intersectRaySegment(const Point& origin, const Vector& direction, const Point& segmentStart,
-                                                            const Point& segmentEnd) const {
+IntersectionResult PerpendicularFinder::intersectRaySegment(const Point& origin, const Vector& direction,
+                                                            const Point& segmentStart, const Point& segmentEnd) const {
     // standard 2D line intersection
     Vector s = segmentEnd - segmentStart;
-    double rayCrossS = cross(direction, s);
+    double rayCrossS = CGAL::to_double(GeometryUtil::cross(direction, s));
     Vector qMinusP = Vector(segmentStart.x() - origin.x(), segmentStart.y() - origin.y());
-    double qMinusPCrossS = cross(qMinusP, direction);
+    double qMinusPCrossS = CGAL::to_double(GeometryUtil::cross(qMinusP, direction));
 
     if (std::fabs(rayCrossS) < 1e-13) {
         // ray and segment are nearly parallel
         return {false, 0, 0};
     }
 
-    double t = cross(qMinusP, s) / rayCrossS;
+    double t = CGAL::to_double(GeometryUtil::cross(qMinusP, s) / rayCrossS);
     double u = qMinusPCrossS / rayCrossS;
 
     return {true, t, u};
-}
-
-double PerpendicularFinder::cross(const Vector& a, const Vector& b) const {
-    // Convert x() and y() of CGAL's number types to double
-    double ax = CGAL::to_double(a.x());
-    double ay = CGAL::to_double(a.y());
-    double bx = CGAL::to_double(b.x());
-    double by = CGAL::to_double(b.y());
-
-    return ax * by - ay * bx;
-}
-
-Vector PerpendicularFinder::normalize(const Vector& v) const {
-    // For length, we can do sqrt( to_double( squared_length() ) )
-    double length = std::sqrt(CGAL::to_double(v.squared_length()));
-    if (length == 0) {
-        // handle zero-length vector, returning an unchanged or zero vector
-        return v;
-    }
-    // Now we divide each coordinate by length, which is a double
-    double vx = CGAL::to_double(v.x());
-    double vy = CGAL::to_double(v.y());
-    return Vector(vx / length, vy / length);
 }
 
 }  // namespace straight_skeleton
