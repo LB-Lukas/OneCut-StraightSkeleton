@@ -20,6 +20,7 @@ public:
 
     std::vector<Point> vertices;
     std::vector<int> adjacentFaces;
+    bool isOuter;
 
 
 private:
