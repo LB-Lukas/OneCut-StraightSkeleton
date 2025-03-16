@@ -104,6 +104,19 @@ class CanvasView(tk.Frame):
         point_scale_factor = max(0.5, min(2.0, math.sqrt(self.camera_scale)))
 
         selected_vertex = self.app.polygon_controller.selected_vertex
+        
+        # Draw grid lines if enabled
+        if self.app.polygon_controller.grid_enabled:
+            grid_spacing = self.app.polygon_controller.GRID_SPACING
+            for x in range(0, CANVAS_WIDTH +1, grid_spacing):
+                start_x, start_y = self.logic_to_canvas(x, 0)
+                end_x, end_y = self.logic_to_canvas(x, CANVAS_HEIGHT)
+                self.canvas.create_line(start_x, start_y, end_x, end_y, fill="lightgray", dash=(2, 2))
+            for y in range(0, CANVAS_HEIGHT +1, grid_spacing):
+                start_x, start_y = self.logic_to_canvas(0, y)
+                end_x, end_y = self.logic_to_canvas(CANVAS_WIDTH, y)
+                self.canvas.create_line(start_x, start_y, end_x, end_y, fill="lightgray", dash=(2, 2))
+        
 
         # Draw completed polygons.
         for i, poly in enumerate(polygons):  # poly is now a PolygonModel instance.

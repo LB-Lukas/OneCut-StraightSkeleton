@@ -25,6 +25,7 @@ class StraightSkeletonApp:
         self.main_view.delete_vertex_button.config(command=self.polygon_controller.delete_selected_vertex)
         self.main_view.add_vertex_button.config(command=self.polygon_controller.add_point_to_polygon)
         self.main_view.delete_polygon_button.config(command=self.polygon_controller.delete_selected_polygon)
+        self.main_view.toggle_grid_button.config(command=self.polygon_controller.toggle_grid)
 
         canvas = self.main_view.canvas_view.canvas
         canvas.bind("<Shift-Button-1>", self._on_shift_left_click)                                      # Shift+LeftClick to add a point

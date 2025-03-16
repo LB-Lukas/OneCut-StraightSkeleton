@@ -15,6 +15,8 @@ class PolygonController:
     def __init__(self, app, max_polygons: int = 1):
         self.app = app
         self.max_polygons = max_polygons
+        self.grid_enabled = False
+        self.GRID_SPACING = 20
 
         # In-progress polygon (list of points)
         self.current_points: list[tuple[float, float]] = []
@@ -32,6 +34,11 @@ class PolygonController:
         # For dragging a vertex.
         self._moving_poly_index: int = None
         self._moving_vertex_index: int = None
+        
+        
+    def toggle_grid(self):  # Add this method
+        self.grid_enabled = not self.grid_enabled
+        self._redraw()
 
 
     def _redraw(self):
@@ -73,6 +80,10 @@ class PolygonController:
         if len(self.polygons) >= self.max_polygons:
             messagebox.showinfo("Error", f"Maximum number of polygons is {self.max_polygons}")
             return
+        
+        if self.grid_enabled:
+            lx = round(lx / self.GRID_SPACING) * self.GRID_SPACING
+            ly = round(ly / self.GRID_SPACING) * self.GRID_SPACING
 
         if not (0 <= lx <= CANVAS_WIDTH and 0 <= ly <= CANVAS_HEIGHT):
             print("Point out of bounds")
@@ -217,6 +228,10 @@ class PolygonController:
 
         lx = max(0, min(lx, CANVAS_WIDTH))
         ly = max(0, min(ly, CANVAS_HEIGHT))
+        
+        if self.grid_enabled:
+            lx = round(lx / self.GRID_SPACING) * self.GRID_SPACING
+            ly = round(ly / self.GRID_SPACING) * self.GRID_SPACING
 
         for i, poly in enumerate(self.polygons):
             if i != self._moving_poly_index and len(poly.points) >= 3:
