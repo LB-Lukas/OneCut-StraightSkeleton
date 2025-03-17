@@ -8,6 +8,13 @@ class PolygonModel:
         self.perpendicular_line_ids = []
         self.mountain_line_ids = []
         self.valley_line_ids = []
+    
+        
+    def clear_creases(self):
+        self.mountain_line_ids = []
+        self.valley_line_ids = []
+        self.skeleton_line_ids = []
+        self.perpendicular_line_ids = []
 
 
     def add_point(self, point: tuple[float, float]):
