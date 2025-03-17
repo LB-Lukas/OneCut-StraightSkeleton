@@ -2,14 +2,6 @@
 
 namespace straight_skeleton {
 
-static double sclar_project(const Vector& a, const Vector& axis) {
-    const double axis_squared_length = CGAL::to_double(axis.squared_length());
-    if (axis_squared_length == 0) {
-        return 0;
-    }
-    return CGAL::to_double(CGAL::scalar_product(a, axis) / std::sqrt(axis_squared_length));
-}
-
 FoldManager::FoldManager(const std::vector<TestSkeleton::Point>& polygon)
     : skeletonBuilder(TestSkeleton::SkeletonBuilder(polygon)),
       skeleton(skeletonBuilder.buildSkeleton()),
@@ -20,26 +12,35 @@ std::vector<Crease> FoldManager::getCreases() {
     for (int f = 0; f < skeleton.faceCount(); f++) {
         for (int v = 1; v < skeleton.face(f).vertexCount(); v++) {
             auto adj = skeleton.face(f).adjacentFaces[v];
-            auto fold = std::make_pair(skeleton.face(f).vertices[v], skeleton.face(f).vertices[(v + 1) % skeleton.face(f).vertexCount()]);
+            auto fold = std::make_pair(skeleton.face(f).vertices[v],
+                                       skeleton.face(f).vertices[(v + 1) % skeleton.face(f).vertexCount()]);
             if (adj > f) {
                 Crease crease;
                 auto adjEdge = std::make_pair(skeleton.face(adj).vertices[0], skeleton.face(adj).vertices[1]);
                 auto edge = std::make_pair(skeleton.face(f).vertices[0], skeleton.face(f).vertices[1]);
 
                 auto adjVec = skeleton.face(adj).vertices[1] - skeleton.face(adj).vertices[0];
-                auto edgeVec = skeleton.face(f).vertices[1] - skeleton.face(f).vertices[0];
+                auto foldVec = fold.second - fold.first;
 
-                auto sidedness = sclar_project(adjVec, edgeVec);
+                auto sidedness = GeometryUtil::scalarProjection(adjVec, foldVec);
 
-                if(sidedness > 0) {
-                    crease.foldType = FoldType::MOUNTAIN;
+                if (skeleton.face(f).isOuter) {
+                    if (sidedness > -0.0001) {
+                        crease.foldType = FoldType::VALLEY;
+                    } else {
+                        crease.foldType = FoldType::MOUNTAIN;
+                    }
                 } else {
-                    crease.foldType = FoldType::VALLEY;
+                    if (sidedness > -0.0001) {
+                        crease.foldType = FoldType::MOUNTAIN;
+                    } else {
+                        crease.foldType = FoldType::VALLEY;
+                    }
                 }
+
                 crease.edge = fold;
                 crease.origin = Origin::SKELETON;
                 creases.push_back(crease);
-
             }
         }
     }
@@ -62,6 +63,7 @@ std::vector<Crease> FoldManager::getCreases() {
     //     creases.push_back(crease);
     // }
 
+    // TODO: proper fold assignment
     // Add perpendicular creases
     std::vector<PerpChain> chains = perpendicularFinder.findPerpendiculars();
     for (const auto& chain : chains) {

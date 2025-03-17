@@ -28,7 +28,7 @@ typedef std::vector<PerpSegment> PerpChain;
 
 class PerpendicularFinder {
    public:
-    static const int MAX_ITERATIONS = 5;
+    static const int MAX_ITERATIONS = 50;
     PerpendicularFinder(const IStraightSkeleton& skeleton);
 
     std::vector<PerpChain> findPerpendiculars();

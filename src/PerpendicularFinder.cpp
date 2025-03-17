@@ -34,6 +34,11 @@ std::vector<PerpChain> PerpendicularFinder::findPerpendiculars() {
 
             PerpChain chain;
             Point currentVertex = face.vertex(v);
+            if (currentVertex.x() < 0 || currentVertex.y() < 0 || currentVertex.x() > 600 ||
+                currentVertex.y() > 600) {
+                std::cout << "Skipping vertex[case 3]: " << v << " due to out of bounds coordinates" << std::endl;
+                continue;
+            }
             int currentFace = f;
             int currentEdge = v;
 

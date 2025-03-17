@@ -109,10 +109,15 @@ if(BUILD_TESTS)
     message(STATUS "Building tests")
     enable_testing()
 
-    # Test: PerpendicularTest
-    # add_executable(perpendicular_test tests/PerpendicularTest.cpp $<TARGET_OBJECTS:common>)
-    # target_link_libraries(perpendicular_test PRIVATE ${CGAL_LIBRARIES} ${CAIRO_LIBRARIES} GTest::gtest_main)
-    # gtest_discover_tests(perpendicular_test)
+    # Test: GeometryUtilTest
+    add_executable(geometry_util_test tests/GeometryUtilTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(geometry_util_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(geometry_util_test)
+
+    # Test: SkeletonBuilderTest
+    add_executable(skeleton_builder_test tests/SkeletonBuilderTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(skeleton_builder_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(skeleton_builder_test)
 
 else()
     message(STATUS "Skipping tests")

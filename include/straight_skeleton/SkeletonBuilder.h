@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <utility>
@@ -13,9 +15,9 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/draw_straight_skeleton_2.h>
 
+#include "Crease.h"
 #include "SkeletonFace.h"
 #include "StraightSkeleton.h"
-#include "Crease.h"
 
 namespace TestSkeleton {
 
@@ -34,23 +36,25 @@ class SkeletonBuilder {
     explicit SkeletonBuilder(const std::vector<Point>& polygon_points);
 
     straight_skeleton::StraightSkeleton buildSkeleton();
-    SurfaceMesh graph;
 
    private:
     SsPtr iss_;
     SsPtr oss_;
+
+    std::map<std::pair<Point, Point>, int> polyEdgeToFaceIndexMap;
+
     std::vector<straight_skeleton::SkeletonFace> faces;
+
+    std::vector<straight_skeleton::SkeletonFace> facesOuter;
+
+    std::vector<straight_skeleton::SkeletonFace> facesInner;
     std::vector<Point> originalPolygonPoints;
 
-    std::vector<straight_skeleton::SkeletonFace> skeletonToFaces(
-        SsPtr skeleton, const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const;
+    std::vector<straight_skeleton::SkeletonFace> innerSkeletonToFaces(SsPtr skeleton, int offset);
+
+    std::vector<straight_skeleton::SkeletonFace> outerSkeletonToFaces(SsPtr skeleton, int offset);
 
     straight_skeleton::Point convertPoint(const Point& point) const;
-
-    std::set<std::pair<Point, Point>, std::less<>> computePolygonBoundaryEdges() const;
-
-    void matchPolygonEdges(std::vector<straight_skeleton::SkeletonFace>& faces,
-                           const std::set<std::pair<Point, Point>, std::less<>>& polygonBoundaryEdges) const;
 };
 
 }  // namespace TestSkeleton
