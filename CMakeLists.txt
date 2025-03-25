@@ -119,6 +119,11 @@ if(BUILD_TESTS)
     target_link_libraries(skeleton_builder_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(skeleton_builder_test)
 
+    # Test: PerpendicularFinderTest
+    add_executable(perpendicular_finder_test tests/PerpendicularFinderTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(perpendicular_finder_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(perpendicular_finder_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()
