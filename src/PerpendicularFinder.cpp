@@ -102,8 +102,9 @@ PerpHelperResult PerpendicularFinder::perpHelper(const Point& vertex, const ISke
     Point vE1 = face.vertex((edgeIndex + 1) % face.vertexCount());
     Vector edgeVector = vE1 - vE0;
 
-    if (edgeVector * directionRay < 0) {
-        // flip direction
+    CGAL::Orientation orientation = CGAL::orientation(Point(0,0), Point(edgeVector.x(), edgeVector.y()), Point(directionRay.x(), directionRay.y()));
+
+    if (orientation == CGAL::RIGHT_TURN) {
         directionRay = -directionRay;
     }
 
