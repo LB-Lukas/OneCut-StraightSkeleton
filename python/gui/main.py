@@ -3,7 +3,7 @@ from app import StraightSkeletonApp
 
 
 SOFTWARE_NAME: str = "One-Cut Tool"
-SOFTWARE_VERSION: str = "0.5.1"
+SOFTWARE_VERSION: str = "1.0.0"
 MAX_POLYGONS: int = 1
 
 

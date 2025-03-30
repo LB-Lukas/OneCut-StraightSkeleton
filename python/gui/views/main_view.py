@@ -4,6 +4,8 @@ from views.canvas_view import CanvasView
 
 
 class MainView(tk.Frame):
+    """@brief Main application view containing menu, canvas, and side controls"""
+    
     def __init__(self, root, app):
         super().__init__(root)
         self.app = app
@@ -14,6 +16,7 @@ class MainView(tk.Frame):
 
 
     def _create_menu(self, root: tk.Tk):
+        """@brief Build main menu with File/Help entries and export submenu"""
         self.menu = tk.Menu(root)
         root.config(menu=self.menu)
 
@@ -30,17 +33,11 @@ class MainView(tk.Frame):
         file_menu.add_cascade(label="Export", menu=export_menu)
         # In MainView's _create_menu method
         export_menu.add_command(label="Export as PDF",command=lambda: self.app.file_controller.export_to_pdf(self.canvas_view))
-        export_menu.add_command(label="Export as PNG",command=lambda: self.app.file_controller.export_to_png(self.canvas_view))
-        
-        
-        
+        export_menu.add_command(label="Export as PNG",command=lambda: self.app.file_controller.export_to_png(self.canvas_view)) 
         
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=root.quit)
 
-        edit_menu = tk.Menu(self.menu, tearoff=0)
-        self.menu.add_cascade(label="Edit", menu=edit_menu)
-        edit_menu.add_command(label="Undo", command=self.app.polygon_controller.undo_last_action)
 
         help_menu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Help", menu=help_menu)

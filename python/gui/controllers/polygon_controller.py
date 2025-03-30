@@ -1,9 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import one_cut
-from utils.last_action import LastAction
 from utils.intersection_helper import IntersectionHelper
-from utils.undo_manager import UndoManager
 from models.polygon_model import PolygonModel
 
 
@@ -12,7 +10,15 @@ CANVAS_HEIGHT = 600
 
 
 class PolygonController:
+    """ 
+    @brief Controller class for managing polygons, handling user interactions, and updating views.
+    """
     def __init__(self, app, max_polygons: int = 1):
+        """ 
+        @brief Initializes the PolygonController with application reference and settings.
+        @param app The main application instance.
+        @param max_polygons Maximum allowed polygons (default 1).
+        """
         self.app = app
         self.max_polygons = max_polygons
         self.grid_enabled = False
@@ -23,7 +29,6 @@ class PolygonController:
         # Finished polygons as models
         self.polygons: list[PolygonModel] = []
 
-        self.undo_manager = UndoManager()
         self.intersection_helper = IntersectionHelper()
         self.selected_vertex: tuple[int, int] = None  # (polygon_index, vertex_index)
         self.selected_edge: tuple[int, int] = None  # (polygon_index, edge_index)
@@ -31,25 +36,33 @@ class PolygonController:
         self.show_perpendiculars: bool = False
         self.show_crease_pattern: bool = False
 
-        # For dragging a vertex.
+        # For dragging a vertex
         self._moving_poly_index: int = None
         self._moving_vertex_index: int = None
         
         
-    def toggle_grid(self):  # Add this method
+    def toggle_grid(self):
+        """ 
+        @brief Toggles grid visibility and triggers canvas redraw.
+        """
         self.grid_enabled = not self.grid_enabled
         self._redraw()
 
 
     def _redraw(self):
+        """ 
+        @brief Triggers a redraw of the canvas view.
+        """
         self.app.main_view.canvas_view._redraw()
 
 
-    def _record_action(self, action, data: dict):
-        self.undo_manager.record_action(action, data)
-
-
     def select_vertex(self, lx: float, ly: float) -> bool:
+        """ 
+        @brief Selects the closest vertex to given coordinates.
+        @param lx X-coordinate for selection check.
+        @param ly Y-coordinate for selection check.
+        @return True if a vertex was selected, False otherwise.
+        """
         result = self._get_closest_vertex(lx, ly)
         if result:
             poly_idx, vertex_idx, _ = result
@@ -61,6 +74,12 @@ class PolygonController:
             return False
         
     def select_edge(self, lx: float, ly: float) -> bool:
+        """ 
+        @brief Selects the closest edge to given coordinates.
+        @param lx X-coordinate for selection check.
+        @param ly Y-coordinate for selection check.
+        @return True if an edge was selected, False otherwise.
+        """
         result = self._get_closest_edge(lx, ly)
         if result:
             poly_idx, vertex_idx, _ = result
@@ -73,10 +92,18 @@ class PolygonController:
 
 
     def clear_selection(self):
+        """ 
+        @brief Clears current vertex/edge selection.
+        """
         self.selected_vertex = None
 
 
     def add_point(self, lx: float, ly: float):
+        """ 
+        @brief Adds a point to current polygon with validation checks.
+        @param lx X-coordinate of new point.
+        @param ly Y-coordinate of new point.
+        """
         if len(self.polygons) >= self.max_polygons:
             messagebox.showinfo("Error", f"Maximum number of polygons is {self.max_polygons}")
             return
@@ -106,11 +133,13 @@ class PolygonController:
             return
 
         self.current_points.append((lx, ly))
-        self._record_action(LastAction.ADD_POINT, {"point": (lx, ly)})
         self._redraw()
 
 
     def finish_polygon(self):
+        """ 
+        @brief Finalizes current polygon and performs validation checks.
+        """
         if len(self.current_points) < 3:
             messagebox.showinfo("Info", "A polygon must have at least 3 points.")
             return
@@ -129,8 +158,7 @@ class PolygonController:
 
         new_poly = PolygonModel(self.current_points)
         self.polygons.append(new_poly)
-        self.current_points = []  # reset in-progress polygon
-
+        self.current_points = []
 
         if self.show_crease_pattern or self.show_skeleton or self.show_perpendiculars:
             try:
@@ -139,11 +167,13 @@ class PolygonController:
                 messagebox.showerror("Error", str(e))
                 print(e)
 
-        self._record_action(LastAction.FINISH_POLYGON, {"polygon": new_poly})
         self._redraw()
 
 
     def add_point_to_polygon(self):
+        """ 
+        @brief Adds a new vertex to the midpoint of selected edge.
+        """
         if not self.polygons:
             messagebox.showinfo("Info", "No polygon available to add point.")
             return
@@ -163,6 +193,10 @@ class PolygonController:
         
         
     def update_drawing_mode(self, mode: str):
+        """ 
+        @brief Updates display mode and regenerates crease patterns.
+        @param mode New display mode from available options.
+        """
         print(f"Drawing mode changed to: {mode}")
         
         if not self.polygons:
@@ -206,6 +240,10 @@ class PolygonController:
             return
         
     def _redraw_or_update_creases(self, polygon=None):
+        """ 
+        @brief Redraws canvas and updates crease patterns conditionally.
+        @param polygon Specific polygon to update (None updates all).
+        """
         if polygon is not None:
             try:
                 polygon.update_creases()
@@ -223,6 +261,11 @@ class PolygonController:
         
 
     def drag_vertex(self, lx: float, ly: float):
+        """ 
+        @brief Handles vertex dragging with collision/intersection checks.
+        @param lx New X-coordinate for dragged vertex.
+        @param ly New Y-coordinate for dragged vertex.
+        """
         if self._moving_poly_index is None:
             return
 
@@ -272,6 +315,11 @@ class PolygonController:
 
 
     def delete_vertex(self, poly_index: int, vertex_index: int):
+        """ 
+        @brief Deletes vertex from specified polygon.
+        @param poly_index Index of target polygon.
+        @param vertex_index Index of vertex to delete.
+        """
         if poly_index < 0 or poly_index >= len(self.polygons):
             messagebox.showerror("Error", "Polygon not found.")
             return
@@ -287,15 +335,13 @@ class PolygonController:
             messagebox.showerror("Error", str(e))
             return
 
-        self._record_action(LastAction.DELETE_VERTEX, {
-            "polygon_index": poly_index,
-            "vertex_index": vertex_index,
-            "deleted_point": deleted_point
-        })
         self._redraw_or_update_creases(poly)
 
 
     def delete_selected_vertex(self):
+        """ 
+        @brief Deletes currently selected vertex.
+        """
         if self.selected_vertex is None:
             return
         poly_index, vertex_index = self.selected_vertex
@@ -304,6 +350,9 @@ class PolygonController:
 
 
     def delete_selected_polygon(self):
+        """ 
+        @brief Deletes polygon associated with current selection.
+        """
         if self.selected_edge is not None:
             poly_index, _ = self.selected_edge
             self.delete_polygon(poly_index)
@@ -314,127 +363,62 @@ class PolygonController:
 
 
     def delete_polygon(self, poly_index: int):
+        """ 
+        @brief Deletes specified polygon.
+        @param poly_index Index of polygon to remove.
+        """
         if poly_index < 0 or poly_index >= len(self.polygons):
             messagebox.showerror("Error", "Polygon not found.")
             return
         removed_poly = self.polygons.pop(poly_index)
-        self._record_action(LastAction.FINISH_POLYGON, {"polygon": removed_poly})
         self._redraw()
 
 
     def insert_vertex(self, poly_index: int, vertex_index: int, new_point: tuple):
+        """ 
+        @brief Inserts new vertex into specified polygon.
+        @param poly_index Index of target polygon.
+        @param vertex_index Position to insert new vertex.
+        @param new_point Coordinates of new vertex.
+        """
         if poly_index < 0 or poly_index >= len(self.polygons):
             messagebox.showerror("Error", "Polygon not found.")
             return
         poly = self.polygons[poly_index]
         poly.insert_point(vertex_index, new_point)
-        self._record_action(LastAction.INSERT_VERTEX, {
-            "polygon_index": poly_index,
-            "vertex_index": vertex_index,
-            "new_point": new_point
-        })
         self._redraw_or_update_creases(poly)
 
 
-    def undo_last_action(self):
-        if not self.undo_manager.has_actions():
-            messagebox.showinfo("Info", "No actions to undo.")
-            return
-
-        action, data = self.undo_manager.pop_action()
-        undo_actions = {
-            LastAction.ADD_POINT: self._undo_add_point,
-            LastAction.FINISH_POLYGON: self._undo_finish_polygon,
-            LastAction.MOVE_POINT: self._undo_move_point,
-            LastAction.GENERATE_SKELETON: self._undo_generate_skeleton,
-            LastAction.REMOVE_SKELETON: self._undo_remove_skeleton,
-            LastAction.DELETE_VERTEX: self._undo_delete_vertex,
-            LastAction.INSERT_VERTEX: self._undo_insert_vertex,
-        }
-        undo_func = undo_actions.get(action)
-        if undo_func:
-            undo_func(data)
-        self._redraw()
-
-
-    def _undo_add_point(self, data: dict):
-        point = data.get("point")
-        if point in self.current_points:
-            self.current_points.remove(point)
-
-
-    def _undo_finish_polygon(self, data: dict):
-        polygon = data.get("polygon")
-        if polygon in self.polygons:
-            self.polygons.remove(polygon)
-
-
-    def _undo_move_point(self, data: dict):
-        poly_index = data.get("polygon_index")
-        vertex_index = data.get("vertex_index")
-        old_x = data.get("old_x")
-        old_y = data.get("old_y")
-        if 0 <= poly_index < len(self.polygons):
-            self.polygons[poly_index].points[vertex_index] = (old_x, old_y)
-
-
-    def _undo_generate_skeleton(self, data: dict):
-        skeleton_data = data.get("skeleton_line_ids", [])
-        if self.polygons:
-            poly = self.polygons[0]
-            for sk in skeleton_data:
-                if sk in poly.skeleton_line_ids:
-                    poly.skeleton_line_ids.remove(sk)
-
-
-    def _undo_remove_skeleton(self, data: dict):
-        skeleton_data = data.get("skeleton_line_ids", [])
-        if self.polygons:
-            poly = self.polygons[0]
-            poly.skeleton_line_ids.extend(skeleton_data)
-
-
-    def _undo_delete_vertex(self, data: dict):
-        poly_index = data.get("polygon_index")
-        vertex_index = data.get("vertex_index")
-        deleted_point = data.get("deleted_point")
-        if poly_index is not None and 0 <= poly_index < len(self.polygons):
-            self.polygons[poly_index].points.insert(vertex_index, deleted_point)
-
-
-    def _undo_insert_vertex(self, data: dict):
-        poly_index = data.get("polygon_index")
-        vertex_index = data.get("vertex_index")
-        if poly_index is not None and 0 <= poly_index < len(self.polygons):
-            poly = self.polygons[poly_index]
-            if 0 <= vertex_index < len(poly.points):
-                poly.points.pop(vertex_index)
-
-
     def begin_move_vertex(self, lx: float, ly: float):
+        """ 
+        @brief Initiates vertex dragging operation.
+        @param lx X-coordinate of target vertex.
+        @param ly Y-coordinate of target vertex.
+        """
         result = self._get_closest_vertex(lx, ly)
         if result:
             poly_idx, vertex_idx, _ = result
             self._moving_poly_index = poly_idx
             self._moving_vertex_index = vertex_idx
             vx, vy = self.polygons[poly_idx].points[vertex_idx]
-            self._record_action(
-                LastAction.MOVE_POINT,
-                {
-                    "polygon_index": poly_idx,
-                    "vertex_index": vertex_idx,
-                    "old_x": vx,
-                    "old_y": vy,
-                }
-            )
 
 
     def end_move_vertex(self):
+        """ 
+        @brief Completes vertex dragging operation.
+        """
         self._moving_poly_index = None
         self._moving_vertex_index = None
         
         
     def _get_closest_vertex(self, lx: float, ly: float, threshold: float = 10.0) -> tuple[int, int, float] | None:
+        """ 
+        @brief Finds closest vertex to given coordinates.
+        @param lx X-coordinate for search.
+        @param ly Y-coordinate for search.
+        @param threshold Maximum search distance.
+        @return Tuple of (polygon index, vertex index, distance) or None.
+        """
         best_dist_sq = threshold ** 2
         found_poly_idx = None
         found_vertex_idx = None
@@ -453,6 +437,14 @@ class PolygonController:
     
     
     def _distance_to_segment_squared(self, px: float, py: float, a: tuple[float, float], b: tuple[float, float]) -> float:
+        """ 
+        @brief Calculates squared distance from point to line segment.
+        @param px Point X-coordinate.
+        @param py Point Y-coordinate.
+        @param a First endpoint of segment.
+        @param b Second endpoint of segment.
+        @return Squared distance value.
+        """
         ax, ay = a
         bx, by = b
         abx = bx - ax
@@ -472,6 +464,13 @@ class PolygonController:
 
 
     def _get_closest_edge(self, lx: float, ly: float, threshold: float = 10.0) -> tuple[int, int, float] | None:
+        """ 
+        @brief Finds closest edge to given coordinates.
+        @param lx X-coordinate for search.
+        @param ly Y-coordinate for search.
+        @param threshold Maximum search distance.
+        @return Tuple of (polygon index, edge index, distance) or None.
+        """
         best_dist_sq = threshold ** 2
         found_poly_idx = None
         found_edge_idx = None

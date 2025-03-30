@@ -6,6 +6,8 @@ CANVAS_WIDTH = 600
 CANVAS_HEIGHT = 600
 
 class CanvasView(tk.Frame):
+    """@brief Handles canvas display, coordinate systems, and user interactions"""
+    
     def __init__(self, parent: tk.Frame, app):
         super().__init__(parent)
         self.app = app
@@ -50,18 +52,21 @@ class CanvasView(tk.Frame):
 
 
     def logic_to_canvas(self, lx: float, ly: float) -> tuple:
+        """@brief Convert logic coords to canvas pixels with camera transform"""
         cx = lx * self.camera_scale + self.camera_offset_x
         cy = ly * self.camera_scale + self.camera_offset_y
         return (cx, cy)
 
 
     def canvas_to_logic(self, cx: float, cy: float) -> tuple:
+        """@brief Convert canvas pixels to logic coordinates"""
         lx = (cx - self.camera_offset_x) / self.camera_scale
         ly = (cy - self.camera_offset_y) / self.camera_scale
         return (lx, ly)
     
     
     def clip_line(self, x1, y1, x2, y2, x_min=0, y_min=0, x_max=600, y_max=600):
+        """@brief Liang-Barsky line clipping to canvas bounds"""
         dx = x2 - x1
         dy = y2 - y1
         t0, t1 = 0.0, 1.0
@@ -90,6 +95,7 @@ class CanvasView(tk.Frame):
 
 
     def redraw_all(self, polygons, in_progress_points):
+        """@brief Render all elements: grid, polygons, creases, and work-in-progress"""
         self.canvas.delete("all")
         # Draw border lines in logic coordinates.
         bx0, by0 = self.logic_to_canvas(0, 0)
@@ -208,6 +214,7 @@ class CanvasView(tk.Frame):
 
 
     def on_zoom(self, event: tk.Event):
+        """@brief Handle zoom with mouse wheel (Ctrl+Scroll)"""
         factor = 1.1 if (hasattr(event, "delta") and event.delta > 0) or (hasattr(event, "num") and event.num == 4) else 0.9
         # Zoom relative to the mouse pointer.
         canvas_x = self.canvas.canvasx(event.x)
@@ -227,11 +234,13 @@ class CanvasView(tk.Frame):
 
 
     def on_pan_start(self, event: tk.Event):
+        """@brief Middle-button pan handlers"""
         self._pan_last_x = event.x
         self._pan_last_y = event.y
 
 
     def on_pan_drag(self, event: tk.Event):
+        """@brief Middle-button pan handlers"""
         dx = event.x - self._pan_last_x
         dy = event.y - self._pan_last_y
         self.camera_offset_x += dx
@@ -240,33 +249,8 @@ class CanvasView(tk.Frame):
         self._pan_last_y = event.y
         self._redraw()
 
-
-    def center_canvas(self, event: tk.Event = None):
-        # Center the view based on all polygon points and in-progress points.
-        all_points = []
-        for poly in self.app.polygon_controller.polygons:
-            all_points.extend(poly.points)
-        all_points.extend(self.app.polygon_controller.current_points)
-        if not all_points:
-            return
-        xs = [p[0] for p in all_points]
-        ys = [p[1] for p in all_points]
-        cx_logic = (min(xs) + max(xs)) / 2
-        cy_logic = (min(ys) + max(ys)) / 2
-
-        canvas_w = self.canvas.winfo_width()
-        canvas_h = self.canvas.winfo_height()
-        desired_cx = canvas_w / 2
-        desired_cy = canvas_h / 2
-
-        curr_cx, curr_cy = self.logic_to_canvas(cx_logic, cy_logic)
-        self.camera_offset_x += desired_cx - curr_cx
-        self.camera_offset_y += desired_cy - curr_cy
-
-        self._redraw()
-
-
     def on_left_button_down(self, event: tk.Event):
+        """@brief Handle vertex selection/dragging and edge selection"""
         # Skip dragging if Shift is pressed (used for adding points).
         if (event.state & 0x0001) != 0:
             return
