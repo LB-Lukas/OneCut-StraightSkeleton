@@ -1,5 +1,5 @@
-import geometry
-from geometry import SkeletonBuilder, TestPoint, PerpendicularFinder, Crease,  FoldManager, FoldType, Origin
+import one_cut
+from one_cut import Point, FoldManager, FoldType, Origin
 
 class PolygonModel:
     def __init__(self, points=None):
@@ -37,7 +37,7 @@ class PolygonModel:
         
     def generate_creases(self):
         try:
-            points_obj = [TestPoint(x,y) for x,y in self.points]
+            points_obj = [Point(x,y) for x,y in self.points]
             fold_manager = FoldManager(points_obj)
             creases = fold_manager.get_creases()
             self.skeleton_line_ids = []

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-import geometry
+import one_cut
 from utils.last_action import LastAction
 from utils.intersection_helper import IntersectionHelper
 from utils.undo_manager import UndoManager
