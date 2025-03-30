@@ -3,7 +3,7 @@
 #include "StraightSkeletonTypes.h"
 #include "ISkeletonFace.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class IStraightSkeleton {
 public:

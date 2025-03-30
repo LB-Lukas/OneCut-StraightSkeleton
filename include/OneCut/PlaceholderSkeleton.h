@@ -6,7 +6,7 @@
 #include <vector>
 #include <stddef.h>
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class PlaceholderSkeleton : public IStraightSkeleton {
 public:

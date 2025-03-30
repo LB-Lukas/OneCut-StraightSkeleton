@@ -11,7 +11,7 @@
 /**
  * @brief: type-aliases for frequently used types
  */
-namespace straight_skeleton {
+namespace OneCut {
 using K = CGAL::Exact_predicates_exact_constructions_kernel_with_sqrt;
 using Point = K::Point_2;
 using Line = K::Line_2;
@@ -22,6 +22,6 @@ using VertexIndex = PlanarGraph::Vertex_index;
 using FaceIndex = PlanarGraph::Face_index;
 using EdgeIndex = PlanarGraph::Edge_index;
 using HalfedgeIndex = PlanarGraph::Halfedge_index;
-}  // namespace straight_skeleton
+}  // namespace OneCut
 
 

@@ -4,7 +4,7 @@
 #include "ISkeletonFace.h"
 #include <iostream>
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class SkeletonFace : public ISkeletonFace{
 public:

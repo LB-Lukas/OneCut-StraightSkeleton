@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "straight_skeleton/SkeletonBuilder.h"
+#include "OneCut/SkeletonBuilder.h"
 
 namespace TestSkeleton {
 

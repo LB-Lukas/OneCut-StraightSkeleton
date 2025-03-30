@@ -1,6 +1,6 @@
-#include "straight_skeleton/FoldManager.h"
+#include "OneCut/FoldManager.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 FoldManager::FoldManager(const std::vector<TestSkeleton::Point>& polygon)
     : skeletonBuilder(TestSkeleton::SkeletonBuilder(polygon)),
@@ -79,4 +79,4 @@ std::vector<Crease> FoldManager::getCreases() {
     return creases;
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

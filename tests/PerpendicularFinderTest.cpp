@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include "straight_skeleton/PerpendicularFinder.h"
-#include "straight_skeleton/SkeletonFace.h"
-#include "straight_skeleton/StraightSkeleton.h"
+#include "OneCut/PerpendicularFinder.h"
+#include "OneCut/SkeletonFace.h"
+#include "OneCut/StraightSkeleton.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class PerpendicularFinderTest : public ::testing::Test {
    protected:
@@ -46,4 +46,4 @@ TEST_F(PerpendicularFinderTest, FindPerpendiculars) {
     EXPECT_EQ(result.size(), 2);
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

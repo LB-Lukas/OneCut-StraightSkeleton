@@ -1,6 +1,6 @@
-#include "straight_skeleton/SkeletonFace.h"
+#include "OneCut/SkeletonFace.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 SkeletonFace::SkeletonFace(const std::vector<Point>& vertices, const std::vector<int>& adjacentFaces) : vertices(vertices), adjacentFaces(adjacentFaces) {}
 
@@ -47,4 +47,4 @@ std::ostream& SkeletonFace::print(std::ostream& os) const {
     return os;
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

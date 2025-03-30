@@ -7,16 +7,16 @@
 
 #include <memory>
 
-#include "../include/straight_skeleton/Crease.h"
-#include "../include/straight_skeleton/FoldManager.h"
-#include "../include/straight_skeleton/PerpendicularFinder.h"
-#include "../include/straight_skeleton/SkeletonBuilder.h"
-#include "../include/straight_skeleton/StraightSkeleton.h"
-#include "../include/straight_skeleton/StraightSkeletonTypes.h"
+#include "../include/OneCut/Crease.h"
+#include "../include/OneCut/FoldManager.h"
+#include "../include/OneCut/PerpendicularFinder.h"
+#include "../include/OneCut/SkeletonBuilder.h"
+#include "../include/OneCut/StraightSkeleton.h"
+#include "../include/OneCut/StraightSkeletonTypes.h"
 
 namespace py = pybind11;
 
-namespace straight_skeleton {
+namespace OneCut {
 
 PYBIND11_MODULE(geometry, m) {
     // Expose the Point_2 type to Python
@@ -65,10 +65,10 @@ PYBIND11_MODULE(geometry, m) {
     py::class_<TestSkeleton::SkeletonBuilder>(m, "SkeletonBuilder")
         .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"));
 
-    py::class_<straight_skeleton::PerpendicularFinder>(m, "PerpendicularFinder")
-        .def(py::init<straight_skeleton::StraightSkeleton&>(), py::arg("skeleton"))
-        .def("find_perpendiculars", [](straight_skeleton::PerpendicularFinder& pf) {
-            std::vector<std::pair<straight_skeleton::Point, straight_skeleton::Point>> edges;
+    py::class_<OneCut::PerpendicularFinder>(m, "PerpendicularFinder")
+        .def(py::init<OneCut::StraightSkeleton&>(), py::arg("skeleton"))
+        .def("find_perpendiculars", [](OneCut::PerpendicularFinder& pf) {
+            std::vector<std::pair<OneCut::Point, OneCut::Point>> edges;
             std::vector<PerpChain> chains = pf.findPerpendiculars();
             for (const auto& chain : chains) {
                 for (const auto& seg : chain) {
@@ -78,30 +78,30 @@ PYBIND11_MODULE(geometry, m) {
             return edges;
         });
 
-    py::enum_<straight_skeleton::Origin>(m, "Origin")
-        .value("POLYGON", straight_skeleton::Origin::POLYGON)
-        .value("SKELETON", straight_skeleton::Origin::SKELETON)
-        .value("PERPENDICULAR", straight_skeleton::Origin::PERPENDICULAR)
+    py::enum_<OneCut::Origin>(m, "Origin")
+        .value("POLYGON", OneCut::Origin::POLYGON)
+        .value("SKELETON", OneCut::Origin::SKELETON)
+        .value("PERPENDICULAR", OneCut::Origin::PERPENDICULAR)
         .export_values();
 
-    py::enum_<straight_skeleton::FoldType>(m, "FoldType")
-        .value("MOUNTAIN", straight_skeleton::FoldType::MOUNTAIN)
-        .value("VALLEY", straight_skeleton::FoldType::VALLEY)
-        .value("UNFOLDED", straight_skeleton::FoldType::UNFOLDED)
+    py::enum_<OneCut::FoldType>(m, "FoldType")
+        .value("MOUNTAIN", OneCut::FoldType::MOUNTAIN)
+        .value("VALLEY", OneCut::FoldType::VALLEY)
+        .value("UNFOLDED", OneCut::FoldType::UNFOLDED)
         .export_values();
 
-    py::class_<straight_skeleton::Crease>(m, "Crease")
+    py::class_<OneCut::Crease>(m, "Crease")
         .def(py::init<>())
-        .def_readonly("edge", &straight_skeleton::Crease::edge)
-        .def_readonly("foldType", &straight_skeleton::Crease::foldType)
-        .def_readonly("origin", &straight_skeleton::Crease::origin)
-        .def_readonly("faceIndex", &straight_skeleton::Crease::faceIndex)
-        .def_readonly("edgeIndex", &straight_skeleton::Crease::edgeIndex)
-        .def_readonly("isBoundaryEdge", &straight_skeleton::Crease::isBoundaryEdge);
+        .def_readonly("edge", &OneCut::Crease::edge)
+        .def_readonly("foldType", &OneCut::Crease::foldType)
+        .def_readonly("origin", &OneCut::Crease::origin)
+        .def_readonly("faceIndex", &OneCut::Crease::faceIndex)
+        .def_readonly("edgeIndex", &OneCut::Crease::edgeIndex)
+        .def_readonly("isBoundaryEdge", &OneCut::Crease::isBoundaryEdge);
 
-    py::class_<straight_skeleton::FoldManager>(m, "FoldManager")
+    py::class_<OneCut::FoldManager>(m, "FoldManager")
         .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"))
-        .def("get_creases", &straight_skeleton::FoldManager::getCreases);
+        .def("get_creases", &OneCut::FoldManager::getCreases);
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

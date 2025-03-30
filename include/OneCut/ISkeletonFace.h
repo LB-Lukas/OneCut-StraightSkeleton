@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class ISkeletonFace {
 public:

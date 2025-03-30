@@ -1,4 +1,4 @@
-#include "straight_skeleton/SkeletonBuilder.h"
+#include "OneCut/SkeletonBuilder.h"
 
 namespace TestSkeleton {
 
@@ -68,16 +68,16 @@ SkeletonBuilder::SkeletonBuilder(const std::vector<Point>& polygon_points) : ori
     faces.insert(faces.end(), facesOuter.begin(), facesOuter.end());
 }
 
-straight_skeleton::StraightSkeleton SkeletonBuilder::buildSkeleton() {
-    return straight_skeleton::StraightSkeleton(faces);
+OneCut::StraightSkeleton SkeletonBuilder::buildSkeleton() {
+    return OneCut::StraightSkeleton(faces);
 }
 
-std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::innerSkeletonToFaces(SsPtr skeleton, int offset) {
-    std::vector<straight_skeleton::SkeletonFace> faces;
+std::vector<OneCut::SkeletonFace> SkeletonBuilder::innerSkeletonToFaces(SsPtr skeleton, int offset) {
+    std::vector<OneCut::SkeletonFace> faces;
     faces.reserve(this->originalPolygonPoints.size());
 
     std::map<Ss::Face_handle, int> faceIndexMap;
-    std::vector<std::pair<int, straight_skeleton::SkeletonFace>> indexedFaces;
+    std::vector<std::pair<int, OneCut::SkeletonFace>> indexedFaces;
 
     // iterate through all faces of the skeleton
     int counter = 0;
@@ -137,14 +137,14 @@ std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::innerSkeletonToFac
             }
         } while (halfedgeIterator != start);
 
-        std::vector<straight_skeleton::Point> epeckPoints;
+        std::vector<OneCut::Point> epeckPoints;
         epeckPoints.reserve(points.size());
         for (const Point& point : points) {
             epeckPoints.emplace_back(convertPoint(point));
         }
 
         // faces.emplace_back(epeckPoints, adjacentFaces);
-        straight_skeleton::SkeletonFace sFace(epeckPoints, adjacentFaces);
+        OneCut::SkeletonFace sFace(epeckPoints, adjacentFaces);
         sFace.isOuter = false;
         indexedFaces.emplace_back(faceIndexPair.second, sFace);
         // 3. for each halfedge get first point and second point and get the opposite face
@@ -160,19 +160,19 @@ std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::innerSkeletonToFac
     }
 
     std::cout << std::endl << "FACES: " << std::endl;
-    for (const straight_skeleton::SkeletonFace& face : faces) {
+    for (const OneCut::SkeletonFace& face : faces) {
         std::cout << face << std::endl;
     }
 
     return faces;
 }
 
-std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::outerSkeletonToFaces(SsPtr skeleton, int offset) {
-    std::vector<straight_skeleton::SkeletonFace> faces;
+std::vector<OneCut::SkeletonFace> SkeletonBuilder::outerSkeletonToFaces(SsPtr skeleton, int offset) {
+    std::vector<OneCut::SkeletonFace> faces;
     faces.reserve(this->originalPolygonPoints.size());
 
     std::map<Ss::Face_handle, int> faceIndexMap;
-    std::vector<std::pair<int, straight_skeleton::SkeletonFace>> indexedFaces;
+    std::vector<std::pair<int, OneCut::SkeletonFace>> indexedFaces;
 
     // iterate through all faces of the skeleton
     int counter = 0 + offset;
@@ -219,7 +219,7 @@ std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::outerSkeletonToFac
                     // update the SkeletonFace with the face index
                     // facesInner get the face with index it->second. Look in the adjacentFaces vector for -1 and
                     // replace it with the face index of the current face
-                    straight_skeleton::SkeletonFace& innerFace = facesInner[it->second];
+                    OneCut::SkeletonFace& innerFace = facesInner[it->second];
                     std::replace(innerFace.adjacentFaces.begin(), innerFace.adjacentFaces.end(), -1,
                                  faceIndexPair.second);
 
@@ -250,14 +250,14 @@ std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::outerSkeletonToFac
             }
         } while (halfedgeIterator != start);
 
-        std::vector<straight_skeleton::Point> epeckPoints;
+        std::vector<OneCut::Point> epeckPoints;
         epeckPoints.reserve(points.size());
         for (const Point& point : points) {
             epeckPoints.emplace_back(convertPoint(point));
         }
 
         // faces.emplace_back(epeckPoints, adjacentFaces);
-        straight_skeleton::SkeletonFace sFace(epeckPoints, adjacentFaces);
+        OneCut::SkeletonFace sFace(epeckPoints, adjacentFaces);
         sFace.isOuter = true;
         indexedFaces.emplace_back(faceIndexPair.second, sFace);
         // 3. for each halfedge get first point and second point and get the opposite face
@@ -273,15 +273,15 @@ std::vector<straight_skeleton::SkeletonFace> SkeletonBuilder::outerSkeletonToFac
     }
 
     std::cout << std::endl << "FACES: " << std::endl;
-    for (const straight_skeleton::SkeletonFace& face : faces) {
+    for (const OneCut::SkeletonFace& face : faces) {
         std::cout << face << std::endl;
     }
 
     return faces;
 }
 
-straight_skeleton::Point SkeletonBuilder::convertPoint(const Point& point) const {
-    return straight_skeleton::Point(point.x(), point.y());
+OneCut::Point SkeletonBuilder::convertPoint(const Point& point) const {
+    return OneCut::Point(point.x(), point.y());
 }
 
 }  // namespace TestSkeleton

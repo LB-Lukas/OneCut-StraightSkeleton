@@ -1,10 +1,10 @@
 #include <vector>
 
-#include "../include/straight_skeleton/PerpendicularFinder.h"
-#include "../include/straight_skeleton/PlaceholderSkeleton.h"
-#include "../include/straight_skeleton/StraightSkeletonTypes.h"
+#include "../include/OneCut/PerpendicularFinder.h"
+#include "../include/OneCut/PlaceholderSkeleton.h"
+#include "../include/OneCut/StraightSkeletonTypes.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 std::vector<Point> getPerpendiculars() {
     Point p1(0, 0);
@@ -41,10 +41,10 @@ std::vector<Point> getPerpendiculars() {
     return points;
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut
 
 int main() {
-    straight_skeleton::getPerpendiculars();
+    OneCut::getPerpendiculars();
 
     return 0;
 }

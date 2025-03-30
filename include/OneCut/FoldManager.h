@@ -11,7 +11,7 @@
 #include "StraightSkeletonTypes.h"
 #include "utils/GeometryUtil.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class FoldManager {
    public:
@@ -25,4 +25,4 @@ class FoldManager {
     PerpendicularFinder perpendicularFinder;
 };
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

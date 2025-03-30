@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "straight_skeleton/utils/GeometryUtil.h"
+#include "OneCut/utils/GeometryUtil.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 // counterclockwise
 TEST(GeometryUtilTest, Rotate90) {

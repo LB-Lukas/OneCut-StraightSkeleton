@@ -1,6 +1,6 @@
-#include "straight_skeleton/utils/GeometryUtil.h"
+#include "OneCut/utils/GeometryUtil.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 Vector GeometryUtil::rotate90(const Vector& v) {
     return Vector(-v.y(), v.x());
@@ -30,4 +30,4 @@ K::FT GeometryUtil::scalarProjection(const Vector& a, const Vector& b) {
     return CGAL::to_double(dot_product) / std::sqrt(CGAL::to_double(axis_squared_length));
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

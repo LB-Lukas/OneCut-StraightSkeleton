@@ -1,8 +1,8 @@
 #pragma once
 
-#include "straight_skeleton/StraightSkeletonTypes.h"
+#include "OneCut/StraightSkeletonTypes.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class GeometryUtil {
    public:
@@ -12,4 +12,4 @@ class GeometryUtil {
     static K::FT scalarProjection(const Vector& a, const Vector& b);
 };
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

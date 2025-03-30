@@ -4,7 +4,7 @@
 
 #include "StraightSkeletonTypes.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 enum class Origin { POLYGON, SKELETON, PERPENDICULAR };
 
@@ -19,4 +19,4 @@ struct Crease {
     bool isBoundaryEdge;  // True if this crease is a boundary edge of the polygon
 };
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

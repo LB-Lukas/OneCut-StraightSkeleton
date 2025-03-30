@@ -1,6 +1,6 @@
-#include "straight_skeleton/PlaceholderSkeleton.h"
+#include "OneCut/PlaceholderSkeleton.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 PlaceholderSkeleton::PlaceholderSkeleton(const std::vector<SkeletonFace>& faces) : faces(faces) {}
 

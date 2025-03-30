@@ -35,7 +35,7 @@ class SkeletonBuilder {
     /// Construct the straight skeleton from the input polygon (vertices in counterclockwise order)
     explicit SkeletonBuilder(const std::vector<Point>& polygon_points);
 
-    straight_skeleton::StraightSkeleton buildSkeleton();
+    OneCut::StraightSkeleton buildSkeleton();
 
    private:
     SsPtr iss_;
@@ -43,18 +43,18 @@ class SkeletonBuilder {
 
     std::map<std::pair<Point, Point>, int> polyEdgeToFaceIndexMap;
 
-    std::vector<straight_skeleton::SkeletonFace> faces;
+    std::vector<OneCut::SkeletonFace> faces;
 
-    std::vector<straight_skeleton::SkeletonFace> facesOuter;
+    std::vector<OneCut::SkeletonFace> facesOuter;
 
-    std::vector<straight_skeleton::SkeletonFace> facesInner;
+    std::vector<OneCut::SkeletonFace> facesInner;
     std::vector<Point> originalPolygonPoints;
 
-    std::vector<straight_skeleton::SkeletonFace> innerSkeletonToFaces(SsPtr skeleton, int offset);
+    std::vector<OneCut::SkeletonFace> innerSkeletonToFaces(SsPtr skeleton, int offset);
 
-    std::vector<straight_skeleton::SkeletonFace> outerSkeletonToFaces(SsPtr skeleton, int offset);
+    std::vector<OneCut::SkeletonFace> outerSkeletonToFaces(SsPtr skeleton, int offset);
 
-    straight_skeleton::Point convertPoint(const Point& point) const;
+    OneCut::Point convertPoint(const Point& point) const;
 };
 
 }  // namespace TestSkeleton

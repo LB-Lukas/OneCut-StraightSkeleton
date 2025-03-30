@@ -7,7 +7,7 @@
 #include "SkeletonFace.h"
 #include "StraightSkeletonTypes.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 class StraightSkeleton : public IStraightSkeleton {
    public:
@@ -20,4 +20,4 @@ class StraightSkeleton : public IStraightSkeleton {
     std::vector<SkeletonFace> faces;
 };
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

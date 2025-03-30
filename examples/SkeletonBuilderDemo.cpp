@@ -1,10 +1,10 @@
 #include <vector>
 
-#include "../include/straight_skeleton/SkeletonBuilder.h"
-#include "../include/straight_skeleton/StraightSkeleton.h"
-#include "../include/straight_skeleton/StraightSkeletonTypes.h"
+#include "../include/OneCut/SkeletonBuilder.h"
+#include "../include/OneCut/StraightSkeleton.h"
+#include "../include/OneCut/StraightSkeletonTypes.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
 StraightSkeleton getSkeleton() {
     // simple polygon
@@ -20,10 +20,10 @@ StraightSkeleton getSkeleton() {
     return skeleton;
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut
 
 int main() {
-    straight_skeleton::StraightSkeleton skeleton = straight_skeleton::getSkeleton();
+    OneCut::StraightSkeleton skeleton = OneCut::getSkeleton();
 
     std::cout << "Straight Skeleton:" << std::endl;
     for (const auto& face : skeleton.getFaces()) {
