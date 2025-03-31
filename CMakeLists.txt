@@ -8,10 +8,11 @@ project(OneStraightCut)
 # Use C++20 standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Build)
 
 # Disable CGAL build warnings about the CMake build type
 set(CGAL_DO_NOT_WARN_ABOUT_CMAKE_BUILD_TYPE TRUE)
+cmake_policy(SET CMP0167 NEW)
 
 #----------------------------------------------#
 #----- Platform-Specific Configuration --------#
@@ -91,15 +92,15 @@ target_link_libraries(SkeletonBuilderDemo PRIVATE ${CGAL_LIBRARIES})
 #---------------Pybind11-Module----------------#
 #----------------------------------------------#
 
-pybind11_add_module(geometry
+pybind11_add_module(one_cut
     bindings/StraightSkeletonPyBind.cpp
     ${SRC_FILES}
 )
 
 # specify name of generated .so file
-set_target_properties(geometry PROPERTIES OUTPUT_NAME geometry)
+set_target_properties(one_cut PROPERTIES OUTPUT_NAME one_cut)
 
-target_link_libraries(geometry PRIVATE ${CGAL_LIBRARIES} pybind11::module)
+target_link_libraries(one_cut PRIVATE ${CGAL_LIBRARIES} pybind11::module)
 
 #----------------------------------------------#
 #---------------Tests--------------------------#
@@ -119,6 +120,16 @@ if(BUILD_TESTS)
     target_link_libraries(skeleton_builder_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
     gtest_discover_tests(skeleton_builder_test)
 
+    # Test: PerpendicularFinderTest
+    add_executable(perpendicular_finder_test tests/PerpendicularFinderTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(perpendicular_finder_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(perpendicular_finder_test)
+
+    # Test: IntersectionUtilTest
+    add_executable(intersection_util_test tests/IntersectionUtilTest.cpp $<TARGET_OBJECTS:common>)
+    target_link_libraries(intersection_util_test PRIVATE ${CGAL_LIBRARIES} GTest::gtest_main)
+    gtest_discover_tests(intersection_util_test)
+
 else()
     message(STATUS "Skipping tests")
 endif()
@@ -127,7 +138,7 @@ endif()
 #----------Project-Installation----------------#
 #----------------------------------------------#
 
-install(TARGETS geometry
+install(TARGETS one_cut
     COMPONENT python
     LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/python/gui"
 )

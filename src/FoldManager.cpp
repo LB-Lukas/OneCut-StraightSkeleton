@@ -1,37 +1,43 @@
-#include "straight_skeleton/FoldManager.h"
+#include "OneCut/FoldManager.h"
 
-namespace straight_skeleton {
+namespace OneCut {
 
-FoldManager::FoldManager(const std::vector<TestSkeleton::Point>& polygon)
-    : skeletonBuilder(TestSkeleton::SkeletonBuilder(polygon)),
+FoldManager::FoldManager(const std::vector<SkeletonConstruction::Point>& polygon)
+    : skeletonBuilder(SkeletonConstruction::SkeletonBuilder(polygon)),
       skeleton(skeletonBuilder.buildSkeleton()),
       perpendicularFinder(skeleton) {}
 
 std::vector<Crease> FoldManager::getCreases() {
     std::vector<Crease> creases;
-    for (int f = 0; f < skeleton.faceCount(); f++) {
-        for (int v = 1; v < skeleton.face(f).vertexCount(); v++) {
-            auto adj = skeleton.face(f).adjacentFaces[v];
-            auto fold = std::make_pair(skeleton.face(f).vertices[v],
-                                       skeleton.face(f).vertices[(v + 1) % skeleton.face(f).vertexCount()]);
-            if (adj > f) {
+    for (int faceIndex = 0; faceIndex < skeleton.faceCount(); faceIndex++) {
+        for (int vertexIndex = 1; vertexIndex < skeleton.face(faceIndex).vertexCount(); vertexIndex++) {
+            auto adjacentFace = skeleton.face(faceIndex).adjacentFaces[vertexIndex];
+            auto fold = std::make_pair(
+                skeleton.face(faceIndex).vertices[vertexIndex],
+                skeleton.face(faceIndex).vertices[(vertexIndex + 1) % skeleton.face(faceIndex).vertexCount()]);
+
+            // Only process each face pair once
+            if (adjacentFace > faceIndex) {
                 Crease crease;
-                auto adjEdge = std::make_pair(skeleton.face(adj).vertices[0], skeleton.face(adj).vertices[1]);
-                auto edge = std::make_pair(skeleton.face(f).vertices[0], skeleton.face(f).vertices[1]);
+                std::pair<Point, Point> adjacentFaceEdge =
+                    std::make_pair(skeleton.face(adjacentFace).vertices[0], skeleton.face(adjacentFace).vertices[1]);
+                std::pair<Point, Point> edge =
+                    std::make_pair(skeleton.face(faceIndex).vertices[0], skeleton.face(faceIndex).vertices[1]);
 
-                auto adjVec = skeleton.face(adj).vertices[1] - skeleton.face(adj).vertices[0];
-                auto foldVec = fold.second - fold.first;
+                Vector adjVec = skeleton.face(adjacentFace).vertices[1] - skeleton.face(adjacentFace).vertices[0];
+                Vector foldVec = fold.second - fold.first;
 
-                auto sidedness = GeometryUtil::scalarProjection(adjVec, foldVec);
+                // Project adjacent edge vector onto current edge vector to determine fold direction
+                auto projectionValue = GeometryUtil::scalarProjection(adjVec, foldVec);
 
-                if (skeleton.face(f).isOuter) {
-                    if (sidedness > -0.0001) {
+                if (skeleton.face(faceIndex).isOuter) {
+                    if (projectionValue > -0.0001) {
                         crease.foldType = FoldType::VALLEY;
                     } else {
                         crease.foldType = FoldType::MOUNTAIN;
                     }
                 } else {
-                    if (sidedness > -0.0001) {
+                    if (projectionValue > -0.0001) {
                         crease.foldType = FoldType::MOUNTAIN;
                     } else {
                         crease.foldType = FoldType::VALLEY;
@@ -45,31 +51,14 @@ std::vector<Crease> FoldManager::getCreases() {
         }
     }
 
-    // for (const auto& face : skeleton.getFaces()) {
-    //     for (size_t i = 2; i < face.vertexCount(); i++) {
-    //         Crease crease;
-    //         crease.edge = std::make_pair(face.vertex(i - 1), face.vertex(i));
-    //         crease.foldType = FoldType::MOUNTAIN;
-    //         crease.origin = Origin::SKELETON;
-    //         creases.push_back(crease);
-    //     }
-    // }
-
-    // for (const auto& edge : skeletonBuilder.getEdges()) {
-    //     Crease crease;
-    //     crease.edge = std::make_pair(Point(edge.first.x(), edge.first.y()), Point(edge.second.x(), edge.second.y()));
-    //     crease.foldType = FoldType::MOUNTAIN;
-    //     crease.origin = Origin::SKELETON;
-    //     creases.push_back(crease);
-    // }
-
-    // TODO: proper fold assignment
-    // Add perpendicular creases
+    // TODO: Tree structure? Dfs?
+    // Add perpendicular creases; all valleys
     std::vector<PerpChain> chains = perpendicularFinder.findPerpendiculars();
     for (const auto& chain : chains) {
-        for (const auto& seg : chain) {
+        for (const auto& segment : chain) {
             Crease crease;
-            crease.edge = std::make_pair(Point(seg.start.x(), seg.start.y()), Point(seg.end.x(), seg.end.y()));
+            crease.edge =
+                std::make_pair(Point(segment.start.x(), segment.start.y()), Point(segment.end.x(), segment.end.y()));
             crease.foldType = FoldType::VALLEY;
             crease.origin = Origin::PERPENDICULAR;
             creases.push_back(crease);
@@ -79,4 +68,4 @@ std::vector<Crease> FoldManager::getCreases() {
     return creases;
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut
