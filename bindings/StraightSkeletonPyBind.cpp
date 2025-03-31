@@ -7,68 +7,77 @@
 
 #include <memory>
 
-#include "../include/straight_skeleton/Crease.h"
-#include "../include/straight_skeleton/FoldManager.h"
-#include "../include/straight_skeleton/PerpendicularFinder.h"
-#include "../include/straight_skeleton/SkeletonBuilder.h"
-#include "../include/straight_skeleton/StraightSkeleton.h"
-#include "../include/straight_skeleton/StraightSkeletonTypes.h"
+#include "../include/OneCut/Crease.h"
+#include "../include/OneCut/FoldManager.h"
+#include "../include/OneCut/PerpendicularFinder.h"
+#include "../include/OneCut/SkeletonBuilder.h"
+#include "../include/OneCut/StraightSkeleton.h"
+#include "../include/OneCut/StraightSkeletonTypes.h"
 
 namespace py = pybind11;
 
-namespace straight_skeleton {
+namespace OneCut {
 
-PYBIND11_MODULE(geometry, m) {
+/**
+ * @defgroup pythonBindings Python Bindings
+ * @brief Python interface for OneCut origami computation library
+ * 
+ * This module provides Python bindings for the core OneCut functionality using pybind11.
+ * It exposes geometric types, skeleton builders, and fold management components.
+ * It is best to use FoldManager as an interface to the origami library.
+ */
+
+/**
+ * @brief Python module initialization for OneCut
+ * @ingroup pythonBindings
+ */
+PYBIND11_MODULE(one_cut, m) {
     // Expose the Point_2 type to Python
-    py::class_<Point>(m, "Point")
+    /**
+     * @class ExactKernelPoint
+     * @brief Python-exposed CGAL exact point type with double coordinate access
+     * @ingroup pythonBindings
+     */
+    py::class_<Point>(m, "ExactKernelPoint")
         .def(py::init<double, double>())
-        .def("x", [](const Point& p) { return CGAL::to_double(p.x()); })
-        .def("y", [](const Point& p) { return CGAL::to_double(p.y()); });
+        .def("x", [](const Point& p) { return CGAL::to_double(p.x()); }, 
+             "Get X coordinate converted to double")
+        .def("y", [](const Point& p) { return CGAL::to_double(p.y()); }, 
+             "Get Y coordinate converted to double");
 
-    py::class_<TestSkeleton::Point>(m, "TestPoint")
+    /**
+     * @class Point
+     * @brief Python-exposed point type for test skeletons
+     * @ingroup pythonBindings
+     */
+    py::class_<SkeletonConstruction::Point>(m, "Point")
         .def(py::init<double, double>())
-        .def("x", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.x()); })
-        .def("y", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.y()); });
+        .def("x", [](const SkeletonConstruction::Point& p) { return CGAL::to_double(p.x()); }, 
+             "Get X coordinate converted to double")
+        .def("y", [](const SkeletonConstruction::Point& p) { return CGAL::to_double(p.y()); }, 
+             "Get Y coordinate converted to double");
 
-    py::class_<PlanarGraph>(m, "PlanarGraph")
-        .def(py::init<>())
-        .def("add_vertex",
-             [](PlanarGraph& graph, const Point& p) {
-                 auto vi = graph.add_vertex(p);
-                 // cast the vertex index to size_t to return as a Python integer
-                 return static_cast<size_t>(vi);
-             })
-        // accept a list of integer vertex indices for add_face
-        .def("add_face",
-             [](PlanarGraph& graph, size_t v0, size_t v1, size_t v2, size_t v3) {
-                 auto f = graph.add_face(PlanarGraph::Vertex_index(v0), PlanarGraph::Vertex_index(v1),
-                                         PlanarGraph::Vertex_index(v2), PlanarGraph::Vertex_index(v3));
-                 return static_cast<size_t>(f);  // Return an integer
-             })
-        .def("add_edge",
-             [](PlanarGraph& graph, size_t v0, size_t v1) {
-                 auto e = graph.add_edge(PlanarGraph::Vertex_index(v0), PlanarGraph::Vertex_index(v1));
-                 return static_cast<size_t>(e);
-             })
-        .def("point", [](const PlanarGraph& graph, size_t v) { return graph.point(PlanarGraph::Vertex_index(v)); })
-        .def("edges", [](const PlanarGraph& graph) {
-            std::vector<std::pair<Point, Point>> edges;
-            for (auto e : graph.edges()) {
-                auto h = graph.halfedge(e);
-                auto src = graph.point(graph.source(h));
-                auto tgt = graph.point(graph.target(h));
-                edges.emplace_back(src, tgt);
-            }
-            return edges;
-        });
+    /**
+     * @class SkeletonBuilder
+     * @brief Python interface for building straight skeletons
+     * @ingroup pythonBindings
+     */
+    py::class_<SkeletonConstruction::SkeletonBuilder>(m, "SkeletonBuilder")
+        .def(py::init<const std::vector<SkeletonConstruction::Point>&>(), 
+             py::arg("vertices"), 
+             "Construct from polygon vertices");
 
-    py::class_<TestSkeleton::SkeletonBuilder>(m, "SkeletonBuilder")
-        .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"));
-
-    py::class_<straight_skeleton::PerpendicularFinder>(m, "PerpendicularFinder")
-        .def(py::init<straight_skeleton::StraightSkeleton&>(), py::arg("skeleton"))
-        .def("find_perpendiculars", [](straight_skeleton::PerpendicularFinder& pf) {
-            std::vector<std::pair<straight_skeleton::Point, straight_skeleton::Point>> edges;
+    /**
+     * @class PerpendicularFinder
+     * @brief Python interface for finding perpendicular folds
+     * @ingroup pythonBindings
+     */
+    py::class_<OneCut::PerpendicularFinder>(m, "PerpendicularFinder")
+        .def(py::init<OneCut::StraightSkeleton&>(), 
+             py::arg("skeleton"), 
+             "Construct with computed straight skeleton")
+        .def("find_perpendiculars", [](OneCut::PerpendicularFinder& pf) {
+            std::vector<std::pair<OneCut::Point, OneCut::Point>> edges;
             std::vector<PerpChain> chains = pf.findPerpendiculars();
             for (const auto& chain : chains) {
                 for (const auto& seg : chain) {
@@ -76,32 +85,56 @@ PYBIND11_MODULE(geometry, m) {
                 }
             }
             return edges;
-        });
+        }, "Find all perpendicular fold chains as flattened edge list");
 
-    py::enum_<straight_skeleton::Origin>(m, "Origin")
-        .value("POLYGON", straight_skeleton::Origin::POLYGON)
-        .value("SKELETON", straight_skeleton::Origin::SKELETON)
-        .value("PERPENDICULAR", straight_skeleton::Origin::PERPENDICULAR)
+    /**
+     * @enum Origin
+     * @brief Origin classification for creases
+     * @ingroup pythonBindings
+     */
+    py::enum_<OneCut::Origin>(m, "Origin")
+        .value("POLYGON", OneCut::Origin::POLYGON, "Original polygon boundary")
+        .value("SKELETON", OneCut::Origin::SKELETON, "Straight skeleton edge")
+        .value("PERPENDICULAR", OneCut::Origin::PERPENDICULAR, "Perpendicular fold")
         .export_values();
 
-    py::enum_<straight_skeleton::FoldType>(m, "FoldType")
-        .value("MOUNTAIN", straight_skeleton::FoldType::MOUNTAIN)
-        .value("VALLEY", straight_skeleton::FoldType::VALLEY)
-        .value("UNFOLDED", straight_skeleton::FoldType::UNFOLDED)
+    /**
+     * @enum FoldType
+     * @brief Classification of fold directions
+     * @ingroup pythonBindings
+     */
+    py::enum_<OneCut::FoldType>(m, "FoldType")
+        .value("MOUNTAIN", OneCut::FoldType::MOUNTAIN, "Mountain fold")
+        .value("VALLEY", OneCut::FoldType::VALLEY, "Valley fold")
+        .value("UNFOLDED", OneCut::FoldType::UNFOLDED, "Unfolded crease")
         .export_values();
 
-    py::class_<straight_skeleton::Crease>(m, "Crease")
+    /**
+     * @class Crease
+     * @brief Python interface for fold crease information
+     * @ingroup pythonBindings
+     */
+    py::class_<OneCut::Crease>(m, "Crease")
         .def(py::init<>())
-        .def_readonly("edge", &straight_skeleton::Crease::edge)
-        .def_readonly("foldType", &straight_skeleton::Crease::foldType)
-        .def_readonly("origin", &straight_skeleton::Crease::origin)
-        .def_readonly("faceIndex", &straight_skeleton::Crease::faceIndex)
-        .def_readonly("edgeIndex", &straight_skeleton::Crease::edgeIndex)
-        .def_readonly("isBoundaryEdge", &straight_skeleton::Crease::isBoundaryEdge);
+        .def_readonly("edge", &OneCut::Crease::edge, "Edge endpoints")
+        .def_readonly("foldType", &OneCut::Crease::foldType, "Fold direction type")
+        .def_readonly("origin", &OneCut::Crease::origin, "Crease origin classification")
+        .def_readonly("faceIndex", &OneCut::Crease::faceIndex, "Associated face index")
+        .def_readonly("edgeIndex", &OneCut::Crease::edgeIndex, "Edge index in face")
+        .def_readonly("isBoundaryEdge", &OneCut::Crease::isBoundaryEdge, 
+                     "True if polygon boundary edge");
 
-    py::class_<straight_skeleton::FoldManager>(m, "FoldManager")
-        .def(py::init<const std::vector<TestSkeleton::Point>&>(), py::arg("vertices"))
-        .def("get_creases", &straight_skeleton::FoldManager::getCreases);
+    /**
+     * @class FoldManager
+     * @brief Main entry point for Python fold computation
+     * @ingroup pythonBindings
+     */
+    py::class_<OneCut::FoldManager>(m, "FoldManager")
+        .def(py::init<const std::vector<SkeletonConstruction::Point>&>(), 
+             py::arg("vertices"), 
+             "Initialize with polygon vertices")
+        .def("get_creases", &OneCut::FoldManager::getCreases, 
+             "Retrieve all computed creases");
 }
 
-}  // namespace straight_skeleton
+}  // namespace OneCut

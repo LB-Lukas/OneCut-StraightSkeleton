@@ -100,8 +100,10 @@ class FileController:
         # Add to application
         canvas_view.app.polygon_controller.polygons = [polygon_model]
         canvas_view.app.polygon_controller.show_crease_pattern = True
-        canvas_view._redraw()    
-        
+        canvas_view.app.polygon_controller.update_drawing_mode("None")
+        canvas_view.app.main_view.drawing_mode.set("None")
+        canvas_view._redraw()
+
 
     def save_fold(self, canvas_view) -> None:
         if self.current_file:

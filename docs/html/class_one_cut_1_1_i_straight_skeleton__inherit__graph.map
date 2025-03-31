@@ -1,0 +1,5 @@
+<map id="OneCut::IStraightSkeleton" name="OneCut::IStraightSkeleton">
+<area shape="rect" id="node1" title="Abstract interface representing a straight skeleton structure." alt="" coords="127,5,316,32"/>
+<area shape="rect" id="node2" href="$class_one_cut_1_1_placeholder_skeleton.html" title="Temporary implementation of IStraightSkeleton used for testing." alt="" coords="5,80,216,107"/>
+<area shape="rect" id="node3" href="$class_one_cut_1_1_straight_skeleton.html" title="Concrete implementation of IStraightSkeleton representing a complete straight skeleton structure." alt="" coords="241,80,426,107"/>
+</map>
