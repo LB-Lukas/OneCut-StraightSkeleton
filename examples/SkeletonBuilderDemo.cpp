@@ -8,13 +8,13 @@ namespace OneCut {
 
 StraightSkeleton getSkeleton() {
     // simple polygon
-    TestSkeleton::Point p1(0, 0);
-    TestSkeleton::Point p2(2, 0);
-    TestSkeleton::Point p3(2, 2);
-    TestSkeleton::Point p4(0, 2);
-    std::vector<TestSkeleton::Point> polygon = {p1, p2, p3, p4};
+    SkeletonConstruction::Point p1(0, 0);
+    SkeletonConstruction::Point p2(2, 0);
+    SkeletonConstruction::Point p3(2, 2);
+    SkeletonConstruction::Point p4(0, 2);
+    std::vector<SkeletonConstruction::Point> polygon = {p1, p2, p3, p4};
 
-    TestSkeleton::SkeletonBuilder builder(polygon);
+    SkeletonConstruction::SkeletonBuilder builder(polygon);
     StraightSkeleton skeleton = builder.buildSkeleton();
 
     return skeleton;

@@ -4,7 +4,7 @@
 
 #include "OneCut/SkeletonBuilder.h"
 
-namespace TestSkeleton {
+namespace SkeletonConstruction {
 
 class SkeletonBuilderTest : public ::testing::Test {
    protected:
@@ -26,4 +26,4 @@ TEST_F(SkeletonBuilderTest, ConstructorWithValidPolygon) {
     EXPECT_NO_THROW(builder.buildSkeleton());
 }
 
-}  // namespace TestSkeleton
+}  // namespace SkeletonConstruction

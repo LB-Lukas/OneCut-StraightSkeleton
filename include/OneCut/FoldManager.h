@@ -26,7 +26,7 @@ class FoldManager {
      * @brief Constructs a FoldManager for the given polygon.
      * @param polygon The input polygon represented as a vector of points.
      */
-    FoldManager(const std::vector<TestSkeleton::Point>& polygon);
+    FoldManager(const std::vector<SkeletonConstruction::Point>& polygon);
 
     /**
      * @brief Retrieves all creases computed by the FoldManager.
@@ -38,7 +38,7 @@ class FoldManager {
     std::vector<Crease> getCreases();
 
    private:
-    TestSkeleton::SkeletonBuilder skeletonBuilder; ///< Builder for computing the straight skeleton
+    SkeletonConstruction::SkeletonBuilder skeletonBuilder; ///< Builder for computing the straight skeleton
     StraightSkeleton skeleton;                     ///< Computed straight skeleton structure
     PerpendicularFinder perpendicularFinder;       ///< Finds perpendicular folds in the skeleton
 };

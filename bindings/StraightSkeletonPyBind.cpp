@@ -50,11 +50,11 @@ PYBIND11_MODULE(one_cut, m) {
      * @brief Python-exposed point type for test skeletons
      * @ingroup pythonBindings
      */
-    py::class_<TestSkeleton::Point>(m, "Point")
+    py::class_<SkeletonConstruction::Point>(m, "Point")
         .def(py::init<double, double>())
-        .def("x", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.x()); }, 
+        .def("x", [](const SkeletonConstruction::Point& p) { return CGAL::to_double(p.x()); }, 
              "Get X coordinate converted to double")
-        .def("y", [](const TestSkeleton::Point& p) { return CGAL::to_double(p.y()); }, 
+        .def("y", [](const SkeletonConstruction::Point& p) { return CGAL::to_double(p.y()); }, 
              "Get Y coordinate converted to double");
 
     /**
@@ -62,8 +62,8 @@ PYBIND11_MODULE(one_cut, m) {
      * @brief Python interface for building straight skeletons
      * @ingroup pythonBindings
      */
-    py::class_<TestSkeleton::SkeletonBuilder>(m, "SkeletonBuilder")
-        .def(py::init<const std::vector<TestSkeleton::Point>&>(), 
+    py::class_<SkeletonConstruction::SkeletonBuilder>(m, "SkeletonBuilder")
+        .def(py::init<const std::vector<SkeletonConstruction::Point>&>(), 
              py::arg("vertices"), 
              "Construct from polygon vertices");
 
@@ -130,7 +130,7 @@ PYBIND11_MODULE(one_cut, m) {
      * @ingroup pythonBindings
      */
     py::class_<OneCut::FoldManager>(m, "FoldManager")
-        .def(py::init<const std::vector<TestSkeleton::Point>&>(), 
+        .def(py::init<const std::vector<SkeletonConstruction::Point>&>(), 
              py::arg("vertices"), 
              "Initialize with polygon vertices")
         .def("get_creases", &OneCut::FoldManager::getCreases, 

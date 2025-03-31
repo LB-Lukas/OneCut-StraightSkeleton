@@ -2,8 +2,8 @@
 
 namespace OneCut {
 
-FoldManager::FoldManager(const std::vector<TestSkeleton::Point>& polygon)
-    : skeletonBuilder(TestSkeleton::SkeletonBuilder(polygon)),
+FoldManager::FoldManager(const std::vector<SkeletonConstruction::Point>& polygon)
+    : skeletonBuilder(SkeletonConstruction::SkeletonBuilder(polygon)),
       skeleton(skeletonBuilder.buildSkeleton()),
       perpendicularFinder(skeleton) {}
 
@@ -45,26 +45,8 @@ std::vector<Crease> FoldManager::getCreases() {
         }
     }
 
-    // for (const auto& face : skeleton.getFaces()) {
-    //     for (size_t i = 2; i < face.vertexCount(); i++) {
-    //         Crease crease;
-    //         crease.edge = std::make_pair(face.vertex(i - 1), face.vertex(i));
-    //         crease.foldType = FoldType::MOUNTAIN;
-    //         crease.origin = Origin::SKELETON;
-    //         creases.push_back(crease);
-    //     }
-    // }
 
-    // for (const auto& edge : skeletonBuilder.getEdges()) {
-    //     Crease crease;
-    //     crease.edge = std::make_pair(Point(edge.first.x(), edge.first.y()), Point(edge.second.x(), edge.second.y()));
-    //     crease.foldType = FoldType::MOUNTAIN;
-    //     crease.origin = Origin::SKELETON;
-    //     creases.push_back(crease);
-    // }
-
-    // TODO: proper fold assignment
-    // Add perpendicular creases
+    // Add perpendicular creases; all valleys
     std::vector<PerpChain> chains = perpendicularFinder.findPerpendiculars();
     for (const auto& chain : chains) {
         for (const auto& seg : chain) {
