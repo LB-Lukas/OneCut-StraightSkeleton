@@ -135,10 +135,10 @@ std::vector<OneCut::SkeletonFace> SkeletonBuilder::innerSkeletonToFaces(SsPtr sk
         faces.push_back(pair.second);
     }
 
-    std::cout << std::endl << "FACES: " << std::endl;
-    for (const OneCut::SkeletonFace& face : faces) {
-        std::cout << face << std::endl;
-    }
+    // std::cout << std::endl << "FACES: " << std::endl;
+    // for (const OneCut::SkeletonFace& face : faces) {
+    //     std::cout << face << std::endl;
+    // }
 
     return faces;
 }
@@ -156,13 +156,9 @@ std::vector<OneCut::SkeletonFace> SkeletonBuilder::outerSkeletonToFaces(SsPtr sk
         faceIndexMap.emplace(face, counter);
         counter++;
     }
-    std::cout << "Counter: " << counter << std::endl;
-    std::cout << "Map Size: " << faceIndexMap.size() << std::endl;
 
     // get the adjacent faces of the face for every face in the map
     for (const auto& faceIndexPair : faceIndexMap) {
-        std::cout << "Face with Index: " << faceIndexPair.second << std::endl;
-        // get the face
         Ss::Face_handle face = faceIndexPair.first;
 
         // through the face halfedges in a circle
@@ -175,9 +171,7 @@ std::vector<OneCut::SkeletonFace> SkeletonBuilder::outerSkeletonToFaces(SsPtr sk
         do {
             // for each halfedge get first point and second point and get the opposite face
             Point startPoint = halfedgeIterator->prev()->vertex()->point();
-            Point endPoint = halfedgeIterator->vertex()->point();
-            std::cout << "startPoint: " << startPoint << std::endl;
-            std::cout << "endPoint " << endPoint << std::endl;
+            Point endPoint = halfedgeIterator->vertex()->point();;
 
             Ss::Face_handle oppositeFace = halfedgeIterator->opposite()->face();
             if (oppositeFace == nullptr) {
@@ -228,10 +222,10 @@ std::vector<OneCut::SkeletonFace> SkeletonBuilder::outerSkeletonToFaces(SsPtr sk
         faces.push_back(pair.second);
     }
 
-    std::cout << std::endl << "FACES: " << std::endl;
-    for (const OneCut::SkeletonFace& face : faces) {
-        std::cout << face << std::endl;
-    }
+    // std::cout << std::endl << "FACES: " << std::endl;
+    // for (const OneCut::SkeletonFace& face : faces) {
+    //     std::cout << face << std::endl;
+    // }
 
     return faces;
 }

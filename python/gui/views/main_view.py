@@ -26,8 +26,6 @@ class MainView(tk.Frame):
         file_menu.add_command(label="Save As", command=self.save_file_as)
         file_menu.add_command(label="Open", command=self.open_file)
         file_menu.add_separator()
-        file_menu.add_command(label="Import")
-        
         
         export_menu = tk.Menu(file_menu, tearoff=0)
         file_menu.add_cascade(label="Export", menu=export_menu)

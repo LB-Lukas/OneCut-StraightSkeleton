@@ -145,6 +145,9 @@ You can toggle between different visualization modes:
 - Display both the skeleton and the perpendiculars.
 
 #### File Operations ####
+There are example files in the ```/resources``` directory.
+You can load them by clicking on the "Open" button in the GUI and selecting the file you want to load.
+The files are in the .fold format.
 
 - Open and Save Files:
 
