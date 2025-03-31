@@ -26,9 +26,6 @@ test-output
 # Binary files
 *.so
 
-# JavaScript files
-*.js
-
 # Miscellaneous
 TODO
 all_code.py
